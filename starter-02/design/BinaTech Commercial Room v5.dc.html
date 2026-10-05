@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#EDEDF0}
+*{box-sizing:border-box}
+a{color:#16211F;text-decoration:underline;text-underline-offset:2px}
+a:hover{color:#4A555C}
+button{font-family:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #16211F;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="background:#EDEDF0;color:#16211F;font-family:'IBM Plex Sans',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased">
+
+<div style="position:sticky;top:0;z-index:90;background:#16211F;color:#FAFAF7;padding:9px 16px 10px;display:flex;flex-wrap:wrap;gap:9px 22px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:1px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#9AA6A3">Prototype controls · not product UI</span>
+<span style="font-size:12px;color:#C9D1CF">Design prototype v5 · synthetic data · no backend, nothing persists</span>
+</div>
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#9AA6A3">Signed-in role</span>
+<sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+<button type="button" onClick="{{ r.go }}" style="{{ r.style }}">{{ r.label }}</button>
+</sc-for>
+</div>
+<div style="margin-inline-start:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9AA6A3;white-space:nowrap">{{ readout }}</div>
+</div>
+
+<section style="padding:22px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:12px;flex-wrap:wrap">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:#5A6670">A</span>
+<h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Commercial Control as a three-pane room</h2>
+<span style="font-size:13.5px;color:#5A6670;max-width:78ch;text-wrap:pretty">Saved views and scope on the left, the register or the selected object's context in the centre, a persistent inspector on the right. A row, a pin or a related record opens in place — no redirect. Actions are permission-gated workflow templates that write an audit record; popovers for tiny choices; a modal only for a discrete decision.</span>
+</div>
+
+<div style="overflow-x:auto;padding-bottom:6px">
+<div data-screen-label="Commercial Control room" style="position:relative;width:100%;min-width:1280px;height:880px;background:#F5F5F7;border-radius:14px;overflow:hidden;display:flex">
+
+<div style="width:64px;flex:none;background:#FAFAF7;border-inline-end:1px solid rgba(22,33,31,.09);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:6px">
+<span title="Coastal Logistics Park · Contract C-2214 · synthetic" dir="ltr" style="width:34px;height:34px;border-radius:8px;background:#16211F;color:#FAFAF7;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;margin-bottom:8px">P2</span>
+<sc-for list="{{ rail }}" as="n" hint-placeholder-count="6">
+<button type="button" title="{{ n.title }}" aria-label="{{ n.title }}" onClick="{{ n.go }}" style="{{ n.style }}">
+<span style="{{ n.barStyle }}"></span>
+<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ n.d }}"></path><path d="{{ n.d2 }}"></path></svg>
+</button>
+</sc-for>
+</div>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+
+<div style="flex:none;background:#FAFAF7;border-bottom:1px solid rgba(22,33,31,.09);padding:12px 20px 0">
+<div style="display:flex;align-items:flex-start;gap:14px">
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<h1 style="font-size:19px;font-weight:600;letter-spacing:-.015em;margin:0">{{ areaTitle }}</h1>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5A6670;border:1px solid rgba(22,33,31,.18);border-radius:8px;padding:2px 6px">Synthetic</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#4A555C;background:#F1F1EE;border-radius:8px;padding:2px 6px;unicode-bidi:isolate">{{ routeId }}</span>
+</div>
+<div style="font-size:13px;color:#5A6670;margin-top:2px;max-width:80ch">{{ areaSub }}</div>
+</div>
+<label style="flex:none;display:flex;align-items:center;gap:8px;background:#FFFFFF;border:1px solid rgba(22,33,31,.18);border-radius:8px;height:44px;padding:0 12px;width:220px">
+<svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="#5A6670" stroke-width="1.7" stroke-linecap="round" style="flex:none"><circle cx="8.1" cy="8.1" r="4.9"></circle><path d="m11.8 11.8 3 3"></path></svg>
+<input type="text" value="{{ q }}" onInput="{{ onQ }}" placeholder="Filter this register" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:inherit;font-size:14px;color:#16211F"/>
+</label>
+<span style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-height:44px;justify-content:center">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#7A848C">Signed in as</span>
+<span style="font-size:13px;font-weight:600">{{ roleChip }}</span>
+</span>
+</div>
+<div style="display:flex;gap:18px;margin-top:6px;flex-wrap:wrap">
+<sc-for list="{{ subs }}" as="s" hint-placeholder-count="5">
+<button type="button" onClick="{{ s.go }}" style="{{ s.style }}">{{ s.label }}<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#7A848C;unicode-bidi:isolate">{{ s.id }}</span></button>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{ notRoom }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;align-items:flex-start;padding:22px 24px">
+<div style="background:#FAFAF7;border-radius:14px;padding:20px 22px;max-width:560px">
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670">Not rebuilt in this draft</span>
+<span style="display:block;font-size:17px;font-weight:600;margin-top:8px">{{ phTitle }}</span>
+<span dir="ltr" style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#4A555C;margin-top:3px">{{ phRoute }}</span>
+<p style="font-size:13.5px;line-height:1.55;color:#4A555C;margin:12px 0 0;text-wrap:pretty">This draft rebuilds Commercial Control only. The other five areas and the remaining commercial sub-routes are unchanged from the six-area rollout and open there: <a href="BinaTech ACC Workspace Rollout v3.dc.html">BinaTech ACC Workspace Rollout v3</a>.</p>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ inRoom }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-height:0;display:flex">
+
+<div style="width:200px;flex:none;display:flex;flex-direction:column;overflow:auto;border-inline-end:1px solid rgba(22,33,31,.09);padding:14px 8px 18px;gap:2px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;padding:0 8px 6px">Pinned views</span>
+<sc-for list="{{ pinnedViews }}" as="v" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:2px">
+<button type="button" onClick="{{ v.go }}" style="{{ v.style }}"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ v.label }}</span><span dir="ltr" style="flex:none;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5A6670;font-variant-numeric:tabular-nums">{{ v.count }}</span></button>
+<button type="button" onClick="{{ v.pin }}" title="{{ v.pinTitle }}" aria-label="{{ v.pinTitle }}" style="{{ v.pinStyle }}"><span style="{{ v.pinMark }}"></span></button>
+</div>
+</sc-for>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;padding:16px 8px 6px">All views</span>
+<sc-for list="{{ otherViews }}" as="v" hint-placeholder-count="6">
+<div style="display:flex;align-items:center;gap:2px">
+<button type="button" onClick="{{ v.go }}" style="{{ v.style }}"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ v.label }}</span><span dir="ltr" style="flex:none;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5A6670;font-variant-numeric:tabular-nums">{{ v.count }}</span></button>
+<button type="button" onClick="{{ v.pin }}" title="{{ v.pinTitle }}" aria-label="{{ v.pinTitle }}" style="{{ v.pinStyle }}"><span style="{{ v.pinMark }}"></span></button>
+</div>
+</sc-for>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;padding:16px 8px 6px">Scope</span>
+<sc-for list="{{ pkgs }}" as="p" hint-placeholder-count="5">
+<button type="button" onClick="{{ p.go }}" style="{{ p.style }}"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.label }}</span><span dir="ltr" style="flex:none;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5A6670;font-variant-numeric:tabular-nums">{{ p.count }}</span></button>
+</sc-for>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;padding:16px 8px 6px">Not in this draft</span>
+<sc-for list="{{ later }}" as="x" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:8px;min-height:32px;padding:0 8px;font-size:12.5px;color:#4A555C"><span style="flex:1;min-width:0">{{ x.label }}</span><span style="flex:none;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#7A848C">{{ x.tag }}</span></div>
+</sc-for>
+</div>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<div style="flex:none;background:#FAFAF7;border-bottom:1px solid rgba(22,33,31,.09);padding:0 18px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px">
+<div style="display:flex;gap:18px">
+<sc-for list="{{ regs }}" as="r" hint-placeholder-count="3">
+<button type="button" onClick="{{ r.go }}" style="{{ r.style }}">{{ r.label }}<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5A6670;font-variant-numeric:tabular-nums">{{ r.count }}</span></button>
+</sc-for>
+</div>
+<sc-if value="{{ ctxOn }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:4px;padding:6px 0">
+<sc-for list="{{ ctxs }}" as="c" hint-placeholder-count="4">
+<button type="button" onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;align-items:center;gap:10px;min-height:36px;border-top:1px solid rgba(22,33,31,.07);font-size:12.5px;color:#5A6670">
+<sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#16211F">Selected</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:#16211F">{{ selRef }}</span>
+<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ selTitle }}</span>
+<span style="flex:none;color:#7A848C">held across Table · 2D · 3D · Evidence</span>
+<button type="button" onClick="{{ clearSel }}" style="margin-inline-start:auto;min-height:28px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:#16211F;font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">Clear</button>
+</sc-if>
+<sc-if value="{{ noSel }}" hint-placeholder-val="{{ true }}">
+<span>Nothing selected. Click a row, a pin or a related record — detail opens in the inspector, not on a new page.</span>
+</sc-if>
+</div>
+</div>
+
+<div style="flex:1;min-height:0;overflow:auto;padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px">
+
+<sc-if value="{{ showBlk }}" hint-placeholder-val="{{ true }}">
+<div style="padding:2px 2px 0">
+<div style="font-size:20px;font-weight:600;letter-spacing:-.012em;font-variant-numeric:tabular-nums">{{ headB }}</div>
+<div style="font-size:12.5px;color:#5A6670;margin-top:3px">{{ subB }}</div>
+</div>
+<div style="background:#FAFAF7;border-radius:14px;overflow:hidden">
+<div style="display:grid;grid-template-columns:88px 1.2fr 1fr 88px 70px 88px;gap:0 10px;padding:11px 16px;border-bottom:1px solid rgba(22,33,31,.09);font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#7A848C">
+<div>Ref</div><div>Type</div><div>Affected</div><div style="text-align:end">Exposure SAR</div><div>Due</div><div>State</div>
+</div>
+<sc-for list="{{ rowsB }}" as="b" hint-placeholder-count="8">
+<button type="button" onClick="{{ b.go }}" style="{{ b.style }}">
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-variant-numeric:tabular-nums">{{ b.ref }}</span>
+<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ b.type }}</span>
+<span style="min-width:0;display:flex;flex-direction:column;gap:1px"><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ b.aff }}</span><span style="font-size:11.5px;color:#5A6670">{{ b.zone }}</span></span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ b.sar }}</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-variant-numeric:tabular-nums">{{ b.due }}</span>
+<span style="{{ b.mkStyle }}"><span style="{{ b.markStyle }}"></span>{{ b.mkLabel }}</span>
+</button>
+</sc-for>
+<sc-if value="{{ noRowsB }}" hint-placeholder-val="{{ false }}">
+<div style="padding:18px 16px;font-size:13px;color:#5A6670">{{ emptyB }}</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showBoq }}" hint-placeholder-val="{{ false }}">
+<div style="padding:2px 2px 0">
+<div style="font-size:20px;font-weight:600;letter-spacing:-.012em;font-variant-numeric:tabular-nums">{{ headL }}</div>
+<div style="font-size:12.5px;color:#5A6670;margin-top:3px">{{ subL }}</div>
+</div>
+<div style="background:#FAFAF7;border-radius:14px;overflow:hidden">
+<div style="display:grid;grid-template-columns:56px 1fr repeat(5,66px) 88px;gap:0 8px;padding:11px 16px;border-bottom:1px solid rgba(22,33,31,.09);font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#7A848C">
+<div>Line</div><div>Description</div><div style="text-align:end">Exec</div><div style="text-align:end">Meas</div><div style="text-align:end">Elig</div><div style="text-align:end">Claim</div><div style="text-align:end">Cert</div><div>Blockers</div>
+</div>
+<sc-for list="{{ rowsL }}" as="l" hint-placeholder-count="8">
+<button type="button" onClick="{{ l.go }}" style="{{ l.style }}">
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-weight:500">{{ l.line }}</span>
+<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.desc }}</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ l.exec }}</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ l.meas }}</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ l.elig }}</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ l.claim }}</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ l.cert }}</span>
+<span style="{{ l.mkStyle }}"><span style="{{ l.markStyle }}"></span>{{ l.mkLabel }}</span>
+</button>
+</sc-for>
+<sc-if value="{{ noRowsL }}" hint-placeholder-val="{{ false }}">
+<div style="padding:18px 16px;font-size:13px;color:#5A6670">No BoQ lines match this view and scope.</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showExp }}" hint-placeholder-val="{{ false }}">
+<div style="padding:2px 2px 0">
+<div style="font-size:20px;font-weight:600;letter-spacing:-.012em;font-variant-numeric:tabular-nums">{{ headB }}</div>
+<div style="font-size:12.5px;color:#5A6670;margin-top:3px">Blocked value from the blocker register; ladder gaps summed from the eight BoQ lines in this fixture. Resolving a blocker in the register moves these figures.</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+<div style="background:#FAFAF7;border-radius:14px;padding:16px 18px">
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:8px">Blocked value by reason · SAR m</span>
+<sc-for list="{{ byReason }}" as="x" hint-placeholder-count="6">
+<div style="{{ x.style }}"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ x.k }}</span><span style="min-width:0"><span style="{{ x.w }}"></span></span><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ x.v }}</span></div>
+</sc-for>
+</div>
+<div style="background:#FAFAF7;border-radius:14px;padding:16px 18px">
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:8px">Blocked value by package · SAR m · click to scope</span>
+<sc-for list="{{ byPkg }}" as="x" hint-placeholder-count="5">
+<button type="button" onClick="{{ x.go }}" style="{{ x.style }}"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ x.k }}</span><span style="min-width:0"><span style="{{ x.w }}"></span></span><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ x.v }}</span></button>
+</sc-for>
+</div>
+<div style="background:#FAFAF7;border-radius:14px;padding:16px 18px">
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:8px">Blocked value by age · SAR m</span>
+<sc-for list="{{ byAge }}" as="x" hint-placeholder-count="4">
+<div style="{{ x.style }}"><span>{{ x.k }}</span><span style="min-width:0"><span style="{{ x.w }}"></span></span><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ x.v }}</span></div>
+</sc-for>
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin:18px 0 8px">Blocked value · four weeks · SAR m</span>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end;height:110px">
+<sc-for list="{{ trend }}" as="t" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px"><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums">{{ t.v }}</span><span style="{{ t.h }}"></span><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5A6670">{{ t.k }}</span></div>
+</sc-for>
+</div>
+</div>
+<div style="background:#FAFAF7;border-radius:14px;padding:16px 18px">
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:8px">Ladder gaps · eight lines in fixture</span>
+<sc-for list="{{ gaps }}" as="g" hint-placeholder-count="6">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:34px;border-bottom:1px solid rgba(22,33,31,.07);font-size:12.5px"><span>{{ g.k }}</span><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end">{{ g.v }}</span></div>
+</sc-for>
+<p style="font-size:12px;line-height:1.5;color:#5A6670;margin:10px 0 0;text-wrap:pretty">Each gap is money in one commercial state that has not moved to the next. The last step is tracked on the IPC register, not on BoQ lines.</p>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ show2d }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FAFAF7;border-radius:14px;padding:16px 18px 14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670">STR-201 Rev D · Zone 03 Level 01 · Zone 01 foundations</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5A6670;border:1px solid rgba(22,33,31,.18);border-radius:8px;padding:2px 6px">Illustrative · schematic, not a drawing</span>
+</div>
+<div style="margin-top:12px;background:#F5F5F7;border-radius:8px;padding:14px;background-image:linear-gradient(rgba(22,33,31,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(22,33,31,.06) 1px,transparent 1px);background-size:24px 24px">
+<span dir="ltr" style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5A6670">Zone 03 · Level 01 slabs · grid 1–5 / A–D</span>
+<div style="display:flex;gap:10px;margin-top:8px">
+<sc-for list="{{ pinsZ3 }}" as="p" hint-placeholder-count="4">
+<button type="button" onClick="{{ p.go }}" style="{{ p.style }}">
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600">{{ p.ref }}</span>
+<span style="font-size:12px;color:#4A555C">{{ p.kind }}</span>
+<span style="{{ p.mkStyle }}"><span style="{{ p.markStyle }}"></span>{{ p.mkLabel }}</span>
+</button>
+</sc-for>
+</div>
+<span dir="ltr" style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#5A6670;margin-top:16px">Zone 01 · Foundations · grid 6–9 / A–B</span>
+<div style="display:flex;gap:10px;margin-top:8px">
+<sc-for list="{{ pinsZ1 }}" as="p" hint-placeholder-count="2">
+<button type="button" onClick="{{ p.go }}" style="{{ p.style }}">
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600">{{ p.ref }}</span>
+<span style="font-size:12px;color:#4A555C">{{ p.kind }}</span>
+<span style="{{ p.mkStyle }}"><span style="{{ p.markStyle }}"></span>{{ p.mkLabel }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:14px;align-items:center">
+<sc-for list="{{ legend }}" as="g" hint-placeholder-count="4">
+<span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#4A555C"><span style="{{ g.mkStyle }}"><span style="{{ g.markStyle }}"></span>{{ g.mkLabel }}</span><span>{{ g.text }}</span></span>
+</sc-for>
+</div>
+<p style="font-size:12px;line-height:1.5;color:#5A6670;margin:10px 0 0;text-wrap:pretty">Colour-by-commercial-status uses the three system hues and their shapes. Measured, eligible and VO pending all take the pending ring; the label carries the difference. Not executed carries no mark. An approved WIR is the word Approved in ink until a certificate exists.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{ show3d }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FAFAF7;border-radius:14px;padding:16px 18px">
+<div style="min-height:360px;border-radius:8px;outline:1px dashed rgba(22,33,31,.3);outline-offset:-1px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670">IFC viewer · existing component mounts here</span>
+<span style="font-size:15px;font-weight:600">{{ heldLine }}</span>
+<span style="font-size:13px;color:#4A555C;max-width:52ch;text-wrap:pretty">No model is rendered in this prototype. In product the viewer receives the same selection and applies the same three hues by commercial state, with the element label carrying the distinction.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showEv }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FAFAF7;border-radius:14px;overflow:hidden">
+<div style="padding:14px 16px 10px;border-bottom:1px solid rgba(22,33,31,.09);display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap">
+<span style="font-size:14px;font-weight:600">{{ evHead }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5A6670;border:1px solid rgba(22,33,31,.18);border-radius:8px;padding:2px 6px">Fixture files · no real captures</span>
+</div>
+<sc-for list="{{ evRows }}" as="f" hint-placeholder-count="5">
+<div style="{{ f.style }}">
+<span style="flex:none;width:44px;height:44px;border-radius:8px;background:#F1F1EE;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:#5A6670">{{ f.kind }}</span>
+<button type="button" onClick="{{ f.go }}" style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:0;background:transparent;padding:0;cursor:pointer;text-align:start;color:#16211F;font-family:inherit">
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">{{ f.name }}</span>
+<span dir="ltr" style="font-size:11.5px;color:#5A6670">{{ f.meta }}</span>
+</button>
+<button type="button" onClick="{{ f.goLink }}" dir="ltr" style="flex:none;min-height:32px;padding:0 10px;border-radius:8px;border:1px solid rgba(22,33,31,.18);background:transparent;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#16211F;cursor:pointer">{{ f.link }}</button>
+</div>
+</sc-for>
+<sc-if value="{{ evMore }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px 16px;font-size:12.5px;color:#5A6670">{{ evMoreText }}</div>
+</sc-if>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+<div style="width:324px;flex:none;background:#FAFAF7;border-inline-start:1px solid rgba(22,33,31,.09);display:flex;flex-direction:column;min-height:0">
+<sc-if value="{{ insp.off }}" hint-placeholder-val="{{ true }}">
+<div style="padding:18px 18px 0">
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670">Inspector</span>
+<p style="font-size:13.5px;line-height:1.55;color:#4A555C;margin:10px 0 0;text-wrap:pretty">Select a blocker, a BoQ line, a pin or a related record. Its ladder, blockers, links, actions and thread open here and stay open while you move between Table, 2D, 3D and Evidence.</p>
+<p style="font-size:12.5px;line-height:1.5;color:#5A6670;margin:14px 0 0;text-wrap:pretty">Opens for BoQ items, blockers, WIRs, measurements, variations, change events, instructions, NCRs and evidence files. IPC lines, invoices and payments are named but not built in this draft.</p>
+</div>
+</sc-if>
+<sc-if value="{{ insp.on }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;display:flex;align-items:center;gap:6px;min-height:46px;padding:6px 10px 6px 12px;border-bottom:1px solid rgba(22,33,31,.09)">
+<sc-if value="{{ insp.canBack }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ insp.back }}" aria-label="Back to previous record" style="flex:none;min-width:32px;height:32px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:#16211F;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4.5 7 10l5.5 5.5"></path></svg>{{ insp.backLabel }}</button>
+</sc-if>
+<span style="flex:1;min-width:0;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ insp.type }}</span>
+<button type="button" onClick="{{ insp.close }}" aria-label="Close inspector" style="flex:none;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:#16211F;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m5 5 10 10M15 5 5 15"></path></svg></button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:14px 16px 24px;display:flex;flex-direction:column;gap:16px">
+
+<div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #16211F;border-bottom:1px solid rgba(22,33,31,.09)">
+<div style="padding:8px 10px 8px 0;border-inline-end:1px solid rgba(22,33,31,.09)"><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#7A848C">Project</span><span style="display:block;font-size:12.5px;font-weight:600;margin-top:3px">Coastal Logistics Park</span></div>
+<div style="padding:8px 0 8px 10px"><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#7A848C">Ref</span><span dir="ltr" style="display:block;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;margin-top:3px">{{ insp.ref }}</span></div>
+<div style="padding:8px 10px 8px 0;border-inline-end:1px solid rgba(22,33,31,.09);border-top:1px solid rgba(22,33,31,.09)"><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#7A848C">{{ insp.revLabel }}</span><span dir="ltr" style="display:block;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;margin-top:3px">{{ insp.rev }}</span></div>
+<div style="padding:8px 0 8px 10px;border-top:1px solid rgba(22,33,31,.09)"><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#7A848C">Status</span><span style="display:block;margin-top:5px"><span style="{{ insp.status.style }}"><span style="{{ insp.status.markStyle }}"></span>{{ insp.status.label }}</span></span></div>
+</div>
+
+<div>
+<h3 style="font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0;line-height:1.35;text-wrap:pretty">{{ insp.title }}</h3>
+<sc-if value="{{ insp.hasTag }}" hint-placeholder-val="{{ false }}">
+<span style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#FAFAF7;background:#16211F;border-radius:8px;padding:4px 8px">{{ insp.tag }}</span>
+</sc-if>
+</div>
+
+<sc-if value="{{ insp.hasFigure }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-top:1px solid rgba(22,33,31,.07);border-bottom:1px solid rgba(22,33,31,.07)">
+<span style="font-size:12.5px;color:#5A6670">{{ insp.figure.k }}</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.01em">{{ insp.figure.v }}</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ insp.hasLadder }}" hint-placeholder-val="{{ false }}">
+<div>
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:6px">Commercial ladder</span>
+<sc-for list="{{ insp.ladder }}" as="s" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:82px 1fr 104px;gap:10px;align-items:center;min-height:30px;font-size:12.5px">
+<span style="display:inline-flex;align-items:center;gap:6px"><span style="{{ s.markStyle }}"></span>{{ s.k }}</span>
+<span style="min-width:0"><span style="{{ s.w }}"></span></span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:end;font-size:12px">{{ s.v }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ insp.hasFacts }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ insp.facts }}" as="f" hint-placeholder-count="5">
+<div style="position:relative;display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start;padding:7px 0;border-bottom:1px solid rgba(22,33,31,.07);font-size:12.5px">
+<span style="color:#5A6670;padding-top:1px">{{ f.k }}</span>
+<span style="min-width:0;display:flex;align-items:flex-start;gap:8px;justify-content:space-between">
+<sc-if value="{{ f.isLink }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ f.go }}" dir="ltr" style="{{ f.vStyle }}">{{ f.v }}</button>
+</sc-if>
+<sc-if value="{{ f.isText }}" hint-placeholder-val="{{ true }}">
+<span style="{{ f.vStyle }}">{{ f.v }}</span>
+</sc-if>
+<sc-if value="{{ f.hasPop }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ f.togglePop }}" aria-expanded="{{ f.popOn }}" style="flex:none;min-height:28px;padding:0 8px;border-radius:8px;border:1px solid rgba(22,33,31,.18);background:transparent;font-size:12px;font-weight:600;color:#16211F;cursor:pointer">Change</button>
+</sc-if>
+</span>
+<sc-if value="{{ f.popOn }}" hint-placeholder-val="{{ false }}">
+<div role="menu" style="position:absolute;top:100%;inset-inline-end:0;z-index:6;width:224px;background:#FAFAF7;border-radius:8px;box-shadow:0 8px 24px rgba(22,33,31,.16),0 0 0 1px rgba(22,33,31,.09);padding:6px;display:flex;flex-direction:column;gap:2px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#7A848C;padding:6px 8px 4px">{{ f.popTitle }}</span>
+<sc-for list="{{ f.popOpts }}" as="o" hint-placeholder-count="3">
+<button type="button" role="menuitem" onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ insp.hasNote }}" hint-placeholder-val="{{ false }}">
+<p style="font-size:12.5px;line-height:1.5;color:#4A555C;margin:0;padding:10px 12px;background:#F5F5F7;border-radius:8px;text-wrap:pretty">{{ insp.note }}</p>
+</sc-if>
+
+<sc-if value="{{ insp.preview }}" hint-placeholder-val="{{ false }}">
+<div style="height:150px;border-radius:8px;background:#F1F1EE;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5A6670">Preview stand-in · not a real capture</div>
+</sc-if>
+
+<sc-for list="{{ insp.lists }}" as="L" hint-placeholder-count="2">
+<div>
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:4px">{{ L.name }}</span>
+<sc-for list="{{ L.items }}" as="it" hint-placeholder-count="3">
+<button type="button" onClick="{{ it.go }}" style="width:100%;display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 0;border:0;border-bottom:1px solid rgba(22,33,31,.07);background:transparent;font-family:inherit;font-size:12.5px;color:#16211F;text-align:start;cursor:pointer">
+<span style="{{ it.mkStyle }}"><span style="{{ it.markStyle }}"></span></span>
+<span dir="ltr" style="flex:none;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500">{{ it.ref }}</span>
+<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#4A555C">{{ it.text }}</span>
+<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#7A848C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m7.5 4.5 5.5 5.5-5.5 5.5"></path></svg>
+</button>
+</sc-for>
+<sc-if value="{{ L.isEmpty }}" hint-placeholder-val="{{ false }}">
+<span style="display:block;font-size:12.5px;color:#5A6670;padding:6px 0">{{ L.empty }}</span>
+</sc-if>
+</div>
+</sc-for>
+
+<sc-if value="{{ insp.hasRelated }}" hint-placeholder-val="{{ false }}">
+<div>
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:6px">Related</span>
+<sc-for list="{{ insp.related }}" as="R" hint-placeholder-count="4">
+<div style="padding:6px 0;border-bottom:1px solid rgba(22,33,31,.07)">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px"><span>{{ R.k }}</span><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums">{{ R.n }}</span></div>
+<sc-if value="{{ R.hasChips }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+<sc-for list="{{ R.chips }}" as="c" hint-placeholder-count="3">
+<button type="button" onClick="{{ c.go }}" dir="ltr" style="min-height:30px;padding:0 9px;border-radius:8px;border:1px solid rgba(22,33,31,.18);background:transparent;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#16211F;cursor:pointer">{{ c.ref }}</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ R.isEv }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ R.go }}" style="margin-top:6px;min-height:32px;padding:0 10px;border-radius:8px;border:1px solid rgba(22,33,31,.18);background:transparent;font-size:12.5px;font-weight:600;color:#16211F;cursor:pointer">Open in Evidence view</button>
+</sc-if>
+<sc-if value="{{ R.hasNote }}" hint-placeholder-val="{{ false }}">
+<span style="display:block;font-size:12px;color:#5A6670;margin-top:4px">{{ R.note }}</span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ insp.hasActions }}" hint-placeholder-val="{{ false }}">
+<div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670">Controlled actions</span>
+<span style="font-size:11.5px;color:#7A848C">permission · state · actor · time</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ insp.actions }}" as="a" hint-placeholder-count="4">
+<button type="button" onClick="{{ a.go }}" disabled="{{ a.dis }}" style="{{ a.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase">{{ a.label }}</span>
+<span style="font-size:11.5px;color:#5A6670;line-height:1.4">{{ a.reason }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ insp.threadOn }}" hint-placeholder-val="{{ false }}">
+<div>
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:4px">Thread · internal</span>
+<sc-for list="{{ insp.comments }}" as="c" hint-placeholder-count="3">
+<div style="padding:8px 0;border-bottom:1px solid rgba(22,33,31,.07)">
+<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px"><span style="font-weight:600">{{ c.who }}</span><span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7A848C">{{ c.when }}</span></div>
+<div style="font-size:12.5px;line-height:1.45;color:#2C3A38;margin-top:2px;text-wrap:pretty">{{ c.text }}</div>
+<sc-if value="{{ c.hasFile }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ c.goFile }}" dir="ltr" style="margin-top:6px;min-height:30px;padding:0 9px;border-radius:8px;border:1px solid rgba(22,33,31,.18);background:transparent;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#16211F;cursor:pointer">{{ c.file }}</button>
+</sc-if>
+</div>
+</sc-for>
+<sc-if value="{{ insp.noComments }}" hint-placeholder-val="{{ false }}">
+<span style="display:block;font-size:12.5px;color:#5A6670;padding:6px 0">No comments yet.</span>
+</sc-if>
+<textarea value="{{ insp.draft }}" onInput="{{ insp.onDraft }}" placeholder="Internal comment" rows="2" style="width:100%;min-height:48px;margin-top:10px;padding:12px 14px;border-radius:8px;border:1px solid rgba(22,33,31,.22);background:#FAFAF7;font-family:inherit;font-size:16px;color:#16211F;resize:vertical"></textarea>
+<button type="button" onClick="{{ insp.addComment }}" disabled="{{ insp.cannotAdd }}" style="{{ insp.addStyle }}">Add internal comment</button>
+<p style="font-size:11.5px;line-height:1.5;color:#5A6670;margin:8px 0 0;text-wrap:pretty">Internal comments are not contractual correspondence. Aconex correspondence stays external and is linked from the record.</p>
+</div>
+</sc-if>
+
+<div>
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:4px">Audit</span>
+<sc-for list="{{ insp.audit }}" as="a" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:1px;padding:7px 0;border-bottom:1px solid rgba(22,33,31,.07)">
+<span style="font-size:12.5px">{{ a.what }}</span>
+<span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#5A6670">{{ a.who }} · {{ a.ts }} {{ a.id }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ insp.noAudit }}" hint-placeholder-val="{{ false }}">
+<span style="display:block;font-size:12.5px;color:#5A6670;padding:6px 0">No actions recorded on this record.</span>
+</sc-if>
+</div>
+
+</div>
+</sc-if>
+</div>
+
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ popOn }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closePop }}" style="position:absolute;inset:0;z-index:5;background:transparent"></div>
+</sc-if>
+
+<sc-if value="{{ modalOn }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-label="{{ modal.title }}" style="position:absolute;inset:0;z-index:20;background:rgba(22,33,31,.45);display:flex;align-items:center;justify-content:center;padding:24px">
+<div style="width:460px;max-width:100%;background:#FAFAF7;border-radius:14px;padding:22px 22px 20px;display:flex;flex-direction:column;gap:14px">
+<div>
+<span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670">Discrete decision</span>
+<h3 style="font-size:18px;font-weight:600;letter-spacing:-.012em;margin:6px 0 0"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">{{ modal.title }}</span> · <span dir="ltr" style="font-family:'IBM Plex Mono',monospace;font-weight:500">{{ modal.ref }}</span></h3>
+</div>
+<p style="font-size:14px;line-height:1.55;color:#2C3A38;margin:0;text-wrap:pretty">{{ modal.body }}</p>
+<sc-if value="{{ modal.needReason }}" hint-placeholder-val="{{ false }}">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:#5A6670">Reason · enters the audit record
+<input type="text" value="{{ modal.reason }}" onInput="{{ modal.onReason }}" placeholder="e.g. Awaiting NCR-088 close-out" style="width:100%;min-height:48px;padding:0 14px;border-radius:8px;border:1px solid rgba(22,33,31,.22);background:#FAFAF7;font-family:inherit;font-size:16px;color:#16211F"/>
+</label>
+</sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+<span style="font-size:12px;color:#5A6670">{{ modal.actorLine }}</span>
+<div style="display:flex;gap:8px">
+<button type="button" onClick="{{ modal.cancel }}" style="min-height:48px;padding:0 18px;border-radius:8px;border:1px solid rgba(22,33,31,.22);background:#FAFAF7;font-size:15px;font-weight:600;color:#16211F;cursor:pointer">Cancel</button>
+<button type="button" onClick="{{ modal.confirm }}" disabled="{{ modal.cannot }}" style="{{ modal.confirmStyle }}">Confirm</button>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 28px;padding:14px 2px 18px;font-size:12.5px;line-height:1.5;color:#4A555C">
+<div><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:4px">Interaction levels</span>Popover for owner and status. Inspector for every record. Modal only for ready-for-certification, certification hold and finance action. Full page only for the six areas.</div>
+<div><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:4px">Colour rule</span>Six commercial states map to the system's three hues and shapes. Green appears only where a certificate exists. Resolved, approved and verified stay in ink.</div>
+<div><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:4px">Actions, not stamps</span>Each template checks role and record state before it is enabled, then writes actor, time and an audit id. Session-local here; nothing is sent.</div>
+<div><span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5A6670;margin-bottom:4px">Not in this draft</span>Dossier export, QR → work item, the mobile object inspector, IPC / invoice / payment inspectors, and Arabic strings. The other five areas are unchanged from v3.</div>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;inspectorDefaultOpen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;none&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;BLK-00941&quot;,&quot;05-003&quot;,&quot;Z03-S12&quot;],&quot;tsType&quot;:&quot;'none'|'BLK-00941'|'05-003'|'Z03-S12'&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;showLadderBars&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Inspector&quot;}}">
+class Component extends DCLogic {
+  state={role:'QS',area:'commercial',sub:'commercialhub',reg:'blockers',ctx:'table',view:'my',bview:null,pkg:null,q:'',sel:null,chain:[],pins:['my','vo','big','week'],pop:null,modal:null,audit:[],comments:{},draft:'',bl:{},tags:{},stOver:{},seq:112};
+
+  ROLES=[['QS','QS'],['CM','Commercial Manager'],['CD','Commercial Director']];
+  LVL={QS:1,CM:2,CD:3};
+  OWN={QS:'QS',CM:'Commercial Manager',CD:'Commercial Director',SITE:'Site Engineer',CONS:'Consultant',FIN:'Finance',QA:'QA Lead'};
+  TODAY=23;
+  AREA={overview:'Overview',sitework:'Site Work',boq:'BoQ & Progress',commercial:'Commercial',documents:'Documents',reports:'Reports'};
+  NAV=[['overview','M3.6 3.6h5.2v5.2H3.6zM11.2 3.6h5.2v5.2h-5.2zM3.6 11.2h5.2v5.2H3.6zM11.2 11.2h5.2v5.2h-5.2z',''],
+    ['sitework','M6.6 4.4H5a1 1 0 0 0-1 1V16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5.4a1 1 0 0 0-1-1h-1.6','M7 2.8h6v3H7zM7 10.2h6M7 13.2h4'],
+    ['boq','M4 16.4V9M8 16.4V4.4M12 16.4v-4.2M16 16.4V7.2',''],
+    ['commercial','M5 3h7l3.2 3.2V17H5z','M12 3v3.4h3.2M8 12.4h4.2M8 9.4h4.2'],
+    ['documents','M3.2 6.2a1 1 0 0 1 1-1h3.2l1.4 1.7H15.8a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1H4.2a1 1 0 0 1-1-1z',''],
+    ['reports','M3.6 13.4 8 8.9l3 3 5.4-5.8','M3.6 16.6h13']];
+  SUB={overview:[['home','Home'],['dashboard','Dashboard'],['approvals','Approvals']],
+    sitework:[['wirs','WIRs'],['ncrs','NCRs'],['snagging','Snagging'],['workitems','Work items']],
+    boq:[['qs','QS'],['progress','Progress'],['model','Model'],['registry','Registry']],
+    commercial:[['commercialhub','Commercial Control'],['certification-control-room','Control Room'],['certqueue','Cert queue'],['ipcs','IPCs'],['invoices','Invoices']],
+    documents:[['drawings','Drawings'],['dms','DMS']],
+    reports:[['reports','Reports'],['cashflow','Cashflow']]};
+  PKG=[['02','Earthworks'],['03','Foundations'],['05','Superstructure'],['07','Substructure']];
+  PKL={'02':'02 Earthworks','03':'03 Foundations','05':'05 Superstructure','07':'07 Substructure',FIN:'IPC · invoice · payment'};
+
+  BLK=[
+    {ref:'BLK-00941',type:'Variation pending',boq:['05-003','05-008'],zone:'Zone 03',sar:1850000,owner:'CM',due:'27 Sep 2026',dueD:27,raised:'12 Sep 2026',pk:'05',age:'8–30 d',links:['WIR-0522','MS-0410','CE-014','EI-032'],why:'VO-014 awaits written client approval. MS-0410 quantities cannot become eligible until the variation is directed.'},
+    {ref:'BLK-00937',type:'NCR',boq:['05-003'],zone:'Zone 03',sar:640000,owner:'QA',due:'25 Sep 2026',dueD:25,raised:'15 Sep 2026',pk:'05',age:'8–30 d',links:['NCR-088','WIR-0522','Z03-S12'],why:'NCR-088 open on the Z03-S12 soffit. The line is held until close-out is accepted.'},
+    {ref:'BLK-00929',type:'Measurement pending',boq:['05-003'],zone:'Zone 03',sar:310000,owner:'QS',due:'24 Sep 2026',dueD:24,raised:'18 Sep 2026',pk:'05',age:'0–7 d',links:['MS-0410','WIR-0522'],why:'MS-0410 Rev 2 needs QS verification before 770 m³ can move from measured to eligible.'},
+    {ref:'BLK-00918',type:'Missing evidence',boq:['03-014'],zone:'Zone 01',sar:420000,owner:'SITE',due:'23 Sep 2026',dueD:23,raised:'16 Sep 2026',pk:'03',age:'0–7 d',links:['WIR-0436'],why:'Integrity test reports are not attached for 6 of the 14 piles in the claim set.'},
+    {ref:'BLK-00902',type:'WIR pending',boq:['03-021'],zone:'Zone 02',sar:275000,owner:'CONS',due:'26 Sep 2026',dueD:26,raised:'19 Sep 2026',pk:'03',age:'0–7 d',links:['WIR-0533'],why:'Inspection of pile cap PC-22 requested 19 Sep. The consultant has not attended.'},
+    {ref:'BLK-00897',type:'Rate unresolved',boq:['07-002'],zone:'Zone C',sar:1120000,owner:'CM',due:'30 Sep 2026',dueD:30,raised:'02 Sep 2026',pk:'07',age:'8–30 d',links:['CE-011'],why:'Star rate for 300 mm drainage is not agreed. Executed quantity cannot be valued.'},
+    {ref:'BLK-00884',type:'Instruction missing',boq:['05-011'],zone:'Zone 03',sar:560000,owner:'CM',due:'22 Sep 2026',dueD:22,raised:'08 Sep 2026',pk:'05',age:'8–30 d',links:['WIR-0515'],why:'Wall thickening built to site direction with no engineer\u2019s instruction on record.'},
+    {ref:'BLK-00871',type:'Certification dispute',boq:['02-006'],zone:'Zone 01',sar:2340000,owner:'CD',due:'02 Oct 2026',dueD:32,raised:'28 Aug 2026',pk:'02',age:'8–30 d',links:['IPC-07','MS-0388'],why:'Consultant certified SAR 0.80m of 3.10m claimed. Rock classification is disputed.'},
+    {ref:'BLK-00866',type:'Invoice hold',boq:['IPC-07'],zone:'—',sar:3900000,owner:'FIN',due:'28 Sep 2026',dueD:28,raised:'10 Sep 2026',pk:'FIN',age:'8–30 d',links:['IPC-07','INV-0231'],why:'Invoice INV-0231 is held pending the client PO amendment.'},
+    {ref:'BLK-00852',type:'Payment overdue',boq:['IPC-06'],zone:'—',sar:5200000,owner:'CD',due:'15 Sep 2026',dueD:15,raised:'15 Aug 2026',pk:'FIN',age:'31–90 d',links:['IPC-06'],why:'Certified 21 Aug. The 28-day payment period elapsed on 15 Sep.'},
+    {ref:'BLK-00849',type:'Commercial review',boq:['05-008'],zone:'Zone 03',sar:890000,owner:'CM',due:'29 Sep 2026',dueD:29,raised:'17 Sep 2026',pk:'05',age:'0–7 d',links:['MS-0412'],why:'Column quantities exceed the drawing take-off by 6%. Review before claim.'}];
+
+  BOQ=[
+    {line:'02-006',pkg:'02',desc:'Bulk excavation in rock, Zone 01',exec:3100000,meas:3100000,elig:3100000,claim:3100000,cert:800000,inv:800000,rev:'Rev C',blk:['BLK-00871'],wirs:4,ms:2,ev:9,ce:0},
+    {line:'03-014',pkg:'03',desc:'Bored piles 600 mm dia',exec:4200000,meas:4200000,elig:3950000,claim:3950000,cert:3600000,inv:3600000,rev:'Rev C',blk:['BLK-00918'],wirs:14,ms:4,ev:38,ce:0},
+    {line:'03-021',pkg:'03',desc:'RC pile caps',exec:1850000,meas:1700000,elig:1420000,claim:1100000,cert:1100000,inv:1100000,rev:'Rev C',blk:['BLK-00902'],wirs:6,ms:2,ev:11,ce:0},
+    {line:'05-003',pkg:'05',desc:'RC suspended slabs, Zone 03',exec:2800000,meas:2600000,elig:2100000,claim:1900000,cert:1700000,inv:1700000,rev:'Rev D',blk:['BLK-00941','BLK-00937','BLK-00929'],wirs:7,ms:3,ev:14,ce:1},
+    {line:'05-008',pkg:'05',desc:'RC columns, Zone 03',exec:1950000,meas:1950000,elig:1200000,claim:1200000,cert:950000,inv:950000,rev:'Rev D',blk:['BLK-00941','BLK-00849'],wirs:5,ms:2,ev:9,ce:1},
+    {line:'05-011',pkg:'05',desc:'RC shear walls',exec:1100000,meas:980000,elig:980000,claim:720000,cert:720000,inv:720000,rev:'Rev D',blk:['BLK-00884'],wirs:3,ms:1,ev:6,ce:0},
+    {line:'07-002',pkg:'07',desc:'Substructure drainage 300 mm',exec:2400000,meas:2400000,elig:1300000,claim:1300000,cert:1300000,inv:900000,rev:'Rev B',blk:['BLK-00897'],wirs:5,ms:2,ev:12,ce:1},
+    {line:'07-005',pkg:'07',desc:'Backfill and compaction, Zone C',exec:860000,meas:600000,elig:600000,claim:600000,cert:480000,inv:480000,rev:'Rev B',blk:[],wirs:3,ms:1,ev:5,ce:0}];
+  LINEREL={'05-003':{wirs:['WIR-0498','WIR-0511','WIR-0522','WIR-0530','WIR-0531','WIR-0537','WIR-0540'],ms:['MS-0398','MS-0402','MS-0410'],ce:['CE-014']},
+    '05-008':{wirs:[],ms:['MS-0412'],ce:['CE-014']},'03-014':{wirs:['WIR-0431','WIR-0436'],ms:['MS-0377'],ce:[]},'03-021':{wirs:['WIR-0509','WIR-0533'],ms:['MS-0405'],ce:[]},
+    '02-006':{wirs:[],ms:['MS-0388'],ce:[]},'05-011':{wirs:['WIR-0515'],ms:[],ce:[]},'07-002':{wirs:[],ms:[],ce:['CE-011']},'07-005':{wirs:[],ms:[],ce:[]}};
+
+  OBJ=[
+    {ref:'Z03-S10',kind:'Slab · 300 mm',zone:'Zone 03',boq:'05-003',exec:true,wir:'WIR-0498',wirSt:'Approved',ms:'MS-0398',qty:'760 m³',cs:'certified',csLabel:'Certified',reason:'Certified under IPC-07',exposed:0,next:'None · certified',drg:'STR-201 Rev C'},
+    {ref:'Z03-S11',kind:'Slab · 300 mm',zone:'Zone 03',boq:'05-003',exec:true,wir:'WIR-0511',wirSt:'Approved',ms:'MS-0402',qty:'765 m³',cs:'pending',csLabel:'Measured',reason:'Awaiting eligibility — verified, not yet in a claim window',exposed:580000,next:'Include in IPA-09',drg:'STR-201 Rev D'},
+    {ref:'Z03-S12',kind:'Slab · 350 mm',zone:'Zone 03',boq:'05-003',exec:true,wir:'WIR-0522',wirSt:'Approved',ms:'MS-0410',qty:'770 m³',cs:'blocker',csLabel:'Blocked',reason:'VO-014 awaiting approval · NCR-088 open',exposed:640000,next:'Clear BLK-00941 and BLK-00937',drg:'STR-201 Rev D'},
+    {ref:'Z03-S13',kind:'Slab · 300 mm',zone:'Zone 03',boq:'05-003',exec:false,wir:'WIR-0537',wirSt:'Awaiting inspection',ms:'—',qty:'—',cs:'neutral',csLabel:'Not executed',reason:'Pour planned 28 Sep 2026',exposed:0,next:'Pre-pour check WIR-0540',drg:'STR-201 Rev D'},
+    {ref:'F-18',kind:'RC foundation',zone:'Zone 01',boq:'03-021',exec:true,wir:'WIR-0509',wirSt:'Approved',ms:'MS-0405',qty:'48 m³',cs:'pending',csLabel:'Measured · not eligible',reason:'Awaiting eligibility check against WI-0392',exposed:210000,next:'QS eligibility review',drg:'STR-201 Rev D',flex:2},
+    {ref:'P-118',kind:'Pile · 600 mm',zone:'Zone 01',boq:'03-014',exec:true,wir:'WIR-0431',wirSt:'Approved',ms:'MS-0377',qty:'12.5 m',cs:'pending',csLabel:'Eligible',reason:'Evidence complete · ready to claim',exposed:0,next:'Include in IPA-09',drg:'STR-104 Rev B',flex:1}];
+
+  REC={
+    'WIR-0522':{type:'WIR',title:'RC slab pour — Z03-S12',rev:'Rev 1',status:['neutral','Approved'],date:'18 Sep 2026',by:'Consultant · A. Rahman',boq:'05-003',ms:'MS-0410',obj:'Z03-S12',drg:'STR-201 Rev D',ev:12,note:'Approved is not certified. This WIR carries ink until a certificate references line 05-003.'},
+    'WIR-0498':{type:'WIR',title:'RC slab pour — Z03-S10',rev:'Rev 1',status:['neutral','Approved'],date:'11 Aug 2026',by:'Consultant · A. Rahman',boq:'05-003',ms:'MS-0398',obj:'Z03-S10',drg:'STR-201 Rev C',ev:9},
+    'WIR-0511':{type:'WIR',title:'RC slab pour — Z03-S11',rev:'Rev 1',status:['neutral','Approved'],date:'04 Sep 2026',by:'Consultant · A. Rahman',boq:'05-003',ms:'MS-0402',obj:'Z03-S11',drg:'STR-201 Rev D',ev:10},
+    'WIR-0530':{type:'WIR',title:'Slab rebar — Z03-S13, part',rev:'Rev 1',status:['neutral','Approved'],date:'20 Sep 2026',by:'Consultant · A. Rahman',boq:'05-003',ms:'—',obj:'Z03-S13',drg:'STR-201 Rev D',ev:4},
+    'WIR-0531':{type:'WIR',title:'Formwork — Z03-S13',rev:'Rev 1',status:['pending','Submitted'],date:'22 Sep 2026',by:'—',boq:'05-003',ms:'—',obj:'Z03-S13',drg:'STR-201 Rev D',ev:0,note:'Submitted means the request exists. It does not mean anyone has looked at it.'},
+    'WIR-0537':{type:'WIR',title:'Slab rebar — Z03-S13, remainder',rev:'Rev 1',status:['pending','Awaiting inspection'],date:'23 Sep 2026',by:'—',boq:'05-003',ms:'—',obj:'Z03-S13',drg:'STR-201 Rev D',ev:2},
+    'WIR-0540':{type:'WIR',title:'Pre-pour check — Z03-S13',rev:'Rev 1',status:['pending','Awaiting inspection'],date:'23 Sep 2026',by:'—',boq:'05-003',ms:'—',obj:'Z03-S13',drg:'STR-201 Rev D',ev:0},
+    'WIR-0431':{type:'WIR',title:'Pile integrity — P-118',rev:'Rev 2',status:['neutral','Approved'],date:'14 Jul 2026',by:'Consultant · A. Rahman',boq:'03-014',ms:'MS-0377',obj:'P-118',drg:'STR-104 Rev B',ev:3},
+    'WIR-0436':{type:'WIR',title:'Pile integrity — P-121 to P-126',rev:'Rev 1',status:['neutral','Approved'],date:'19 Jul 2026',by:'Consultant · A. Rahman',boq:'03-014',ms:'MS-0379',obj:'—',drg:'STR-104 Rev B',ev:2,note:'Approved on the site record. Integrity test reports for six piles are not attached — see BLK-00918.'},
+    'WIR-0509':{type:'WIR',title:'RC foundation — F-18',rev:'Rev 1',status:['neutral','Approved'],date:'08 Sep 2026',by:'Consultant · A. Rahman',boq:'03-021',ms:'MS-0405',obj:'F-18',drg:'STR-201 Rev D',ev:12},
+    'WIR-0533':{type:'WIR',title:'Pile cap — PC-22',rev:'Rev 1',status:['pending','Awaiting inspection'],date:'19 Sep 2026',by:'—',boq:'03-021',ms:'—',obj:'—',drg:'STR-108 Rev A',ev:3},
+    'WIR-0515':{type:'WIR',title:'Shear wall — SW-3 thickening',rev:'Rev 1',status:['neutral','Approved'],date:'10 Sep 2026',by:'Consultant · A. Rahman',boq:'05-011',ms:'—',obj:'—',drg:'STR-220 Rev B',ev:5},
+    'MS-0410':{type:'Measurement',title:'Slab Z03-S12 — concrete volume',rev:'Rev 2',status:['pending','Needs verification'],qty:'770 m³',by:'Karim · Surveyor',date:'18 Sep 2026',wir:'WIR-0522',boq:'05-003',obj:'Z03-S12',value:310000,note:'Rev 2 supersedes 740 m³ after the thickening under EI-032.'},
+    'MS-0402':{type:'Measurement',title:'Slab Z03-S11 — concrete volume',rev:'Rev 1',status:['neutral','QS verified'],qty:'765 m³',by:'Karim · Surveyor',date:'05 Sep 2026',wir:'WIR-0511',boq:'05-003',obj:'Z03-S11'},
+    'MS-0398':{type:'Measurement',title:'Slab Z03-S10 — concrete volume',rev:'Rev 1',status:['neutral','QS verified'],qty:'760 m³',by:'Karim · Surveyor',date:'12 Aug 2026',wir:'WIR-0498',boq:'05-003',obj:'Z03-S10'},
+    'MS-0405':{type:'Measurement',title:'Foundation F-18 — concrete volume',rev:'Rev 1',status:['neutral','QS verified'],qty:'48 m³',by:'M. Idris · Surveyor',date:'09 Sep 2026',wir:'WIR-0509',boq:'03-021',obj:'F-18'},
+    'MS-0377':{type:'Measurement',title:'Pile P-118 — length',rev:'Rev 1',status:['neutral','QS verified'],qty:'12.5 m',by:'M. Idris · Surveyor',date:'15 Jul 2026',wir:'WIR-0431',boq:'03-014',obj:'P-118'},
+    'MS-0379':{type:'Measurement',title:'Piles P-121 to P-126 — length',rev:'Rev 1',status:['neutral','QS verified'],qty:'74.0 m',by:'M. Idris · Surveyor',date:'20 Jul 2026',wir:'WIR-0436',boq:'03-014',obj:'—'},
+    'MS-0412':{type:'Measurement',title:'Columns Zone 03 — Level 01',rev:'Rev 1',status:['pending','Draft'],qty:'184 m³',by:'Karim · Surveyor',date:'17 Sep 2026',wir:'—',boq:'05-008',obj:'—'},
+    'MS-0388':{type:'Measurement',title:'Rock excavation — Zone 01',rev:'Rev 3',status:['blocker','Disputed'],qty:'9,400 m³',by:'M. Idris · Surveyor',date:'22 Aug 2026',wir:'—',boq:'02-006',obj:'—',note:'Consultant accepts 2,400 m³ as rock. The rest is classified as hard material at the lower rate.'},
+    'CE-014':{type:'Change event',title:'Slab Z03-S12 thickened to 350 mm',rev:'Rev 1',status:['neutral','Variation raised'],date:'05 Sep 2026',vo:'VO-014',ei:'EI-032',boq:'05-003',wir:'WIR-0522',ms:'MS-0410'},
+    'CE-011':{type:'Change event',title:'Drainage 300 mm — star rate',rev:'Rev 1',status:['pending','Rate under negotiation'],date:'28 Aug 2026',vo:'—',ei:'—',boq:'07-002',wir:'—',ms:'—'},
+    'VO-014':{type:'Variation',title:'Additional slab thickening — Z03-S12',rev:'Rev 1',status:['pending','Pending client approval'],value:1850000,date:'12 Sep 2026',ce:'CE-014',ei:'EI-032',boq:['05-003','05-008'],note:'Direction exists on site (EI-032). Written client approval of the variation does not. Until it does, MS-0410 quantities stay measured, not eligible.'},
+    'EI-032':{type:'Instruction',title:'Engineer\u2019s instruction — thicken Z03-S12 to 350 mm',rev:'Rev 0',status:['neutral','Issued'],date:'03 Sep 2026',ext:'Aconex · ACX-2214-0871',note:'Contractual correspondence lives in Aconex and is linked, not copied.'},
+    'NCR-088':{type:'NCR',title:'Honeycombing at Z03-S12 soffit, grid 3/C',rev:'Rev 1',status:['blocker','Open'],date:'15 Sep 2026',owner:'QA Lead',close:'Repair method statement submitted 21 Sep · close-out inspection proposed 24 Sep',wir:'WIR-0522',obj:'Z03-S12'},
+    'IPC-07':{type:'Later',title:'Interim payment certificate 07'},'IPC-06':{type:'Later',title:'Interim payment certificate 06'},'INV-0231':{type:'Later',title:'Invoice 0231'},'IPA-09':{type:'Later',title:'Interim payment application 09'},'WI-0392':{type:'Later',title:'Work item 0392 · RC foundation F-18'}};
+
+  EVID=this.buildEvid();
+  buildEvid(){
+    const s12=[['z03-s12-pour-01.jpg','JPG','2.4 MB · 18 Sep 07:52 · F. Al-Harbi','WIR-0522'],['z03-s12-pour-02.jpg','JPG','2.1 MB · 18 Sep 07:58 · F. Al-Harbi','WIR-0522'],['pour-card-0522.pdf','PDF','0.8 MB · 18 Sep 09:10 · F. Al-Harbi','WIR-0522'],['ncr-088-soffit-01.jpg','JPG','1.9 MB · 15 Sep 10:12 · QA','NCR-088'],['rebar-check-z03-s12.pdf','PDF','0.6 MB · 17 Sep 16:30 · Consultant','WIR-0522']];
+    const survey=['ms-0410-survey.pdf','PDF','1.6 MB · 18 Sep 15:40 · Karim','MS-0410'];
+    const p118=[['p118-integrity.pdf','PDF','0.5 MB · 14 Jul 13:02 · Lab','WIR-0431'],['p118-cage-01.jpg','JPG','2.0 MB · 12 Jul 06:40 · F. Al-Harbi','WIR-0431'],['p118-pour-card.pdf','PDF','0.3 MB · 13 Jul 09:30 · F. Al-Harbi','WIR-0431']];
+    const f18=[['f18-rebar-01.jpg','JPG','2.3 MB · 07 Sep 06:50 · M. Idris','WIR-0509'],['f18-pour-card.pdf','PDF','0.4 MB · 08 Sep 09:12 · M. Idris','WIR-0509'],['f18-cube-results.pdf','PDF','0.4 MB · 15 Sep 11:00 · Lab','WIR-0509']];
+    const E={'05-003':{total:14,files:[s12[0],s12[1],s12[2],survey,['z03-s11-pour-01.jpg','JPG','2.2 MB · 04 Sep 08:05 · F. Al-Harbi','WIR-0511'],['cube-results-z03-s10.pdf','PDF','0.4 MB · 08 Sep 11:20 · Lab','WIR-0498']]},
+      'WIR-0522':{total:12,files:s12},'MS-0410':{total:1,files:[survey]},
+      'NCR-088':{total:2,files:[s12[3],['ncr-088-soffit-02.jpg','JPG','1.8 MB · 15 Sep 10:14 · QA','NCR-088']]},
+      'P-118':{total:3,files:p118},'F-18':{total:12,files:f18},'WIR-0511':{total:10,files:[['z03-s11-pour-01.jpg','JPG','2.2 MB · 04 Sep 08:05 · F. Al-Harbi','WIR-0511']]}};
+    E['Z03-S12']=E['WIR-0522'];E['WIR-0431']=E['P-118'];E['WIR-0509']=E['F-18'];E['Z03-S11']=E['WIR-0511'];
+    return E;
+  }
+
+  THREADS={'CE-014':[['Tarek','18 Sep','Engineer requested revised quantity breakdown.'],['Karim','18 Sep','Measurement MS-0410 updated. Survey attached.','ms-0410-survey.pdf'],['Commercial Manager','19 Sep','Keep blocked pending written VO direction.']],
+    'BLK-00941':[['Commercial Manager','19 Sep','Exposure recomputed after MS-0410 Rev 2: SAR 1,850,000 across 05-003 and 05-008.']],
+    'MS-0410':[['Karim','18 Sep','Rev 2 volume 770 m³ after thickening under EI-032. Survey attached.','ms-0410-survey.pdf']],
+    'VO-014':[['Commercial Manager','12 Sep','Submitted to client with EI-032 and MS-0410 Rev 1 attached.']]};
+  AUDIT0={'BLK-00941':[['Raised','Karim · QS','12 Sep 2026 09:14'],['Owner → Commercial Manager','Karim · QS','12 Sep 2026 09:15'],['VO PENDING','Commercial Manager','12 Sep 2026 16:40']],
+    'MS-0410':[['Rev 2 uploaded','Karim · Surveyor','18 Sep 2026 15:40']],'05-003':[['CM REVIEW REQUIRED','Karim · QS','19 Sep 2026 08:30']],'07-005':[['READY FOR CLAIM','Karim · QS','20 Sep 2026 10:05']]};
+  AGG={reason:[['Variation pending',6100000],['Payment overdue',5200000],['Invoice hold',3900000],['Certification dispute',2600000],['Rate unresolved',1900000],['Measurement pending',1400000],['NCR',1100000],['Commercial review',1000000],['Missing evidence',900000],['Instruction missing',600000]],
+    pkg:[['FIN',9100000],['05',6400000],['07',3200000],['03',3100000],['02',2900000]],
+    age:[['0–7 d',2300000],['8–30 d',11200000],['31–90 d',6000000],['> 90 d',5200000]]};
+
+  VIEWS=[['my','My Blockers','blockers',(b,c)=>c.own(b)===c.role],['vo','VO Pending','blockers',b=>b.type==='Variation pending'],['big','> SAR 1m Exposure','blockers',b=>b.sar>=1000000],['week','Due This Week','blockers',b=>b.dueD>=23&&b.dueD<=29],
+    ['ms','Missing Measurement','blockers',b=>b.type==='Measurement pending'],['z3','Zone 03','blockers',b=>b.zone==='Zone 03'],['pay','Overdue Payment','blockers',b=>b.type==='Payment overdue'],['all','All open blockers','blockers',()=>true],
+    ['xe','Executed But Not Eligible','boq',l=>l.exec>l.elig],['cc','Claimed But Not Certified','boq',l=>l.claim>l.cert],['ci','Certified But Not Invoiced','boq',l=>l.cert>l.inv]];
+  TPL=[['QS VERIFIED',1,['Measurement'],false],['CM REVIEW REQUIRED',1,['Blocker','BoQ line','Measurement','Variation','Change event'],false],['VO PENDING',2,['Blocker','BoQ line','Variation'],false],['NCR HOLD',2,['Blocker','BoQ line','NCR'],false],
+    ['EVIDENCE INCOMPLETE',1,['WIR','BoQ line','Blocker'],false],['READY FOR CLAIM',1,['BoQ line'],false],['READY FOR CERTIFICATION',2,['BoQ line'],true],['CERTIFICATION HOLD',2,['BoQ line','Blocker'],true],['FINANCE ACTION',3,['Blocker'],true]];
+  OV={'QS VERIFIED':['neutral','QS verified'],'CM REVIEW REQUIRED':['pending','CM review required'],'VO PENDING':['pending','VO pending'],'NCR HOLD':['blocker','NCR hold'],'EVIDENCE INCOMPLETE':['blocker','Evidence incomplete'],'READY FOR CLAIM':['pending','Ready for claim'],'READY FOR CERTIFICATION':['pending','Ready for certification'],'CERTIFICATION HOLD':['blocker','Certification hold'],'FINANCE ACTION':['pending','Finance action']};
+
+  fmt(n){return n.toLocaleString('en-US');}
+  mm(n){return (n/1e6).toFixed(2);}
+  now(){const d=new Date(),M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return String(d.getDate()).padStart(2,'0')+' '+M[d.getMonth()]+' '+d.getFullYear()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+  mk(kind,label){
+    const base="display:inline-flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;";
+    const m={certified:['#1C6B52','background:#1C6B52'],pending:['#7A5410','background:transparent;border:1.5px solid #7A5410;border-radius:50%'],blocker:['#8C2F26','background:#8C2F26;clip-path:polygon(50% 0,100% 100%,0 100%)'],neutral:['#5A6670','display:none']}[kind]||['#5A6670','display:none'];
+    return {label,style:base+'color:'+m[0],markStyle:'width:9px;height:9px;flex:none;'+m[1]};
+  }
+  short(r){if(this.REC[r])return this.REC[r].title;const l=this.BOQ.find(x=>x.line===r);if(l)return l.desc;const o=this.OBJ.find(x=>x.ref===r);if(o)return o.kind+' · '+o.zone;const b=this.BLK.find(x=>x.ref===r);if(b)return b.type+' · SAR '+this.fmt(b.sar);return 'Not in this fixture';}
+  roleLabel(){return this.ROLES.find(r=>r[0]===this.state.role)[1];}
+  set(p){return ()=>this.setState(p);}
+  open(ref,fresh){const st=this.state;if(fresh||!st.sel||st.sel===ref)this.setState({sel:ref,chain:fresh?[]:st.chain,pop:null,draft:''});else this.setState({sel:ref,chain:[...st.chain,st.sel],pop:null,draft:''});}
+  back(){const c=[...this.state.chain];const p=c.pop();this.setState({sel:p||null,chain:c,pop:null,draft:''});}
+  log(ref,label){const st=this.state;const id='A-'+(st.seq+1);return {audit:[...st.audit,{ref,label,actor:'You · '+this.roleLabel(),ts:this.now(),id}],seq:st.seq+1};}
+  setBl(ref,key,val,label){const st=this.state;const bl={...st.bl,[ref]:{...(st.bl[ref]||{}),[key]:val}};this.setState({bl,pop:null,...this.log(ref,label)});}
+  act(label,isModal,ref,R){if(isModal)this.setState({modal:{label,ref,reason:'',R},pop:null});else this.commit(label,ref,R);}
+  commit(label,ref,R){const st=this.state;const tags={...st.tags,[ref]:[...(st.tags[ref]||[]),label]};const stOver={...st.stOver,[ref]:this.OV[label]};
+    let bl=st.bl;if(label==='FINANCE ACTION')bl={...st.bl,[ref]:{...(st.bl[ref]||{}),owner:'FIN'}};
+    const reason=st.modal&&st.modal.reason&&st.modal.reason.trim()?' · '+st.modal.reason.trim():'';
+    this.setState({tags,stOver,bl,modal:null,...this.log(ref,label+reason)});}
+  gate(label,R){switch(label){
+    case 'QS VERIFIED':return R.needsVerify?null:'Measurement is not awaiting verification';
+    case 'READY FOR CLAIM':return R.openBlk?R.openBlk+' open blocker'+(R.openBlk>1?'s':'')+' on this line':(R.elig>R.claim?null:'Nothing eligible beyond claimed');
+    case 'READY FOR CERTIFICATION':return R.openBlk?R.openBlk+' open blocker'+(R.openBlk>1?'s':'')+' on this line':(R.claim>R.cert?null:'Nothing claimed beyond certified');
+    case 'FINANCE ACTION':return R.fin?null:'Only for invoice or payment blockers';
+    case 'NCR HOLD':return R.hasNcr?null:'No open NCR linked';
+    case 'VO PENDING':return R.hasVo?null:'No variation linked';
+    case 'EVIDENCE INCOMPLETE':return R.evGap?null:'No evidence gap recorded on this record';
+    default:return null;}}
+  evKeyFor(sel){if(!sel)return null;if(sel.startsWith('EV:')){const n=sel.slice(3);for(const k of Object.keys(this.EVID)){if(this.EVID[k].files.some(f=>f[0]===n))return k;}return null;}
+    if(this.EVID[sel])return sel;const r=this.REC[sel];if(r){if(r.wir&&this.EVID[r.wir])return r.wir;if(r.obj&&this.EVID[r.obj])return r.obj;}
+    const b=this.BLK.find(x=>x.ref===sel);if(b){return b.links.find(x=>this.EVID[x])||null;}return null;}
+  componentDidMount(){const d=this.props.inspectorDefaultOpen;if(d&&d!=='none'&&!this.state.sel)this.setState({sel:d});this._k=e=>{if(e.key==='Escape'){if(this.state.modal)this.setState({modal:null});else if(this.state.pop)this.setState({pop:null});}};window.addEventListener('keydown',this._k);}
+  componentWillUnmount(){window.removeEventListener('keydown',this._k);}
+
+  buildInsp(H){
+    const st=this.state,ref=st.sel;
+    const I={on:false,off:true,type:'',ref:'',title:'',revLabel:'Revision',rev:'—',status:this.mk('neutral',''),figure:{k:'',v:''},hasFigure:false,facts:[],hasFacts:false,hasLadder:false,ladder:[],lists:[],related:[],hasRelated:false,actions:[],hasActions:false,threadOn:false,comments:[],noComments:false,audit:[],noAudit:true,note:'',hasNote:false,preview:false,tag:'',hasTag:false,
+      canBack:st.chain.length>0,backLabel:st.chain.length?st.chain[st.chain.length-1].replace('EV:',''):'',back:()=>this.back(),close:this.set({sel:null,chain:[],pop:null,draft:''}),draft:'',cannotAdd:true,addStyle:'',onDraft:null,addComment:null};
+    if(!ref)return I;
+    I.on=true;I.off=false;I.ref=ref.replace('EV:','');
+    const go=r=>()=>this.open(r,false);
+    const evGo=this.set({ctx:'evidence',reg:st.reg==='exposure'?'blockers':st.reg,pop:null});
+    const V="font-size:12.5px;color:#16211F;min-width:0;text-wrap:pretty;";
+    const LINK="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:#16211F;background:transparent;border:0;padding:0;cursor:pointer;text-align:start;text-decoration:underline;text-underline-offset:2px;min-width:0;overflow-wrap:anywhere;";
+    const fact=(k,v,o)=>{const f=Object.assign({k,v:String(v),isLink:false,mono:false,hasPop:false,popOn:false,popOpts:[],popTitle:''},o||{});f.isText=!f.isLink;f.vStyle=f.isLink?LINK:V+(f.mono?"font-family:'IBM Plex Mono',monospace;font-size:12px;":'');return f;};
+    const link=(k,r,label)=>fact(k,label||r,{isLink:!!(r&&r!=='—'&&r!==''),go:go(r)});
+    const item=(r,extra)=>{const x=Object.assign({ref:r,text:this.short(r),go:go(r)},this.mk('neutral',''),extra||{});return x;};
+    const popOpt=(label,on,fn)=>({label,go:fn,style:'width:100%;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:'+(on?'rgba(22,33,31,.08)':'transparent')+';font-family:inherit;font-size:13px;font-weight:'+(on?'600':'450')+';color:#16211F;text-align:start;cursor:pointer'});
+    let R=null;
+    const ov=st.stOver[ref];
+    const b=this.BLK.find(x=>x.ref===ref),l=this.BOQ.find(x=>x.line===ref),o=this.OBJ.find(x=>x.ref===ref),rec=this.REC[ref];
+    if(b){
+      const s=H.bstat(b),ow=H.own(b);
+      I.type='Commercial blocker';I.title=b.type+' — '+b.why;I.revLabel='Raised';I.rev=b.raised;I.status=ov?this.mk(ov[0],ov[1]):H.bMark(b);
+      I.figure={k:'Commercial impact',v:'SAR '+this.fmt(b.sar)};I.hasFigure=true;
+      I.facts=[fact('Type',b.type),
+        fact('Status',s,{hasPop:true,popOn:st.pop==='status',popTitle:'Change status',togglePop:()=>this.setState({pop:st.pop==='status'?null:'status'}),popOpts:['Open','Under review','Resolved'].map(x=>popOpt(x,x===s,()=>this.setBl(b.ref,'status',x,'Status → '+x)))}),
+        fact('Owner',this.OWN[ow],{hasPop:true,popOn:st.pop==='owner',popTitle:'Assign owner',togglePop:()=>this.setState({pop:st.pop==='owner'?null:'owner'}),popOpts:Object.keys(this.OWN).map(k=>popOpt(this.OWN[k],k===ow,()=>this.setBl(b.ref,'owner',k,'Owner → '+this.OWN[k])))}),
+        fact('Due',b.due,{mono:true}),fact('Location',b.zone)];
+      I.lists=[{name:'Affected',items:b.boq.map(x=>item(x)),isEmpty:false,empty:''},{name:'Linked records',items:b.links.map(x=>item(x)),isEmpty:false,empty:''}];
+      I.threadOn=true;
+      R={kind:'Blocker',btype:b.type,hasVo:b.type==='Variation pending',hasNcr:b.type==='NCR',fin:b.type==='Invoice hold'||b.type==='Payment overdue',evGap:b.type==='Missing evidence',sar:b.sar};
+    } else if(l){
+      const n=H.lineOpen(l);
+      I.type='BoQ line';I.title=l.desc;I.rev=l.rev;
+      I.status=ov?this.mk(ov[0],ov[1]):(n?this.mk('blocker',n+' open blocker'+(n>1?'s':'')):(l.cert>=l.exec?this.mk('certified','Certified'):this.mk('neutral','No open blockers')));
+      I.hasLadder=true;
+      I.ladder=[['Executed','exec'],['Measured','meas'],['Eligible','elig'],['Claimed','claim'],['Certified','cert'],['Invoiced','inv']].map(([k,f])=>({k,v:'SAR '+this.fmt(l[f]),w:(this.props.showLadderBars===false?'display:none;':'display:block;')+'width:'+Math.max(1,Math.round(l[f]/l.exec*100))+'%;height:6px;background:#2C3A38;border-radius:2px',markStyle:k==='Certified'&&l.cert>0?'width:9px;height:9px;flex:none;background:#1C6B52':'display:none'}));
+      I.facts=[fact('Package',this.PKL[l.pkg]),fact('Executed − certified','SAR '+this.fmt(l.exec-l.cert),{mono:true}),fact('Eligible − claimed','SAR '+this.fmt(l.elig-l.claim),{mono:true})];
+      I.lists=[{name:'Blockers',items:l.blk.map(r=>{const bb=this.BLK.find(x=>x.ref===r);return item(r,H.bMark(bb));}),isEmpty:l.blk.length===0,empty:'No blockers on this line.'}];
+      const rel=this.LINEREL[l.line]||{wirs:[],ms:[],ce:[]};
+      const relRow=(k,n,refs,note)=>({k,n:String(n),chips:refs.map(r=>({ref:r,go:go(r)})),hasChips:refs.length>0,isEv:false,hasNote:refs.length<n,note:note||(refs.length?(n-refs.length)+' more not itemised in this fixture':'Not itemised in this fixture')});
+      I.related=[relRow('WIRs',l.wirs,rel.wirs),relRow('Measurements',l.ms,rel.ms),{k:'Evidence files',n:String(l.ev),chips:[],hasChips:false,isEv:!!this.EVID[l.line],go:evGo,hasNote:!this.EVID[l.line],note:'Not itemised in this fixture'},relRow('Change events',l.ce,rel.ce)];
+      I.hasRelated=true;
+      const openTypes=l.blk.map(r=>this.BLK.find(x=>x.ref===r)).filter(bb=>bb&&H.bstat(bb)!=='Resolved').map(bb=>bb.type);
+      R={kind:'BoQ line',openBlk:n,elig:l.elig,claim:l.claim,cert:l.cert,hasVo:openTypes.includes('Variation pending'),hasNcr:openTypes.includes('NCR'),evGap:openTypes.includes('Missing evidence')};
+    } else if(o){
+      I.type=o.kind.split(' · ')[0]+' · commercial pin';I.title=o.ref+' · '+o.zone+' · '+o.kind;I.revLabel='Drawing';I.rev=o.drg;I.status=this.mk(o.cs,o.csLabel);
+      if(o.exposed){I.figure={k:'Value exposed',v:'SAR '+this.fmt(o.exposed)};I.hasFigure=true;}
+      const evN=this.EVID[o.ref]?this.EVID[o.ref].total:0;
+      I.facts=[link('BOQ',o.boq),fact('Executed',o.exec?'Yes':'Not yet'),link('WIR',o.wir,o.wir+' · '+o.wirSt),o.ms!=='—'?link('Measurement',o.ms,o.qty+' · '+o.ms):fact('Measurement','—'),fact('Commercial status',o.csLabel),fact('Reason',o.reason),fact('Next action',o.next)];
+      I.related=[{k:'Evidence files',n:String(evN),chips:[],hasChips:false,isEv:evN>0,go:evGo,hasNote:evN===0,note:'None attached in this fixture'}];I.hasRelated=true;
+    } else if(ref.startsWith('EV:')){
+      const n=ref.slice(3);let f=null;for(const k of Object.keys(this.EVID)){const hit=this.EVID[k].files.find(x=>x[0]===n);if(hit){f=hit;break;}}
+      I.type='Evidence file';I.title=n;I.revLabel='Captured';
+      if(f){const parts=f[2].split(' · ');I.rev=parts[1]||'—';I.status=this.mk('neutral','Attached');I.facts=[fact('Kind',f[1]),fact('Size',parts[0]),fact('Captured by',parts[2]||'—'),link('Linked record',f[3])];I.preview=true;I.note='The file is a fixture and the preview is a stand-in. Nothing here is a real capture.';I.hasNote=true;}
+      else{I.status=this.mk('neutral','Unknown');I.note='This file is not in the fixture.';I.hasNote=true;}
+    } else if(rec){
+      I.type=rec.type==='Later'?'Record':rec.type;I.title=rec.title;I.rev=rec.rev||'—';I.status=rec.status?(ov?this.mk(ov[0],ov[1]):this.mk(rec.status[0],rec.status[1])):this.mk('neutral','Not built');
+      if(rec.note){I.note=rec.note;I.hasNote=true;}
+      switch(rec.type){
+        case 'WIR':I.facts=[fact('Inspected by',rec.by),fact('Date',rec.date,{mono:true}),link('BoQ line',rec.boq),link('Measurement',rec.ms),link('Object',rec.obj),fact('Drawing',rec.drg,{mono:true})];
+          I.related=[{k:'Evidence files',n:String(rec.ev),chips:[],hasChips:false,isEv:!!this.EVID[ref],go:evGo,hasNote:!this.EVID[ref]&&rec.ev>0,note:'Not itemised in this fixture'}];I.hasRelated=true;
+          R={kind:'WIR',evGap:ref==='WIR-0436'};break;
+        case 'Measurement':I.facts=[fact('Quantity',rec.qty,{mono:true}),fact('Surveyor',rec.by),fact('Date',rec.date,{mono:true}),link('WIR',rec.wir),link('BoQ line',rec.boq),link('Object',rec.obj)];
+          if(rec.value){I.figure={k:'Value waiting on verification',v:'SAR '+this.fmt(rec.value)};I.hasFigure=true;}
+          I.related=[{k:'Evidence files',n:String(this.EVID[ref]?this.EVID[ref].total:0),chips:[],hasChips:false,isEv:!!this.EVID[ref],go:evGo,hasNote:!this.EVID[ref],note:'None attached in this fixture'}];I.hasRelated=true;
+          I.threadOn=true;R={kind:'Measurement',needsVerify:!ov&&rec.status[1]==='Needs verification'};break;
+        case 'Change event':I.facts=[fact('Raised',rec.date,{mono:true}),link('Variation',rec.vo),link('Instruction',rec.ei),link('BoQ line',rec.boq),link('WIR',rec.wir),link('Measurement',rec.ms)];I.threadOn=true;R={kind:'Change event'};break;
+        case 'Variation':I.figure={k:'Variation value',v:'SAR '+this.fmt(rec.value)};I.hasFigure=true;
+          I.facts=[fact('Submitted',rec.date,{mono:true}),link('Change event',rec.ce),link('Instruction',rec.ei)];
+          I.lists=[{name:'Affected',items:rec.boq.map(x=>item(x)),isEmpty:false,empty:''}];I.threadOn=true;R={kind:'Variation',hasVo:true};break;
+        case 'Instruction':I.revLabel='Issued';I.rev=rec.date;I.facts=[fact('External record',rec.ext,{mono:true})];break;
+        case 'NCR':I.revLabel='Raised';I.rev=rec.date;I.facts=[fact('Owner',rec.owner),fact('Close-out',rec.close),link('WIR',rec.wir),link('Object',rec.obj)];
+          I.related=[{k:'Evidence files',n:String(this.EVID[ref]?this.EVID[ref].total:0),chips:[],hasChips:false,isEv:!!this.EVID[ref],go:evGo,hasNote:false,note:''}];I.hasRelated=true;R={kind:'NCR',hasNcr:true};break;
+        default:I.note='Inspector for IPC, invoice, payment and work-item records is not in this draft. The reference is real in the fixture; its detail is not.';I.hasNote=true;
+      }
+    } else {I.type='Record';I.title='Not in this fixture';I.status=this.mk('neutral','Unknown');}
+    I.hasFacts=I.facts.length>0;
+    const tags=st.tags[ref]||[];if(tags.length){I.tag='Latest action · '+tags[tags.length-1]+' · You · '+H.roleLabel;I.hasTag=true;}
+    if(R){const applied=tags;
+      I.actions=this.TPL.filter(t=>t[2].includes(R.kind)).map(t=>{let reason=null;
+        if(applied.includes(t[0]))reason='Applied this session — see audit';
+        else if(H.lvl<t[1])reason='Requires '+(t[1]===2?'Commercial Manager':'Commercial Director')+' · you are '+H.roleLabel;
+        else reason=this.gate(t[0],R);
+        const on=!reason;
+        return {label:t[0],dis:!on,reason:reason||(t[3]?'Opens a confirmation · writes an audit record as '+H.roleLabel:'Applies now · writes an audit record as '+H.roleLabel),go:on?()=>this.act(t[0],t[3],ref,R):undefined,
+          style:'width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;padding:8px 12px;border-radius:8px;border:1px solid '+(on?'rgba(22,33,31,.22)':'rgba(22,33,31,.09)')+';background:'+(on?'#FAFAF7':'transparent')+';color:'+(on?'#16211F':'#5A6670')+';font-family:inherit;text-align:start;cursor:'+(on?'pointer':'not-allowed')};});
+      I.hasActions=I.actions.length>0;}
+    if(I.threadOn){const base=(this.THREADS[ref]||[]).concat(st.comments[ref]||[]);
+      I.comments=base.map(c=>({who:c[0],when:c[1],text:c[2],file:c[3]||'',hasFile:!!c[3],goFile:c[3]?()=>this.open('EV:'+c[3],false):undefined}));I.noComments=I.comments.length===0;
+      I.draft=st.draft;I.onDraft=e=>this.setState({draft:e.target.value});const can=st.draft.trim().length>0;I.cannotAdd=!can;
+      I.addStyle='margin-top:8px;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid '+(can?'rgba(22,33,31,.22)':'rgba(22,33,31,.09)')+';background:#FAFAF7;font-size:13.5px;font-weight:600;color:'+(can?'#16211F':'#5A6670')+';cursor:'+(can?'pointer':'not-allowed');
+      I.addComment=()=>{const t=this.state.draft.trim();if(!t)return;this.setState({comments:{...this.state.comments,[ref]:[...(this.state.comments[ref]||[]),['You · '+H.roleLabel,'Today',t]]},draft:''});};}
+    const a0=(this.AUDIT0[ref]||[]).map(a=>({what:a[0],who:a[1],ts:a[2],id:''}));
+    const a1=st.audit.filter(a=>a.ref===ref).map(a=>({what:a.label,who:a.actor,ts:a.ts,id:'· '+a.id}));
+    I.audit=a0.concat(a1);I.noAudit=I.audit.length===0;
+    return I;
+  }
+
+  renderVals(){
+    const st=this.state,role=st.role,roleLabel=this.roleLabel(),lvl=this.LVL[role];
+    const pb=on=>'min-height:28px;padding:0 10px;border-radius:8px;border:1px solid '+(on?'#FAFAF7':'rgba(250,250,247,.32)')+';background:'+(on?'#FAFAF7':'transparent')+';color:'+(on?'#16211F':'#FAFAF7')+';font-size:12px;font-weight:600;cursor:pointer';
+    const roles=this.ROLES.map(r=>({label:r[1],go:this.set({role:r[0],pop:null}),style:pb(role===r[0])}));
+    const rail=this.NAV.map(n=>{const on=st.area===n[0];return {title:this.AREA[n[0]],d:n[1],d2:n[2],go:this.set({area:n[0],sub:this.SUB[n[0]][0][0],pop:null,modal:null}),
+      style:'position:relative;width:44px;height:44px;border:0;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:'+(on?'#16211F':'#4A555C')+';background:'+(on?'rgba(22,33,31,.09)':'transparent'),
+      barStyle:'position:absolute;inset-inline-start:-10px;top:12px;width:3px;height:20px;border-radius:2px;background:'+(on?'#16211F':'transparent')};});
+    const subs=this.SUB[st.area].map(s=>{const on=st.sub===s[0];return {label:s[1],id:s[0],go:this.set({sub:s[0],pop:null,modal:null}),style:'display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 2px;border:0;background:transparent;cursor:pointer;font-size:13px;font-weight:'+(on?'600':'500')+';color:'+(on?'#16211F':'#5A6670')+';border-bottom:2px solid '+(on?'#16211F':'transparent')};});
+    const inRoom=st.area==='commercial'&&st.sub==='commercialhub';
+    const subLabel=(this.SUB[st.area].find(s=>s[0]===st.sub)||[])[1]||'';
+
+    const own=b=>(st.bl[b.ref]||{}).owner||b.owner;
+    const bstat=b=>(st.bl[b.ref]||{}).status||'Open';
+    const ctxV={role,own};
+    const openB=this.BLK.filter(b=>bstat(b)!=='Resolved'),resolved=this.BLK.filter(b=>bstat(b)==='Resolved');
+    const total=138-resolved.length,totalV=24700000-resolved.reduce((a,b)=>a+b.sar,0);
+    const viewOf=id=>this.VIEWS.find(v=>v[0]===id);
+    const vB=viewOf(st.view);
+    const q=st.q.trim().toLowerCase();
+    const lineOpen=l=>l.blk.filter(r=>{const b=this.BLK.find(x=>x.ref===r);return b&&bstat(b)!=='Resolved';}).length;
+    const bMark=b=>{const s=bstat(b);if(s==='Resolved')return this.mk('neutral','Resolved');if(s==='Under review')return this.mk('pending','Under review');return this.mk('blocker',b.dueD<this.TODAY?'Overdue':'Open');};
+    const listB=openB.filter(b=>vB[3](b,ctxV)&&(!st.pkg||b.pk===st.pkg)&&(!q||(b.ref+' '+b.type+' '+b.boq.join(' ')+' '+b.zone).toLowerCase().includes(q)));
+    const vL=st.bview?viewOf(st.bview):null;
+    const listL=this.BOQ.filter(l=>(!vL||vL[3](l,ctxV))&&(!st.pkg||l.pkg===st.pkg)&&(!q||(l.line+' '+l.desc).toLowerCase().includes(q)));
+
+    const ROWV='flex:1;min-width:0;display:flex;align-items:center;gap:8px;min-height:36px;padding:0 8px;border:0;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;text-align:start;color:#16211F;';
+    const viewCount=v=>v[2]==='blockers'?openB.filter(b=>v[3](b,ctxV)).length:this.BOQ.filter(l=>v[3](l,ctxV)).length;
+    const viewRow=v=>{const on=v[2]==='blockers'?(st.reg==='blockers'&&st.view===v[0]):(st.reg==='boq'&&st.bview===v[0]);const pinned=st.pins.includes(v[0]);
+      return {label:v[1],count:String(viewCount(v)),go:v[2]==='blockers'?this.set({reg:'blockers',view:v[0],pop:null}):this.set({reg:'boq',bview:v[0],pop:null}),
+        style:ROWV+'font-weight:'+(on?'600':'450')+';background:'+(on?'rgba(22,33,31,.08)':'transparent'),
+        pin:()=>this.setState({pins:pinned?this.state.pins.filter(p=>p!==v[0]):[...this.state.pins,v[0]]}),pinTitle:pinned?'Unpin view':'Pin view',
+        pinStyle:'flex:none;width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center',
+        pinMark:'width:9px;height:9px;'+(pinned?'background:#16211F':'border:1.5px solid #7A848C')};};
+    const pinnedViews=this.VIEWS.filter(v=>st.pins.includes(v[0])).map(viewRow);
+    const otherViews=this.VIEWS.filter(v=>!st.pins.includes(v[0])).map(viewRow);
+    const pkgs=[['','All packages']].concat(this.PKG.map(p=>[p[0],p[0]+' '+p[1]])).map(p=>{const on=(st.pkg||'')===p[0];return {label:p[1],count:String(openB.filter(b=>!p[0]||b.pk===p[0]).length),go:this.set({pkg:p[0]||null,pop:null}),style:ROWV+'font-weight:'+(on?'600':'450')+';background:'+(on?'rgba(22,33,31,.08)':'transparent')};});
+    const later=[{label:'Dossier export · IPC-08',tag:'Later'},{label:'QR → work item',tag:'Mobile'},{label:'Mobile object inspector',tag:'Mobile'},{label:'IPC · invoice · payment inspectors',tag:'Later'}];
+
+    const regs=[['blockers','Blockers',String(listB.length)],['boq','BoQ lines',String(listL.length)],['exposure','Exposure','']].map(r=>{const on=st.reg===r[0];return {label:r[1],count:r[2],go:this.set({reg:r[0],pop:null}),style:'display:inline-flex;align-items:center;gap:7px;min-height:46px;padding:0 2px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:'+(on?'600':'500')+';color:'+(on?'#16211F':'#5A6670')+';border-bottom:2px solid '+(on?'#16211F':'transparent')};});
+    const ctxOn=st.reg!=='exposure';
+    const ctxs=[['table','Table'],['2d','2D'],['3d','3D'],['evidence','Evidence']].map(c=>{const on=st.ctx===c[0];return {label:c[1],go:this.set({ctx:c[0],pop:null}),style:'min-height:32px;padding:0 12px;border-radius:8px;border:1px solid '+(on?'#16211F':'rgba(22,33,31,.18)')+';background:'+(on?'#16211F':'transparent')+';color:'+(on?'#FAFAF7':'#16211F')+';font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer'};});
+    const showBlk=ctxOn&&st.ctx==='table'&&st.reg==='blockers',showBoq=ctxOn&&st.ctx==='table'&&st.reg==='boq',showExp=!ctxOn,show2d=ctxOn&&st.ctx==='2d',show3d=ctxOn&&st.ctx==='3d',showEv=ctxOn&&st.ctx==='evidence';
+
+    const ROWB="width:100%;display:grid;grid-template-columns:88px 1.2fr 1fr 88px 70px 88px;gap:0 10px;align-items:center;min-height:44px;padding:8px 16px;border:0;border-bottom:1px solid rgba(22,33,31,.07);font-family:inherit;font-size:12.5px;color:#16211F;text-align:start;cursor:pointer;";
+    const rowsB=listB.map(b=>{const m=bMark(b);return {ref:b.ref,type:b.type,aff:b.boq.join(' · '),zone:b.zone,sar:this.fmt(b.sar),due:b.due.slice(0,6),mkLabel:m.label,mkStyle:m.style,markStyle:m.markStyle,go:()=>this.open(b.ref,true),style:ROWB+'background:'+(st.sel===b.ref?'rgba(22,33,31,.07)':'transparent')};});
+    const ROWL="width:100%;display:grid;grid-template-columns:56px 1fr repeat(5,66px) 88px;gap:0 8px;align-items:center;min-height:44px;padding:8px 16px;border:0;border-bottom:1px solid rgba(22,33,31,.07);font-family:inherit;font-size:12.5px;color:#16211F;text-align:start;cursor:pointer;";
+    const rowsL=listL.map(l=>{const n=lineOpen(l);const ov=st.stOver[l.line];const m=ov?this.mk(ov[0],ov[1]):(n?this.mk('blocker',n+' open'):this.mk('neutral','None'));
+      return {line:l.line,desc:l.desc,exec:this.mm(l.exec),meas:this.mm(l.meas),elig:this.mm(l.elig),claim:this.mm(l.claim),cert:this.mm(l.cert),mkLabel:m.label,mkStyle:m.style,markStyle:m.markStyle,go:()=>this.open(l.line,true),style:ROWL+'background:'+(st.sel===l.line?'rgba(22,33,31,.07)':'transparent')};});
+    const listBV=listB.reduce((a,b)=>a+b.sar,0);
+    const headB=total+' open commercial blockers representing SAR '+(totalV/1e6).toFixed(1)+'m.';
+    const subB='Showing '+listB.length+' in '+vB[1]+(st.pkg?' · package '+st.pkg:'')+(q?' · matching \u201C'+st.q.trim()+'\u201D':'')+' · SAR '+this.mm(listBV)+'m. Owner, links and thread open in the inspector.';
+    const emptyB=st.view==='my'?'No open blockers are owned by '+roleLabel+(st.pkg?' in package '+st.pkg:'')+'. Switch role above, widen the scope, or pick another view.':'No open blockers match this view and scope.';
+    const S=k=>listL.reduce((a,l)=>a+l[k],0);
+    const headL=listL.length+' BoQ lines · SAR '+this.mm(S('exec'))+'m executed · SAR '+this.mm(S('cert'))+'m certified · SAR '+this.mm(S('exec')-S('cert'))+'m not yet certified.';
+    const subL=(vL?'View '+vL[1]:'All lines')+(st.pkg?' · package '+st.pkg:'')+' · figures in SAR millions; full riyals in the inspector.';
+
+    const SA=k=>this.BOQ.reduce((a,l)=>a+l[k],0);
+    const stages=[['Executed','exec'],['Measured','meas'],['Eligible','elig'],['Claimed','claim'],['Certified','cert'],['Invoiced','inv']];
+    const gaps=stages.slice(1).map((s,i)=>({k:stages[i][0]+' → '+s[0],v:'SAR '+this.mm(SA(stages[i][1])-SA(s[1]))+'m'})).concat([{k:'Invoiced → Paid',v:'SAR 5.20m · IPC-06 overdue'}]);
+    const subAgg=(arr,key)=>arr.map(([k,v])=>[k,Math.max(0,v-resolved.filter(b=>b[key]===k).reduce((a,b)=>a+b.sar,0))]);
+    const BAR='display:grid;grid-template-columns:150px 1fr 56px;gap:10px;align-items:center;min-height:32px;width:100%;border:0;background:transparent;padding:0;font-family:inherit;font-size:12.5px;color:#16211F;text-align:start;';
+    const bars=(arr,labelOf,goOf)=>{const max=Math.max(...arr.map(a=>a[1]))||1;return arr.map(([k,v])=>({k:labelOf?labelOf(k):k,v:this.mm(v),w:'display:block;width:'+Math.max(1,Math.round(v/max*100))+'%;height:8px;background:#2C3A38;border-radius:2px',go:goOf?goOf(k):undefined,style:BAR+'cursor:'+(goOf&&goOf(k)?'pointer':'default')}));};
+    const byReason=bars(subAgg(this.AGG.reason,'type'));
+    const byPkg=bars(subAgg(this.AGG.pkg,'pk'),k=>this.PKL[k],k=>k==='FIN'?undefined:this.set({pkg:k,reg:'blockers',view:'all',ctx:'table',pop:null}));
+    const byAge=bars(subAgg(this.AGG.age,'age'));
+    const trend=[['W35',28.0],['W36',26.3],['W37',25.1],['W38 · now',totalV/1e6]].map(([k,v])=>({k,v:v.toFixed(1),h:'display:block;width:100%;height:'+Math.round(v/28*70)+'px;background:#2C3A38;border-radius:2px 2px 0 0'}));
+
+    const pin=o=>{const on=st.sel===o.ref;const m=this.mk(o.cs,o.csLabel);return {ref:o.ref,kind:o.kind,mkLabel:m.label,mkStyle:m.style,markStyle:m.markStyle,go:()=>this.open(o.ref,true),
+      style:'flex:'+(o.flex||1)+';min-width:0;min-height:118px;border:0;border-radius:8px;padding:12px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:6px;cursor:pointer;text-align:start;color:#16211F;font-family:inherit;'+(o.exec?'background:#FAFAF7;':'background:transparent;outline:1px dashed rgba(22,33,31,.3);outline-offset:-1px;')+(on?'box-shadow:inset 0 0 0 2px #16211F':'box-shadow:none')};};
+    const pinsZ3=this.OBJ.filter(o=>o.zone==='Zone 03').map(pin),pinsZ1=this.OBJ.filter(o=>o.zone==='Zone 01').map(pin);
+    const legend=[Object.assign({text:'a certificate exists'},this.mk('certified','Certified')),Object.assign({text:'measured · eligible · VO pending — label distinguishes'},this.mk('pending','Pending')),Object.assign({text:'blocker owned by someone'},this.mk('blocker','Blocked')),Object.assign({text:'dashed outline, no mark'},this.mk('neutral','Not executed'))].map(g=>({text:g.text,mkLabel:g.label,mkStyle:g.style,markStyle:g.markStyle}));
+
+    const evKey=this.evKeyFor(st.sel);const ev=evKey?this.EVID[evKey]:null;
+    const evRows=ev?ev.files.map(f=>({name:f[0],kind:f[1],meta:f[2],link:f[3],go:()=>this.open('EV:'+f[0],false),goLink:()=>this.open(f[3],false),style:'display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid rgba(22,33,31,.07);background:'+(st.sel==='EV:'+f[0]?'rgba(22,33,31,.07)':'transparent')})):[];
+    const evHead=ev?ev.total+' evidence files on '+evKey:(st.sel?'No evidence attached to '+st.sel.replace('EV:','')+' in this fixture.':'Select a record to see its evidence. The selection is held when you switch views.');
+    const evMore=!!ev&&ev.total>ev.files.length;const evMoreText=ev?(ev.total-ev.files.length)+' more files are counted on the record but not itemised in this fixture.':'';
+
+    const I=this.buildInsp({bstat,own,lineOpen,bMark,role,roleLabel,lvl});
+    const hasSel=!!st.sel;
+    const heldLine=st.sel?'Selection held · '+st.sel.replace('EV:','')+' · '+I.title:'Nothing selected · pick a row, a pin or a related record';
+
+    const md=st.modal;let modal={title:'',ref:'',body:'',needReason:false,reason:'',cannot:true,confirm:null,cancel:null,onReason:null,confirmStyle:'',actorLine:''};
+    if(md){const R=md.R;const needReason=md.label==='CERTIFICATION HOLD';let body='';
+      if(md.label==='READY FOR CERTIFICATION')body='Marks '+md.ref+' ready for certification. Claimed SAR '+this.fmt(R.claim)+', certified SAR '+this.fmt(R.cert)+' — SAR '+this.fmt(R.claim-R.cert)+' goes to the certifier. No certificate is created here; the line turns green only when one exists.';
+      else if(needReason)body='Places '+md.ref+' on certification hold. Certification stops where it stands until the hold is released. The reason enters the audit record.';
+      else body='Raises a finance action on '+md.ref+(R.sar?' · SAR '+this.fmt(R.sar):'')+' and reassigns the owner to Finance. Due in 7 days.';
+      const can=!needReason||md.reason.trim().length>0;
+      modal={title:md.label,ref:md.ref,body,needReason,reason:md.reason,cannot:!can,confirm:()=>this.commit(md.label,md.ref,R),cancel:this.set({modal:null}),onReason:e=>this.setState({modal:{...this.state.modal,reason:e.target.value}}),
+        confirmStyle:'min-height:48px;padding:0 18px;border-radius:8px;border:1px solid transparent;background:'+(can?'#16211F':'rgba(22,33,31,.25)')+';color:#FAFAF7;font-size:15px;font-weight:600;cursor:'+(can?'pointer':'not-allowed'),actorLine:'Recorded as You · '+roleLabel+' · '+this.now()};}
+
+    return {roles,readout:'role='+role+' · reg='+st.reg+' · ctx='+st.ctx+' · view='+(st.reg==='boq'?(st.bview||'all'):st.view)+(st.pkg?' · pkg='+st.pkg:'')+' · sel='+(st.sel||'—'),
+      rail,subs,inRoom,notRoom:!inRoom,areaTitle:inRoom?'Commercial Control':this.AREA[st.area],areaSub:inRoom?'Blockers, BoQ ladder and exposure for Contract C-2214. Every figure is synthetic.':'Six-area shell. Only Commercial Control is rebuilt in this draft.',routeId:st.area+' / '+st.sub,
+      q:st.q,onQ:e=>this.setState({q:e.target.value}),roleChip:'You · '+roleLabel,phTitle:this.AREA[st.area]+' · '+subLabel,phRoute:st.area+' / '+st.sub,
+      pinnedViews,otherViews,pkgs,later,regs,ctxOn,ctxs,hasSel,noSel:!hasSel,selRef:st.sel?st.sel.replace('EV:',''):'',selTitle:I.title,clearSel:this.set({sel:null,chain:[],pop:null,draft:''}),
+      showBlk,showBoq,showExp,show2d,show3d,showEv,headB,subB,rowsB,noRowsB:rowsB.length===0,emptyB,headL,subL,rowsL,noRowsL:rowsL.length===0,
+      byReason,byPkg,byAge,trend,gaps,pinsZ3,pinsZ1,legend,heldLine,evHead,evRows,evMore,evMoreText,
+      insp:I,popOn:!!st.pop,closePop:this.set({pop:null}),modalOn:!!md,modal};
+  }
+}
+</script>
+</body>
+</html>

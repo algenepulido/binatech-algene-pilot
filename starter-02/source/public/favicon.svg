@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" role="img" aria-label="BinaTech">
+  <!-- Logo System v1.0, mark 2C "the chain": the compressed payment chain
+       (WIR → BOQ → IPC → certified). Final dot always Certified Green. -->
+  <rect x="2" y="2" width="52" height="52" rx="13" fill="#16211F"/>
+  <circle cx="13.5" cy="28" r="4.4" fill="#FAFAF7"/>
+  <circle cx="23.5" cy="28" r="4.4" fill="#FAFAF7"/>
+  <circle cx="33.5" cy="28" r="4.4" fill="#FAFAF7"/>
+  <circle cx="43.5" cy="28" r="4.4" fill="#1C6B52"/>
+</svg>

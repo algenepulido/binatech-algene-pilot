@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+html,body{margin:0;padding:0;background:#EDEDF0;overflow-x:hidden}
+*{box-sizing:border-box}
+a{color:#245EA8;text-decoration:underline;text-underline-offset:2px}
+a:hover{color:#16211F}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid #245EA8;outline-offset:2px}
+@keyframes shim{0%{opacity:.4}50%{opacity:.85}100%{opacity:.4}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="background:#EDEDF0;color:#16211F;font-family:system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;min-height:100vh;overflow-x:hidden">
+
+<div style="position:sticky;top:0;z-index:90;background:#16211F;color:#FAFAF7;padding:9px 16px 10px;display:flex;flex-wrap:wrap;gap:9px 18px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:1px;margin-inline-end:4px">
+<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#9AA6A3">Reviewer controls · outside product UI</span>
+<span style="font-size:12px;color:#C9D1CF">Pilot Progress Composer v1 · PROPOSED, NOT APPROVED · basis: Main Chat clarification ed46134b · fictional Pilot Warehouse P · no backend</span>
+</div>
+<sc-for list="{{ switchRows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#9AA6A3">{{ r.name }}</span>
+<sc-for list="{{ r.opts }}" as="m" hint-placeholder-count="4">
+<button type="button" onClick="{{ m.go }}" style="{{ m.style }}">{{ m.label }}</button>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-inline-start:auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:#9AA6A3;white-space:nowrap">{{ readout }}</div>
+</div>
+
+<section style="padding:22px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:12px;flex-wrap:wrap">
+<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">A</span>
+<h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Report progress · composer opened from the existing Capture sheet</h2>
+<span style="font-size:13.5px;color:#5D6966;max-width:76ch">One additive action in the existing Capture sheet opens a five-step composer: compose, review, pending, error, acknowledgement. Project comes from the current context. The reference is supplied by the reporter or stays None; it is never inferred from the sheet's selected WIR, text or photos. Nothing is created, uploaded or saved.</span>
+</div>
+<div style="overflow-x:auto;padding-bottom:6px">
+<div ref="{{ frameRef }}" data-shell-frame="{{ shellId }}" style="{{ frameStyle }}">
+<div id="{{ shellId }}" data-frame-id="{{ shellId }}" style="height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;background:#F5F5F7">
+
+<header style="flex:none;background:#FAFAF7;border-bottom:1px solid rgba(22,33,31,.09);padding:10px 16px 9px;display:flex;align-items:center;gap:10px;min-height:60px">
+<sc-if value="{{ backOn }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ backAction }}" aria-label="{{ backLabel }}" style="flex:none;min-width:48px;height:48px;margin-inline-start:-10px;padding:0 6px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#245EA8;display:flex;align-items:center;gap:4px;font-family:inherit;font-size:13px;font-weight:600" style-hover="background:rgba(22,33,31,.05)"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.4 3.8 6.2 9l5.2 5.2"></path></svg><span>{{ backText }}</span></button>
+</sc-if>
+<span style="flex:none;width:26px;height:26px;border-radius:8px;background:#245EA8;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;font-weight:600">P</span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font-size:16.5px;font-weight:600;letter-spacing:-.01em;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ title }}</span><span style="font-size:12px;color:#5D6966;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sub }}</span></span>
+</header>
+
+<div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:16px 16px 20px">
+<div style="max-width:620px;margin-inline:auto">
+
+<sc-if value="{{ isSheet }}" hint-placeholder-val="{{ true }}">
+<div id="capture-sheet-reference" data-frame-id="capture-sheet-reference">
+<div style="font-size:11.5px;color:#5D6966;margin-bottom:10px">Sample data · Local prototype</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px;margin-bottom:12px">
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:6px">Existing Capture sheet · unchanged</div>
+<div style="font-size:13.5px;color:#5D6966;line-height:1.5">The WIR selector, file chooser and local-draft controls stay exactly as they are. Shown here as reference only; not redesigned on this board.</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+<div style="display:flex;align-items:center;gap:10px;min-height:48px;border:1px dashed rgba(22,33,31,.2);border-radius:8px;padding:0 13px;font-size:14px;color:#5D6966">Selected WIR · WIR-0412 (existing control)</div>
+<div style="display:flex;align-items:center;gap:10px;min-height:48px;border:1px dashed rgba(22,33,31,.2);border-radius:8px;padding:0 13px;font-size:14px;color:#5D6966">Choose file · local draft (existing controls)</div>
+</div>
+</div>
+<div style="font-size:12.5px;font-weight:600;color:#5D6966;margin:0 0 8px">Additive action</div>
+<button type="button" data-focus-return="report-progress" onClick="{{ openComposer }}" style="width:100%;min-height:52px;border-radius:8px;background:#245EA8;color:#FFFFFF;border:0;font-family:inherit;font-size:15.5px;font-weight:600;cursor:pointer" style-hover="background:#1C4C87">Report progress</button>
+<div style="font-size:12.5px;color:#5D6966;margin-top:10px;line-height:1.5">Opens the composer. The selected WIR above is not carried into it.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCompose }}" hint-placeholder-val="{{ false }}">
+<div id="pilot-progress-compose" data-frame-id="pilot-progress-compose" style="display:flex;flex-direction:column;gap:14px">
+<div style="font-size:11.5px;color:#5D6966">Sample data · Local prototype</div>
+
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span style="font-size:13px;color:#5D6966">Project</span><span style="font-size:14px;font-weight:600">Pilot Warehouse P</span></div>
+<div style="font-size:12px;color:#5D6966;margin-top:4px;line-height:1.45">From the current context. Not editable here.</div>
+</div>
+
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<div style="font-size:13px;color:#5D6966;margin-bottom:6px">Reference <span>· optional</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">
+<sc-for list="{{ refTypes }}" as="r" hint-placeholder-count="4">
+<button type="button" onClick="{{ r.go }}" aria-pressed="{{ r.on }}" style="{{ r.style }}">{{ r.label }}</button>
+</sc-for>
+</div>
+<sc-if value="{{ refOn }}" hint-placeholder-val="{{ false }}">
+<label style="display:flex;flex-direction:column;gap:5px;margin-top:10px"><span style="font-size:13px;color:#5D6966">{{ refIdLabel }}</span><input type="text" value="{{ f.refId }}" onChange="{{ onRefId }}" placeholder="{{ refPlaceholder }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 12px;font-family:inherit;font-size:16px;color:#16211F"></label>
+</sc-if>
+<div style="font-size:12px;color:#5D6966;margin-top:8px;line-height:1.45">Supplied by you, or None. The Capture sheet's selected WIR, text and photos are not used to fill this.</div>
+</div>
+
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<label style="display:flex;flex-direction:column;gap:5px"><span style="font-size:13px;color:#5D6966">Description <span style="color:#A53A32">· required</span></span>
+<textarea value="{{ f.desc }}" onChange="{{ onDesc }}" rows="4" dir="auto" placeholder="What was done, where, and anything the team should know" style="border-radius:8px;border:1px solid {{ descBorder }};background:#FFFFFF;padding:11px 12px;font-family:inherit;font-size:16px;line-height:1.5;color:#16211F;resize:vertical;min-height:112px"></textarea></label>
+<sc-if value="{{ errDesc }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:#A53A32;margin-top:6px">Enter a description before continuing.</div></sc-if>
+<div style="font-size:12px;color:#5D6966;margin-top:8px;line-height:1.45">Your text is kept exactly as typed. Arabic or English, written by you.</div>
+</div>
+
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<div style="font-size:13px;color:#5D6966;margin-bottom:6px">Status <span style="color:#A53A32">· required</span></div>
+<div role="radiogroup" aria-label="Status" style="display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ statuses }}" as="s" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{ s.on }}" onClick="{{ s.go }}" style="{{ s.style }}"><span style="{{ s.dot }}"></span><span style="flex:1;min-width:0;text-align:start"><span style="display:block;font-size:15px;font-weight:600">{{ s.label }}</span><span style="display:block;font-size:12.5px;color:#5D6966;margin-top:1px">{{ s.hint }}</span></span></button>
+</sc-for>
+</div>
+<sc-if value="{{ errStatus }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:#A53A32;margin-top:8px">Choose a status before continuing.</div></sc-if>
+<div style="font-size:12px;color:#5D6966;margin-top:8px;line-height:1.45">Your statement about the work. It is not an inspection result, a measurement, an approval or a certificate.</div>
+</div>
+
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<label style="display:flex;flex-direction:column;gap:5px"><span style="font-size:13px;color:#5D6966">Blocker note <span>· optional</span></span>
+<textarea value="{{ f.blocker }}" onChange="{{ onBlocker }}" rows="2" dir="auto" placeholder="What is in the way, if anything" style="border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:11px 12px;font-family:inherit;font-size:16px;line-height:1.5;color:#16211F;resize:vertical;min-height:64px"></textarea></label>
+<div style="font-size:12px;color:#5D6966;margin-top:8px;line-height:1.45">Optional whatever the status, including Blocked.</div>
+</div>
+
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:8px"><span style="font-size:13px;color:#5D6966">Photos <span>· optional, up to 3</span></span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#5D6966">{{ photoCount }} of 3</span></div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ photos }}" as="p" hint-placeholder-count="1">
+<div style="display:flex;align-items:center;gap:12px;background:#F5F5F7;border-radius:8px;padding:8px 10px;min-height:56px">
+<span style="flex:none;width:44px;height:44px;border-radius:8px;background:#E3E4E8;display:flex;align-items:center;justify-content:center;color:#5D6966"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"></rect><path d="m3.6 16.4 4.6-4.3 3.4 3.1 3.6-3.6 5.2 4.8"></path></svg></span>
+<span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:500;overflow-wrap:anywhere">{{ p.name }}</span><span style="display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;margin-top:2px;color:{{ p.sizeColor }}">{{ p.size }}</span></span>
+<button type="button" onClick="{{ p.remove }}" aria-label="{{ p.removeLabel }}" style="flex:none;min-width:48px;height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.16);background:#FFFFFF;color:#16211F;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:0 10px">Remove</button>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ errPhotoSize }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:9px;align-items:flex-start;background:#FBF0EE;border-radius:8px;padding:10px 12px;margin-top:8px"><span style="width:9px;height:9px;flex:none;background:#A53A32;clip-path:polygon(50% 0,100% 100%,0 100%);margin-top:4px"></span><span style="font-size:13px;line-height:1.45">{{ errPhotoSizeText }}</span></div></sc-if>
+<sc-if value="{{ errPhotoCount }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:9px;align-items:flex-start;background:#FBF3E6;border-radius:8px;padding:10px 12px;margin-top:8px"><span style="width:9px;height:9px;flex:none;border:1.5px solid #9A651A;border-radius:50%;margin-top:4px"></span><span style="font-size:13px;line-height:1.45">Up to 3 photos. Remove one before adding another.</span></div></sc-if>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+<sc-for list="{{ addPhotoOpts }}" as="a" hint-placeholder-count="2">
+<button type="button" onClick="{{ a.go }}" style="flex:1;min-width:140px;min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;font-family:inherit;font-size:13.5px;font-weight:600;color:#16211F;cursor:pointer" style-hover="background:#F2F5F9">{{ a.label }}</button>
+</sc-for>
+</div>
+<div style="font-size:12px;color:#5D6966;margin-top:8px;line-height:1.45">Placeholders stand in for the device picker. Each photo must be 3,000,000 bytes or less; the existing image preparation helper is applied later and is not shown here.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+<div id="pilot-progress-review" data-frame-id="pilot-progress-review" style="display:flex;flex-direction:column;gap:12px">
+<div style="font-size:11.5px;color:#5D6966">Sample data · Local prototype</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Project</span><span style="flex:1;min-width:0;font-size:14.5px;font-weight:600">Pilot Warehouse P</span></div>
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Reference</span><span style="flex:1;min-width:0;font-size:14.5px;overflow-wrap:anywhere;{{ rv.refStyle }}">{{ rv.ref }}</span></div>
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Status</span><span style="flex:1;min-width:0;display:flex;align-items:center;gap:8px"><span style="{{ rv.dot }}"></span><span style="font-size:14.5px;font-weight:600">{{ rv.status }}</span></span></div>
+</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<div style="font-size:13px;color:#5D6966;margin-bottom:6px">Description</div>
+<p dir="auto" style="margin:0;font-size:15px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere">{{ rv.desc }}</p>
+</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<div style="font-size:13px;color:#5D6966;margin-bottom:6px">Blocker note</div>
+<p dir="auto" style="margin:0;font-size:15px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;{{ rv.blockerStyle }}">{{ rv.blocker }}</p>
+</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px">
+<div style="font-size:13px;color:#5D6966;margin-bottom:8px">Photos · {{ rv.photoCount }}</div>
+<sc-if value="{{ rv.hasPhotos }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ photos }}" as="p" hint-placeholder-count="1">
+<div style="display:flex;align-items:center;gap:12px;background:#F5F5F7;border-radius:8px;padding:8px 10px;min-height:56px"><span style="flex:none;width:44px;height:44px;border-radius:8px;background:#E3E4E8"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:500;overflow-wrap:anywhere">{{ p.name }}</span><span style="display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:#5D6966;margin-top:2px">{{ p.size }}</span></span></div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ rv.noPhotos }}" hint-placeholder-val="{{ true }}"><div style="font-size:14px;color:#5D6966">None</div></sc-if>
+</div>
+<div style="font-size:12.5px;color:#5D6966;line-height:1.5">Check this is what you want to send. Your status is your own statement; nothing is approved, measured or certified by sending it.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPending }}" hint-placeholder-val="{{ false }}">
+<div id="pilot-progress-pending" data-frame-id="pilot-progress-pending" style="display:flex;flex-direction:column;gap:12px" aria-busy="true">
+<div style="font-size:11.5px;color:#5D6966">Sample data · Local prototype</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:18px 16px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:9px;height:9px;flex:none;background:#245EA8"></span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#245EA8">Sending</span></div>
+<div style="font-size:16px;font-weight:600;line-height:1.3">Sending your report…</div>
+<div style="height:6px;border-radius:3px;background:#E3E4E8;overflow:hidden;margin:12px 0 8px"><div style="height:6px;width:45%;border-radius:3px;background:#245EA8;animation:shim 1.2s infinite"></div></div>
+<p style="margin:0;font-size:13.5px;line-height:1.55;color:#5D6966">Keep this screen open. Send is unavailable until the test service answers; nothing has been received yet.</p>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div id="pilot-progress-error" data-frame-id="pilot-progress-error" style="display:flex;flex-direction:column;gap:12px">
+<div style="font-size:11.5px;color:#5D6966">Sample data · Local prototype</div>
+<div role="alert" style="background:#FFFFFF;border-radius:8px;padding:18px 16px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:9px;height:9px;flex:none;background:#A53A32;clip-path:polygon(50% 0,100% 100%,0 100%)"></span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#A53A32">Not sent</span></div>
+<div style="font-size:16px;font-weight:600;line-height:1.3">The test service did not receive your report</div>
+<p style="margin:6px 0 0;font-size:13.5px;line-height:1.55;color:#5D6966">Your description, status, reference and photos are kept exactly as entered. Retry sends the same report; Back to edit lets you change it first.</p>
+</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Status</span><span style="flex:1;font-size:14.5px;font-weight:600">{{ rv.status }}</span></div>
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Reference</span><span style="flex:1;font-size:14.5px;overflow-wrap:anywhere;{{ rv.refStyle }}">{{ rv.ref }}</span></div>
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Description</span><span dir="auto" style="flex:1;font-size:14.5px;white-space:pre-wrap;overflow-wrap:anywhere">{{ rv.desc }}</span></div>
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Photos</span><span style="flex:1;font-size:14.5px">{{ rv.photoCount }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAck }}" hint-placeholder-val="{{ false }}">
+<div id="pilot-progress-ack" data-frame-id="pilot-progress-ack" tabindex="-1" role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:12px;outline-offset:4px">
+<div style="font-size:11.5px;color:#5D6966">Sample data · Local prototype</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:18px 16px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:9px;height:9px;flex:none;background:#16211F"></span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#16211F">Acknowledged</span></div>
+<div style="font-size:16px;font-weight:600;line-height:1.35">Received by the test service. Not delivered to the project team.</div>
+<p style="margin:8px 0 0;font-size:13.5px;line-height:1.55;color:#5D6966">This is the pilot test service only. No one on the project has been notified, nothing has been reviewed, and nothing has been saved to the project record.</p>
+</div>
+<div style="background:#FFFFFF;border-radius:8px;padding:14px 15px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Status</span><span style="flex:1;font-size:14.5px;font-weight:600">{{ rv.status }}</span></div>
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Reference</span><span style="flex:1;font-size:14.5px;overflow-wrap:anywhere;{{ rv.refStyle }}">{{ rv.ref }}</span></div>
+<div style="display:flex;gap:10px"><span style="flex:none;width:96px;font-size:13px;color:#5D6966">Photos</span><span style="flex:1;font-size:14.5px">{{ rv.photoCount }}</span></div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+<sc-if value="{{ footerOn }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;background:#FAFAF7;border-top:1px solid rgba(22,33,31,.09);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px">
+<button type="button" onClick="{{ primaryGo }}" disabled="{{ primaryDisabled }}" aria-disabled="{{ primaryDisabled }}" style="{{ primaryStyle }}">{{ primaryLabel }}</button>
+<sc-if value="{{ secondaryOn }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ secondaryGo }}" disabled="{{ secondaryDisabled }}" style="{{ secondaryStyle }}">{{ secondaryLabel }}</button></sc-if>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+<div style="margin-top:12px;display:flex;gap:26px;flex-wrap:wrap;font-size:12.5px;color:#5D6966;max-width:1100px">
+<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#16211F">Proposed · not approved · fictional data</span>
+<span>Reviewer notes, kept out of the canvas: the composer is reached only by the additive Report progress action in the existing Capture sheet; the sheet's own WIR, upload and local-draft controls are unchanged and are shown as a reference panel. Project P comes from the current context. Transitions here are review simulations: Send → pending → acknowledgement or error according to the Test service switch. Request identity (requestId) and client project metadata (projectId) travel in the payload and are named in section C; they are not shown as fields. No record is created, no file leaves the page, no draft persists, and reload discards everything. This board does not supply the app lifecycle, stale-result or retry source — that is Algene's.</span>
+</div>
+</section>
+
+<section style="padding:26px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">B</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Frame and content map</h2></div>
+<p style="font-size:13.5px;line-height:1.55;color:#5D6966;margin:0 0 14px;max-width:860px">Each frame id is the <span style="font-family:ui-monospace,Menlo,Consolas,monospace">id</span> and <span style="font-family:ui-monospace,Menlo,Consolas,monospace">data-frame-id</span> of the rendered element; the control-bar readout names the frame on screen. Every frame is PROPOSED, NOT APPROVED; Karim approves the exact frames and payload before handover.</p>
+<div style="background:#FAFAF7;border-radius:8px;overflow:hidden;max-width:1200px">
+<div style="display:grid;grid-template-columns:210px minmax(0,1fr) minmax(0,1.4fr) 150px;gap:14px;padding:10px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966"><span>Frame id</span><span>Content</span><span>How it is reached</span><span>Status</span></div>
+<sc-for list="{{ frameMap }}" as="r" hint-placeholder-count="7">
+<div style="display:grid;grid-template-columns:210px minmax(0,1fr) minmax(0,1.4fr) 150px;gap:14px;padding:10px 18px;border-top:1px solid rgba(22,33,31,.07);font-size:13px;line-height:1.45;align-items:start"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;font-weight:600">{{ r.id }}</span><span>{{ r.content }}</span><span style="color:#5D6966">{{ r.how }}</span><span style="{{ sstAttn }}">Proposed · not approved</span></div>
+</sc-for>
+</div>
+</section>
+
+<section style="padding:26px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">C</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Source precedence and proposed payload</h2></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:1200px">
+<div style="background:#FAFAF7;border-radius:8px;padding:16px 18px">
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:10px">Source precedence</div>
+<div style="font-size:13px;line-height:1.6"><span style="font-weight:600">projectId</span> — the current context project, explicit; never a choice in the composer.<br><span style="font-weight:600">reference</span> — null by default; only what the reporter supplies in the composer (type + id). Never inferred from the Capture sheet's selected WIR, from text or from photos.<br><span style="font-weight:600">description, fieldStatus, blockerNote</span> — exactly as entered; description trimmed only for the non-empty check, stored as typed.<br><span style="font-weight:600">photos</span> — 0 to 3, each ≤ 3,000,000 bytes, prepared later by the existing image preparation helper (Algene).<br><span style="font-weight:600">Reference display label</span> — derived at display time from the supplied type and id (e.g. "WIR · WIR-0419"); not an extra persisted field.</div>
+</div>
+<div style="background:#FAFAF7;border-radius:8px;padding:16px 18px">
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:10px">Proposed payload · for approval</div>
+<pre style="margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;color:#16211F">{{ payloadText }}</pre>
+<div style="font-size:12.5px;color:#5D6966;margin-top:10px;line-height:1.5">Rendered live from the current composer state. requestId is a client-generated identity for the request; it is not a receipt and implies no durable save.</div>
+</div>
+</div>
+</section>
+
+<section style="padding:26px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">D</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Measured checks</h2></div>
+<p style="font-size:13.5px;line-height:1.55;color:#5D6966;margin:0 0 14px;max-width:860px">Measured in the rendered board with the viewport switch, Chromium-based preview, 3 Oct 2026. Nothing is extrapolated.</p>
+<div style="background:#FAFAF7;border-radius:8px;overflow:hidden;max-width:1200px">
+<div style="display:grid;grid-template-columns:90px minmax(0,1.8fr) minmax(0,.9fr) 80px;gap:12px;padding:10px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966"><span>Width</span><span>What was exercised</span><span>Smallest target</span><span>Overflow</span></div>
+<sc-for list="{{ measured }}" as="m" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:90px minmax(0,1.8fr) minmax(0,.9fr) 80px;gap:12px;padding:10px 18px;border-top:1px solid rgba(22,33,31,.07);font-size:13px;line-height:1.45;align-items:start"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;font-weight:600">{{ m.w }}</span><span style="color:#5D6966">{{ m.what }}</span><span style="color:#5D6966">{{ m.target }}</span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px">{{ m.overflow }}</span></div>
+</sc-for>
+</div>
+<div style="margin-top:12px;font-size:13px;color:#5D6966;line-height:1.55;max-width:860px">{{ measuredNote }}</div>
+</section>
+
+<section style="padding:26px 22px 64px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:12px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">E</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Limits</h2></div>
+<div style="background:#FAFAF7;border-radius:8px;padding:16px 18px;max-width:1200px;font-size:13px;line-height:1.6">Bounded design proposal for owner review; not an approved application, not a delivered handover, and not Algene's implementation. Mobile Field v4.2 is a styling reference only; this is not that board's workflow. No new route, tab or global navigation. No quantities, assignments, percentage complete, office inbox, Daily Plan or P6 links, AI or voice, translation, offline persistence, real upload, backend or native-app features. Statuses are reporter statements and are never shown as approved, inspected, measured or certified. The acknowledgement text is fixed: Received by the test service. Not delivered to the project team. Photo rows are placeholders; the device picker, the image preparation helper and byte-size measurement of real files are not exercised here. Transitions are simulated with fictional data; the app lifecycle, stale-result handling and retry source are not provided.</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:1100}}">
+class Component extends DCLogic {
+  frameRef=React.createRef();
+  state={mode:'390',w:390,svc:'ok',view:'sheet',f:{refType:'none',refId:'',desc:'',status:'',blocker:''},photos:[],errs:{},note:''};
+  LIMIT=3000000;
+  STATUSES=[['in_progress','In progress','Work is under way'],['blocked','Blocked','Something is stopping the work'],['reported_complete','Reported complete','You consider this work finished']];
+  REFTYPES=[['none','None'],['area','Area'],['work_item','Work item'],['wir','WIR']];
+  SAMPLES=[{name:'bay-c-formwork-01.jpg',bytes:2412880},{name:'bay-c-formwork-02.jpg',bytes:1980416},{name:'panorama-bay-c.jpg',bytes:4180224},{name:'rebar-detail.jpg',bytes:3000000}];
+  set(p){return ()=>this.setState(p);}
+  componentDidMount(){const el=this.frameRef.current;if(el&&typeof ResizeObserver!=='undefined'){this.ro=new ResizeObserver(es=>{const w=Math.round(es[0].contentRect.width);if(w&&Math.abs(w-this.state.w)>1)this.setState({w});});this.ro.observe(el);}}
+  componentWillUnmount(){if(this.ro)this.ro.disconnect();clearTimeout(this.t);}
+  focusIn(sel){const go=()=>{const root=this.frameRef.current||document;const el=root.querySelector(sel);if(el&&document.activeElement!==el)el.focus();};go();if(typeof requestAnimationFrame==='function')requestAnimationFrame(go);setTimeout(go,0);setTimeout(go,80);setTimeout(go,200);}
+  fmt(n){return n.toLocaleString('en-US');}
+  field(k){return e=>{const v=e.target.value;this.setState(s=>({f:Object.assign({},s.f,{[k]:v}),errs:Object.assign({},s.errs,{[k]:undefined})}));};}
+  openComposer=()=>{this.setState({view:'compose',errs:{}});this.focusIn('#pilot-progress-compose textarea');};
+  closeToSheet=()=>{this.setState({view:'sheet',errs:{}});this.focusIn('[data-focus-return="report-progress"]');};
+  setRefType(t){return ()=>this.setState(s=>({f:Object.assign({},s.f,{refType:t,refId:t==='none'?'':s.f.refId})}));}
+  setStatus(v){return ()=>this.setState(s=>({f:Object.assign({},s.f,{status:v}),errs:Object.assign({},s.errs,{status:undefined})}));}
+  addPhoto(i){return ()=>this.setState(s=>{const p=this.SAMPLES[i];if(s.photos.length>=3)return {errs:Object.assign({},s.errs,{photoCount:true})};
+    if(p.bytes>this.LIMIT)return {errs:Object.assign({},s.errs,{photoSize:p.name+' is '+this.fmt(p.bytes)+' bytes, over the 3,000,000-byte limit by '+this.fmt(p.bytes-this.LIMIT)+'. It was not added.'})};
+    return {photos:s.photos.concat([p]),errs:Object.assign({},s.errs,{photoCount:undefined,photoSize:undefined})};});}
+  removePhoto(i){return ()=>this.setState(s=>({photos:s.photos.filter((_,j)=>j!==i),errs:Object.assign({},s.errs,{photoCount:undefined})}));}
+  validate(){const f=this.state.f;const e={};if(!f.desc.trim())e.desc=true;if(!f.status)e.status=true;return e;}
+  toReview=()=>{const e=this.validate();if(Object.keys(e).length){this.setState({errs:e});this.focusIn(e.desc?'#pilot-progress-compose textarea':'#pilot-progress-compose [role="radio"]');return;}
+    this.setState({view:'review',errs:{}});this.focusIn('header button');};
+  backToEdit=()=>{this.setState({view:'compose',errs:{}});this.focusIn('#pilot-progress-compose textarea');};
+  send=()=>{if(this.state.view==='pending')return;this.setState({view:'pending'});clearTimeout(this.t);
+    this.t=setTimeout(()=>{this.setState(s=>({view:s.svc==='fail'?'error':'ack'}));this.focusIn(this.state.svc==='fail'?'header button':'#pilot-progress-ack');},1100);};
+  reset=()=>{clearTimeout(this.t);this.setState({view:'sheet',f:{refType:'none',refId:'',desc:'',status:'',blocker:''},photos:[],errs:{}});this.focusIn('[data-focus-return="report-progress"]');};
+  refLabel(f){if(f.refType==='none')return '';const t={area:'Area',work_item:'Work item',wir:'WIR'}[f.refType];return f.refId.trim()?t+' · '+f.refId.trim():t+' · (no id entered)';}
+  renderVals(){
+    const st=this.state,f=st.f,W=st.mode==='auto'?st.w:+st.mode;
+    const hb=(on,c)=>'min-height:26px;padding:0 9px;border-radius:8px;border:1px solid '+(on?c:'rgba(250,250,247,.28)')+';background:'+(on?c:'transparent')+";color:#FAFAF7;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;font-weight:600;cursor:pointer";
+    const v=st.view;const stObj=this.STATUSES.filter(s=>s[0]===f.status)[0];
+    const dot=k=>'width:10px;height:10px;flex:none;border-radius:'+(k==='in_progress'?'0':k==='blocked'?'0':'50%')+';'+(k==='in_progress'?'background:#245EA8':k==='blocked'?'background:#9A651A;clip-path:polygon(50% 0,100% 100%,0 100%)':'border:1.5px solid #16211F');
+    const rv={ref:f.refType==='none'?'None':this.refLabel(f),refStyle:f.refType==='none'?'color:#5D6966':'',status:stObj?stObj[1]:'—',dot:stObj?dot(stObj[0]):'',desc:f.desc,blocker:f.blocker||'None',blockerStyle:f.blocker?'':'color:#5D6966',photoCount:st.photos.length?String(st.photos.length):'none',hasPhotos:st.photos.length>0,noPhotos:st.photos.length===0};
+    const payload={requestId:'req_7f3a2c9e-pilot',projectId:'P',reference:f.refType==='none'?null:{type:f.refType,id:f.refId.trim()},description:f.desc,fieldStatus:f.status||null,blockerNote:f.blocker||null,photos:st.photos.map(p=>({name:p.name,bytes:p.bytes}))};
+    const pend=v==='pending';
+    const primary={sheet:null,compose:['Review',this.toReview,false],review:['Send to test service',this.send,false],pending:['Sending…',()=>{},true],error:['Retry',this.send,false],ack:['Done',this.reset,false]}[v];
+    const secondary={compose:['Cancel',this.closeToSheet],review:['Back to edit',this.backToEdit],pending:['Back to edit',()=>{},true],error:['Back to edit',this.backToEdit],ack:null,sheet:null}[v];
+    return {
+      frameRef:this.frameRef,shellId:'pilot-progress-'+(W>=768?'768':W>=428?'428':'390'),
+      readout:(W>=768?'tablet · compact form':'phone')+' · '+(st.mode==='auto'?st.w+'px auto':st.mode+'px forced')+' · frame '+(v==='sheet'?'capture-sheet-reference':'pilot-progress-'+v),
+      frameStyle:'background:#F5F5F7;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px rgba(22,33,31,.13);'+(st.mode==='auto'?'width:100%;':'width:'+st.mode+'px;flex:none;')+'height:'+(W>=768?900:844)+'px',
+      switchRows:[
+        {name:'Viewport',opts:[['390','390'],['428','428'],['768','768'],['auto','Auto']].map(m=>({label:m[1],go:this.set({mode:m[0]}),style:hb(st.mode===m[0],'#245EA8')}))},
+        {name:'Test service',opts:[['ok','Acknowledges'],['fail','Fails']].map(m=>({label:m[1],go:this.set({svc:m[0]}),style:hb(st.svc===m[0],'#9A651A')}))},
+        {name:'Jump',opts:[{label:'Capture sheet',go:this.reset},{label:'Compose',go:this.openComposer},{label:'Prefill sample',go:()=>{this.setState({view:'compose',f:{refType:'wir',refId:'WIR-0419',desc:'Formwork to Bay C columns C3–C5 complete to underside of beam. مستوى القالب تم فحصه ذاتياً قبل الصب. Waiting on rebar inspection before pour.',status:'blocked',blocker:'Rebar inspection not yet booked for Bay C.'},photos:[this.SAMPLES[0],this.SAMPLES[1]],errs:{}});}}].map(o=>({label:o.label,go:o.go,style:hb(false,'#245EA8')}))}],
+      sstAttn:"font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;color:#9A651A",
+      backOn:v==='compose'||v==='review'||v==='error',
+      backAction:v==='compose'?this.closeToSheet:this.backToEdit,backLabel:v==='compose'?'Cancel and return to Capture':'Back to edit',backText:v==='compose'?'Capture':'Edit',
+      title:v==='sheet'?'Capture':v==='compose'?'Report progress':v==='review'?'Review report':v==='pending'?'Sending':v==='error'?'Not sent':'Acknowledged',
+      sub:v==='sheet'?'Pilot Warehouse P · existing sheet':'Pilot Warehouse P · '+(v==='compose'?'step 1 of 2':v==='review'?'step 2 of 2':'test service'),
+      isSheet:v==='sheet',isCompose:v==='compose',isReview:v==='review',isPending:pend,isError:v==='error',isAck:v==='ack',
+      openComposer:this.openComposer,
+      f,onRefId:this.field('refId'),onDesc:this.field('desc'),onBlocker:this.field('blocker'),
+      refTypes:this.REFTYPES.map(r=>({label:r[1],on:f.refType===r[0],go:this.setRefType(r[0]),style:'min-height:48px;padding:0 6px;border-radius:8px;border:1px solid '+(f.refType===r[0]?'#245EA8':'rgba(22,33,31,.2)')+';background:'+(f.refType===r[0]?'#EAF1FA':'#FFFFFF')+';color:'+(f.refType===r[0]?'#245EA8':'#16211F')+';font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer'})),
+      refOn:f.refType!=='none',refIdLabel:({area:'Area reference',work_item:'Work item reference',wir:'WIR number'})[f.refType]||'',refPlaceholder:({area:'e.g. Bay C',work_item:'e.g. WI-0233',wir:'e.g. WIR-0419'})[f.refType]||'',
+      descBorder:st.errs.desc?'#A53A32':'rgba(22,33,31,.2)',errDesc:!!st.errs.desc,errStatus:!!st.errs.status,
+      statuses:this.STATUSES.map(s=>({label:s[1],hint:s[2],on:f.status===s[0],go:this.setStatus(s[0]),dot:dot(s[0]),style:'display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 13px;border-radius:8px;border:1px solid '+(f.status===s[0]?'#245EA8':st.errs.status?'#A53A32':'rgba(22,33,31,.2)')+';background:'+(f.status===s[0]?'#EAF1FA':'#FFFFFF')+';color:#16211F;font-family:inherit;cursor:pointer;text-align:start'})),
+      photos:st.photos.map((p,i)=>({name:p.name,size:this.fmt(p.bytes)+' bytes',sizeColor:'#5D6966',remove:this.removePhoto(i),removeLabel:'Remove '+p.name})),
+      photoCount:String(st.photos.length),errPhotoCount:!!st.errs.photoCount,errPhotoSize:!!st.errs.photoSize,errPhotoSizeText:st.errs.photoSize||'',
+      addPhotoOpts:[{label:'Add photo (2.4 MB sample)',go:this.addPhoto(0)},{label:'Add photo (1.9 MB sample)',go:this.addPhoto(1)},{label:'Add photo (4.1 MB sample)',go:this.addPhoto(2)},{label:'Add photo (exactly 3,000,000 B)',go:this.addPhoto(3)}],
+      rv,
+      footerOn:!!primary,primaryLabel:primary?primary[0]:'',primaryGo:primary?primary[1]:()=>{},primaryDisabled:primary?primary[2]:false,
+      primaryStyle:'width:100%;min-height:52px;border-radius:8px;border:0;font-family:inherit;font-size:15.5px;font-weight:600;cursor:'+(primary&&primary[2]?'default':'pointer')+';background:'+(primary&&primary[2]?'#E6E7EA':'#245EA8')+';color:'+(primary&&primary[2]?'#5D6966':'#FFFFFF'),
+      secondaryOn:!!secondary,secondaryLabel:secondary?secondary[0]:'',secondaryGo:secondary?secondary[1]:()=>{},secondaryDisabled:secondary?!!secondary[2]:false,
+      secondaryStyle:'width:100%;min-height:48px;border-radius:8px;background:#FFFFFF;border:1px solid rgba(22,33,31,.2);color:'+(secondary&&secondary[2]?'#9AA6A3':'#16211F')+';font-family:inherit;font-size:15px;font-weight:600;cursor:'+(secondary&&secondary[2]?'default':'pointer'),
+      payloadText:JSON.stringify(payload,null,2),
+      frameMap:[
+        ['capture-sheet-reference','Existing Capture sheet as reference with the additive Report progress action','Default, or Jump › Capture sheet'],
+        ['pilot-progress-compose','Project from context; Reference None / Area / Work item / WIR with id; Description (required); Status radio (required, unselected by default); Blocker note (optional); Photos 0–3 with Remove and inline validation','Report progress, or Jump › Compose / Prefill sample'],
+        ['pilot-progress-review','Exact entered content: project, reference label, status, description, blocker note, photos; Send to test service / Back to edit','Review with a valid form'],
+        ['pilot-progress-pending','Sending…; Send and Back to edit disabled; no receipt','Send to test service, for 1.1 s'],
+        ['pilot-progress-error','Not sent; same content kept; Retry / Back to edit','Test service Fails, then Send'],
+        ['pilot-progress-ack','Fixed text: Received by the test service. Not delivered to the project team.; Done','Test service Acknowledges, then Send'],
+        ['Inline validation (within compose)','Missing description; missing status; too many photos (4th add); oversized photo (4,180,224 B rejected); 3,000,000 B accepted','Review with empty fields; Add photo buttons']
+      ].map(r=>({id:r[0],content:r[1],how:r[2]})),
+      measured:this.MEASURED.map(m=>({w:m[0],what:m[1],target:m[2],overflow:m[3]})),measuredNote:this.MEASURED_NOTE};
+  }
+  MEASURED=[
+    ['390','Capture sheet reference: existing WIR-0412 and draft controls shown, Report progress 52px. Compose: focus lands on Description; Reference defaults to None; all three Status radios unselected (56px each); project Pilot Warehouse P shown; the sheet\u2019s WIR-0412 does not appear in the composer. Review on an empty form shows both inline errors and refocuses Description; a whitespace-only description is rejected. Photos: the 4,180,224-byte sample is refused with the byte overage stated and nothing added; 3,000,000 bytes is accepted; a fourth add is refused with the count message; Remove clears it. Review shows the description byte-for-byte including trailing spaces, mixed Arabic and English rendered with dir=auto, reference WIR · WIR-0419, status Blocked, blocker note and Photos · 2; focus lands on the header Back; Send 52px, Back to edit 48px. Back to edit restores description, reference, status, blocker and both photos and refocuses Description. Send → pending: Sending… and Back to edit both disabled, no receipt text, repeat press ignored. Test service Fails → error: text The test service did not receive your report, content kept, Retry 52px and Back to edit 48px enabled, focus on header Back; Back to edit keeps content; a second send fails again; switching the service and pressing Retry → pending → acknowledgement with the exact sentence Received by the test service. Not delivered to the project team. and only Done; after the focus fix the acknowledgement panel receives focus. Done clears the form and returns focus to Report progress; Cancel from compose returns focus to Report progress. Footer visible without scrolling on every step; body scrolls','48px (header Back / Cancel); fields 48px; status 56px','0'],
+    ['428','Same flow with the prefilled sample; form 396px wide; reference-type buttons 87px wide; no clipped labels; review shows the mixed-direction description and Photos · 2; footer visible, body scrolls','48px','0'],
+    ['768','Compact form 620px wide centred in the frame, not a desktop layout; reference-type buttons 143px; same flow and review; footer visible, body scrolls','48px','0']];
+  MEASURED_NOTE='Overflow is the frame scrollWidth minus clientWidth: 0 on every step at every width. Timer transitions (1.1 s) were confirmed after waits in a hidden preview frame. The first pass found the acknowledgement left focus on the document body; the panel is now a focus target with role status and this was re-measured as passing. Untested: the device photo picker and real byte sizes (placeholders only), the existing image preparation helper, the real Capture sheet host and its focus return in the app, screen-reader announcement order, and any physical device. Transitions are review simulations; the app lifecycle, stale-result handling and retry source are not provided here.';
+}
+</script>
+</body>
+</html>

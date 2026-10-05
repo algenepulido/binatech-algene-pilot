@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+html,body{margin:0;padding:0;background:#EDEDF0;overflow-x:hidden}
+*{box-sizing:border-box}
+a{color:#245EA8;text-decoration:underline;text-underline-offset:2px}
+a:hover{color:#16211F}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid #245EA8;outline-offset:2px}
+@keyframes shim{0%{opacity:.4}50%{opacity:.85}100%{opacity:.4}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="background:#EDEDF0;color:#16211F;font-family:system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;min-height:100vh;overflow-x:hidden">
+
+<div style="position:sticky;top:0;z-index:90;background:#16211F;color:#FAFAF7;padding:9px 16px 10px;display:flex;flex-wrap:wrap;gap:9px 18px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:1px;margin-inline-end:4px">
+<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#9AA6A3">Reviewer controls · outside product UI</span>
+<span style="font-size:12px;color:#C9D1CF">Pilot Invoice Frames v1 · PROPOSED, NOT APPROVED · visual handoff for the accepted bounded pilot · fictional data, no backend</span>
+</div>
+<sc-for list="{{ switchRows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#9AA6A3">{{ r.name }}</span>
+<sc-for list="{{ r.opts }}" as="m" hint-placeholder-count="4">
+<button type="button" onClick="{{ m.go }}" style="{{ m.style }}">{{ m.label }}</button>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-inline-start:auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:#9AA6A3;white-space:nowrap">{{ readout }}</div>
+</div>
+
+<section style="padding:22px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:12px;flex-wrap:wrap">
+<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">A</span>
+<h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Invoice register, detail and Create / Edit</h2>
+<span style="font-size:13.5px;color:#5D6966;max-width:76ch">Presentation only. Every value, column, action and rule below already exists in the current UI; this board proposes how they look at 1280, 1440, 1024 and 768. Frames A and B render the desired field state only — the lifecycle repair that gets the form there is Algene's to deliver and is not shown here.</span>
+</div>
+<div style="overflow-x:auto;padding-bottom:6px">
+<div ref="{{ frameRef }}" data-shell-frame="{{ shellId }}" style="{{ frameStyle }}">
+<div id="{{ shellId }}" data-frame-id="{{ shellId }}" style="display:flex;height:100%;position:relative;overflow:hidden">
+
+<sc-if value="{{ sidebarOn }}" hint-placeholder-val="{{ true }}">
+<div style="width:232px;flex:none;background:#FAFAF7;border-inline-end:1px solid rgba(22,33,31,.09);display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;gap:10px;min-height:60px;padding:10px 14px;border-bottom:1px solid rgba(22,33,31,.09)"><span style="flex:none;width:30px;height:30px;border-radius:8px;background:#245EA8;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;font-weight:600">P2</span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Coastal Logistics Park</span><span style="display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:#5D6966;margin-top:1px">Contract C-2214</span></span></div>
+<nav style="padding:10px 10px 6px;display:flex;flex-direction:column;gap:2px" aria-label="Workspace areas">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
+<button type="button" onClick="{{ n.go }}" style="{{ n.style }}" style-hover="background:rgba(22,33,31,.05)"><span style="flex:none;width:3px;height:18px;border-radius:2px;background:{{ n.bar }}"></span><span>{{ n.label }}</span></button>
+</sc-for>
+</nav>
+</div>
+</sc-if>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;background:#F5F5F7">
+<div style="flex:none;background:#FAFAF7;border-bottom:1px solid rgba(22,33,31,.09);padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-height:64px">
+<div style="flex:1;min-width:200px">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h1 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Invoices</h1><span style="font-size:12px;color:#5D6966">Sample data</span></div>
+<div style="font-size:12.5px;color:#5D6966;margin-top:2px">Commercial · Coastal Logistics Park · internal invoice drafts</div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button type="button" onClick="{{ pingRefresh }}" aria-label="Refresh" style="min-height:48px;min-width:48px;padding:0 12px;border-radius:8px;border:1px solid rgba(22,33,31,.18);background:#FFFFFF;font-family:inherit;font-size:13.5px;font-weight:600;color:#16211F;cursor:pointer;display:flex;align-items:center;gap:7px" style-hover="background:#F2F5F9"><svg width="15" height="15" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.6 7.4A6 6 0 0 0 4.2 5.2M3.4 10.6a6 6 0 0 0 10.4 2.2"></path><path d="M14.8 3.2v4.2h-4.2M3.2 14.8v-4.2h4.2"></path></svg>Refresh</button>
+<button type="button" onClick="{{ pingExport }}" style="min-height:48px;padding:0 14px;border-radius:8px;border:1px solid rgba(22,33,31,.18);background:#FFFFFF;font-family:inherit;font-size:13.5px;font-weight:600;color:#16211F;cursor:pointer" style-hover="background:#F2F5F9">Export</button>
+<sc-if value="{{ hasCertifiedIpc }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ pingFromIpc }}" style="min-height:48px;padding:0 14px;border-radius:8px;border:1px solid rgba(22,33,31,.18);background:#FFFFFF;font-family:inherit;font-size:13.5px;font-weight:600;color:#16211F;cursor:pointer" style-hover="background:#F2F5F9">New from IPC</button></sc-if>
+<button type="button" data-focus-return="new-invoice" onClick="{{ openCreate }}" style="min-height:48px;padding:0 15px;border-radius:8px;border:0;background:#245EA8;color:#FFFFFF;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="background:#1C4C87">New invoice</button>
+</div>
+</div>
+
+<sc-if value="{{ note }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;background:#EAF1FA;border-bottom:1px solid rgba(36,94,168,.2);padding:9px 24px;display:flex;align-items:center;gap:12px"><span style="width:9px;height:9px;flex:none;background:#245EA8"></span><span style="flex:1;font-size:13px;color:#1C4C87;line-height:1.45">{{ note }}</span><button type="button" onClick="{{ clearNote }}" style="min-height:48px;padding:0 12px;border-radius:8px;background:transparent;border:1px solid rgba(36,94,168,.35);color:#1C4C87;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">Dismiss</button></div>
+</sc-if>
+
+<div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:18px 24px 28px">
+<div style="max-width:1180px">
+
+<div style="display:flex;align-items:flex-start;gap:10px;background:#FBF3E6;border-radius:8px;padding:10px 14px;margin-bottom:16px"><span style="width:9px;height:9px;flex:none;border:1.5px solid #9A651A;border-radius:50%;margin-top:5px"></span><span style="font-size:13px;line-height:1.5;color:#16211F">Internal invoice drafts, not legally cleared e-invoices. Statuses are recorded by hand; no connection to Fatoora. A linked WIR is a reference, not proof of completed work.</span></div>
+
+<sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}">
+<div id="invoice-register-loading" data-frame-id="invoice-register-loading" aria-busy="true" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px"><div style="height:74px;background:#FFFFFF;border-radius:8px;animation:shim 1.3s infinite"></div><div style="height:74px;background:#FFFFFF;border-radius:8px;animation:shim 1.3s infinite"></div><div style="height:74px;background:#FFFFFF;border-radius:8px;animation:shim 1.3s infinite"></div><div style="height:74px;background:#FFFFFF;border-radius:8px;animation:shim 1.3s infinite"></div></div>
+<div style="height:300px;background:#FFFFFF;border-radius:8px;animation:shim 1.3s infinite"></div>
+<span style="font-size:12.5px;color:#5D6966">Loading invoices…</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ stError }}" hint-placeholder-val="{{ false }}">
+<div id="invoice-register-error" data-frame-id="invoice-register-error" role="alert" style="background:#FFFFFF;border-radius:8px;padding:22px 24px;max-width:560px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="{{ mkBlock }}"></span><span style="{{ sstBlock }}">Error</span></div>
+<h2 style="font-size:17px;font-weight:600;margin:0 0 6px">Could not load invoices</h2>
+<p style="font-size:13.5px;line-height:1.55;color:#5D6966;margin:0 0 14px">The request did not complete. Nothing is shown from a saved copy. Export, New invoice and New from IPC stay available above.</p>
+<button type="button" onClick="{{ retryLoad }}" style="min-height:48px;padding:0 15px;border-radius:8px;background:#245EA8;color:#FFFFFF;border:0;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer">Try again</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}">
+<div id="invoice-register-empty" data-frame-id="invoice-register-empty" style="background:#FFFFFF;border-radius:8px;padding:22px 24px;max-width:560px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="{{ mkInfo }}"></span><span style="{{ sstInfo }}">No invoices</span></div>
+<h2 style="font-size:17px;font-weight:600;margin:0 0 6px">No invoices on this project yet</h2>
+<p style="font-size:13.5px;line-height:1.55;color:#5D6966;margin:0 0 14px">Summary values appear once the first invoice exists. New invoice starts a blank draft; New from IPC pre-fills from a certified IPC.</p>
+<button type="button" onClick="{{ openCreate }}" style="min-height:48px;padding:0 15px;border-radius:8px;background:#245EA8;color:#FFFFFF;border:0;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer">New invoice</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ stList }}" hint-placeholder-val="{{ true }}">
+<div id="{{ registerId }}" data-frame-id="{{ registerId }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px">
+<sc-for list="{{ summary }}" as="s" hint-placeholder-count="4">
+<div style="background:#FFFFFF;border-radius:8px;padding:12px 16px;min-width:0"><div style="font-size:12.5px;color:#5D6966">{{ s.k }}</div><div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:19px;font-weight:500;margin-top:3px;letter-spacing:-.01em;{{ s.c }}">{{ s.v }}</div><div style="font-size:11.5px;color:#5D6966;margin-top:2px">{{ s.sub }}</div></div>
+</sc-for>
+</div>
+
+<sc-if value="{{ wideTable }}" hint-placeholder-val="{{ true }}">
+<div style="background:#FFFFFF;border-radius:8px;overflow:hidden">
+<div role="row" style="display:grid;grid-template-columns:{{ cols }};gap:12px;padding:10px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966">
+<span>Invoice</span><span>Linked WIR</span><span>Issued</span><span>Due</span><span style="text-align:end">Amount SAR</span><span>ZATCA status</span><span>Payment</span><span>Paid date</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+<button type="button" role="row" data-invoice="{{ r.id }}" aria-selected="{{ r.selected }}" onClick="{{ r.go }}" style="{{ r.style }}" style-hover="background:#F2F5F9">
+<span style="min-width:0;font-weight:600;font-size:14px;overflow-wrap:anywhere">{{ r.no }}</span>
+<span style="min-width:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;overflow-wrap:anywhere">{{ r.wir }}</span>
+<span style="min-width:0;font-size:13px;color:#5D6966">{{ r.issue }}</span>
+<span style="min-width:0;font-size:13px;color:#5D6966">{{ r.due }}</span>
+<span style="min-width:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;text-align:end">{{ r.amount }}</span>
+<span style="min-width:0;display:flex;align-items:center;gap:7px"><span style="{{ r.zMk }}"></span><span style="font-size:12.5px;line-height:1.3;color:{{ r.zColor }}">{{ r.zatca }}</span></span>
+<span style="min-width:0;display:flex;align-items:center;gap:7px"><span style="{{ r.pMk }}"></span><span style="font-size:12.5px;line-height:1.3;color:{{ r.pColor }}">{{ r.pay }}</span></span>
+<span style="min-width:0;font-size:13px;color:#5D6966">{{ r.paid }}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ stackedTable }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FFFFFF;border-radius:8px;overflow:hidden">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+<button type="button" data-invoice="{{ r.id }}" aria-selected="{{ r.selected }}" onClick="{{ r.go }}" style="{{ r.stackStyle }}" style-hover="background:#F2F5F9">
+<span style="display:flex;justify-content:space-between;gap:12px;align-items:baseline;min-width:0"><span style="font-weight:600;font-size:15px;overflow-wrap:anywhere;min-width:0">{{ r.no }}</span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;flex:none">{{ r.amount }} SAR</span></span>
+<span style="display:block;font-size:13px;color:#5D6966;margin-top:4px;line-height:1.45;overflow-wrap:anywhere">Linked WIR <span style="font-family:ui-monospace,Menlo,Consolas,monospace;color:#16211F">{{ r.wir }}</span> · Issued {{ r.issue }} · Due {{ r.due }} · Paid date {{ r.paid }}</span>
+<span style="display:flex;gap:16px;flex-wrap:wrap;margin-top:7px"><span style="display:flex;align-items:center;gap:7px"><span style="{{ r.zMk }}"></span><span style="font-size:12.5px;color:{{ r.zColor }}">ZATCA · {{ r.zatca }}</span></span><span style="display:flex;align-items:center;gap:7px"><span style="{{ r.pMk }}"></span><span style="font-size:12.5px;color:{{ r.pColor }}">Payment · {{ r.pay }}</span></span></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<div style="font-size:12.5px;color:#5D6966;line-height:1.5;margin-top:10px;max-width:760px">Status columns show recorded data. Nothing here certifies an invoice, clears it, or makes it eligible for payment.</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+
+<sc-if value="{{ drawerOn }}" hint-placeholder-val="{{ false }}">
+<div style="{{ overlayStyle }}">
+<button type="button" onClick="{{ closeDrawer }}" aria-label="Close" tabindex="-1" style="position:absolute;inset:0;background:transparent;border:0;cursor:pointer"></button>
+<div role="dialog" aria-modal="true" aria-label="{{ drawerTitle }}" id="{{ drawerId }}" data-frame-id="{{ drawerId }}" onKeyDown="{{ onKey }}" style="{{ dialogStyle }}">
+<div style="flex:none;padding:16px 22px 14px;border-bottom:1px solid rgba(22,33,31,.09);display:flex;align-items:flex-start;gap:14px">
+<div style="flex:1;min-width:0">
+<div style="font-size:12px;color:#5D6966;margin-bottom:3px">{{ drawerKicker }}</div>
+<h2 style="font-size:19px;font-weight:600;letter-spacing:-.015em;margin:0;line-height:1.25;overflow-wrap:anywhere">{{ drawerTitle }}</h2>
+<div style="font-size:12.5px;color:#5D6966;margin-top:4px">{{ drawerSub }}</div>
+</div>
+<button type="button" onClick="{{ closeDrawer }}" aria-label="Close" style="flex:none;width:48px;height:48px;border-radius:8px;background:transparent;border:1px solid rgba(22,33,31,.16);color:#16211F;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:#F2F5F9"><svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4.5 4.5 13.5 13.5M13.5 4.5 4.5 13.5"></path></svg></button>
+</div>
+
+<div style="flex:1;min-height:0;overflow-y:auto;padding:18px 22px 24px">
+
+<sc-if value="{{ detailOn }}" hint-placeholder-val="{{ false }}">
+<div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+<span style="display:flex;align-items:center;gap:7px"><span style="{{ d.zMk }}"></span><span style="font-size:13px;color:{{ d.zColor }}">ZATCA · {{ d.zatca }}</span></span>
+<span style="display:flex;align-items:center;gap:7px"><span style="{{ d.pMk }}"></span><span style="font-size:13px;color:{{ d.pColor }}">Payment · {{ d.pay }}</span></span>
+</div>
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:8px">Invoice details</div>
+<div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:9px 14px;font-size:14px;margin-bottom:18px"><span style="color:#5D6966;font-size:13px">Invoice number</span><span style="font-weight:600;overflow-wrap:anywhere">{{ d.no }}</span><span style="color:#5D6966;font-size:13px">Contractor</span><span>{{ d.contractor }} <span style="font-size:12px;color:#5D6966">· from project</span></span><span style="color:#5D6966;font-size:13px">Amount</span><span style="font-family:ui-monospace,Menlo,Consolas,monospace">{{ d.amount }} SAR</span></div>
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:8px">Linked work</div>
+<div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:9px 14px;font-size:14px;margin-bottom:18px"><span style="color:#5D6966;font-size:13px">WIR number</span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere">{{ d.wir }}</span><span style="color:#5D6966;font-size:13px">Element</span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;overflow-wrap:anywhere;{{ d.guidStyle }}">{{ d.guid }}</span></div>
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:8px">Dates and statuses</div>
+<div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:9px 14px;font-size:14px;margin-bottom:18px"><span style="color:#5D6966;font-size:13px">Issue date</span><span>{{ d.issue }}</span><span style="color:#5D6966;font-size:13px">Due date</span><span>{{ d.due }}</span><span style="color:#5D6966;font-size:13px">Paid date</span><span style="{{ d.paidStyle }}">{{ d.paid }}</span><span style="color:#5D6966;font-size:13px">ZATCA status</span><span>{{ d.zatca }} <span style="font-size:12px;color:#5D6966">· recorded</span></span><span style="color:#5D6966;font-size:13px">Payment status</span><span>{{ d.pay }} <span style="font-size:12px;color:#5D6966">· recorded</span></span></div>
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:8px">Linked WIRs · {{ d.linkCount }}</div>
+<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px">
+<sc-for list="{{ d.links }}" as="l" hint-placeholder-count="1"><div style="display:flex;align-items:center;gap:10px;background:#F5F5F7;border-radius:8px;padding:9px 12px;min-height:44px"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;overflow-wrap:anywhere;flex:1;min-width:0">{{ l }}</span><span style="font-size:11.5px;color:#5D6966;flex:none">reference</span></div></sc-for>
+</div>
+<div style="font-size:12px;color:#5D6966;line-height:1.45;margin-bottom:18px">Existing InvoiceWirLinks section, placement only. A link records which inspection the invoice refers to; it does not show that the work is complete.</div>
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:8px">Attachments · {{ d.attCount }}</div>
+<sc-if value="{{ d.hasAtt }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"><sc-for list="{{ d.att }}" as="a" hint-placeholder-count="1"><div style="display:flex;align-items:center;gap:10px;background:#F5F5F7;border-radius:8px;padding:9px 12px;min-height:44px"><span style="font-size:13.5px;overflow-wrap:anywhere;flex:1;min-width:0">{{ a }}</span><span style="font-size:11.5px;color:#5D6966;flex:none">existing</span></div></sc-for></div></sc-if>
+<sc-if value="{{ d.noAtt }}" hint-placeholder-val="{{ true }}"><p style="margin:0 0 6px;font-size:13.5px;color:#5D6966">No attachments.</p></sc-if>
+<div style="font-size:12px;color:#5D6966;line-height:1.45;margin-bottom:18px">Existing Attachments section, placement only. No attachment integration is added or changed by this board.</div>
+<div style="font-size:12.5px;color:#5D6966;line-height:1.5">Internal draft. Recorded statuses are what someone entered; the drawer does not clear, certify or approve anything.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ formOn }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:18px">
+<sc-if value="{{ isCreate }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:12px;background:#F1F1EE;border-radius:8px;padding:10px 13px"><button type="button" disabled="{{ yes }}" style="min-height:44px;padding:0 12px;border-radius:8px;border:1px solid rgba(22,33,31,.14);background:#E6E7EA;color:#5D6966;font-family:inherit;font-size:13px;font-weight:600;cursor:not-allowed">Scan and pre-fill</button><span style="flex:1;font-size:12.5px;color:#5D6966;line-height:1.45">Unavailable in the sandbox pilot. The external service is disconnected; fields are entered by hand.</span></div>
+</sc-if>
+<div>
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:10px">Invoice details</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">Invoice number <span style="color:#A53A32">· required</span></span><input type="text" value="{{ f.no }}" onChange="{{ onNo }}" style="min-height:48px;border-radius:8px;border:1px solid {{ noBorder }};background:#FFFFFF;padding:0 12px;font-family:inherit;font-size:14px;color:#16211F"><sc-if value="{{ noErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;color:#A53A32">Enter an invoice number.</span></sc-if></label>
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">Contractor <span>· read-only, from project</span></span><input type="text" value="Coastal Build JV" readOnly="{{ yes }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.12);background:#F5F5F7;padding:0 12px;font-family:inherit;font-size:14px;color:#5D6966"></label>
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">Amount SAR</span><input type="text" inputMode="decimal" value="{{ f.amount }}" onChange="{{ onAmount }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;color:#16211F"><span style="font-size:12px;color:#5D6966">Zero is a valid amount.</span></label>
+</div>
+</div>
+<div>
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:10px">Linked work</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">WIR number</span><select value="{{ f.wir }}" onChange="{{ onWir }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 10px;font-family:inherit;font-size:14px;color:#16211F"><option value="">None</option><sc-for list="{{ wirOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for></select></label>
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">Element</span><select value="{{ f.guid }}" onChange="{{ onGuid }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 10px;font-family:inherit;font-size:14px;color:#16211F"><option value="">None</option><sc-for list="{{ guidOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+</div>
+</div>
+<div>
+<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966;margin-bottom:10px">Dates and statuses</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">Issue date</span><input type="date" value="{{ f.issue }}" onChange="{{ onIssue }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 12px;font-family:inherit;font-size:14px;color:#16211F"></label>
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">Due date</span><input type="date" value="{{ f.due }}" onChange="{{ onDue }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 12px;font-family:inherit;font-size:14px;color:#16211F"></label>
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">Paid date</span><input type="date" value="{{ f.paid }}" onChange="{{ onPaid }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 12px;font-family:inherit;font-size:14px;color:#16211F"></label>
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">ZATCA status</span><select value="{{ f.zatca }}" onChange="{{ onZatca }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 10px;font-family:inherit;font-size:14px;color:#16211F"><sc-for list="{{ zatcaOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for></select></label>
+<label style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font-size:13px;color:#5D6966">Payment status</span><select value="{{ f.pay }}" onChange="{{ onPay }}" style="min-height:48px;border-radius:8px;border:1px solid rgba(22,33,31,.2);background:#FFFFFF;padding:0 10px;font-family:inherit;font-size:14px;color:#16211F"><sc-for list="{{ payOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for></select></label>
+</div>
+<div style="font-size:12px;color:#5D6966;margin-top:10px;line-height:1.45">Dates are optional and may be left empty. Statuses use the existing recorded values — ZATCA: Awaiting IPC, Reported, Cleared, Rejected; payment: Not Issued, Pending, Paid, Overdue — and are not a check against ZATCA or a payment system.</div>
+</div>
+<sc-if value="{{ saveErr }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="background:#FBF0EE;border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px"><span style="{{ mkBlock }};margin-top:4px"></span><span style="flex:1;font-size:13.5px;line-height:1.5">Could not save. Nothing was changed on the server and your entries are still here. Try again, or cancel to discard.</span></div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+
+<div style="flex:none;border-top:1px solid rgba(22,33,31,.09);padding:13px 22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+<sc-if value="{{ detailOn }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ openEdit }}" style="min-height:48px;padding:0 15px;border-radius:8px;background:#245EA8;color:#FFFFFF;border:0;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="background:#1C4C87">Edit</button>
+<button type="button" onClick="{{ pingDelete }}" style="min-height:48px;padding:0 15px;border-radius:8px;background:#FFFFFF;border:1px solid rgba(165,58,50,.45);color:#A53A32;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="background:#FBF0EE">Delete</button>
+<span style="flex:1;min-width:140px;font-size:12.5px;color:#5D6966;line-height:1.4">Existing actions. Delete asks for confirmation as it does today.</span>
+</sc-if>
+<sc-if value="{{ formOn }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ closeDrawer }}" disabled="{{ saving }}" style="{{ cancelStyle }}">Cancel</button>
+<button type="button" onClick="{{ submit }}" disabled="{{ saving }}" aria-disabled="{{ saving }}" style="{{ submitStyle }}">{{ submitLabel }}</button>
+<span style="flex:1;min-width:140px;font-size:12.5px;color:#5D6966;line-height:1.4">{{ footNote }}</span>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+<div style="margin-top:12px;display:flex;gap:26px;flex-wrap:wrap;font-size:12.5px;color:#5D6966;max-width:1100px">
+<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#16211F">Proposed · not approved · fictional data</span>
+<span>Technical notes, kept out of the canvas: reconciled to upstream source 1955bf7. Saved invoices carry no persisted notes field in this baseline, so ordinary detail shows no Notes section; the existing detail.notes value appears only as the conditional New-from-IPC pre-fill, which is not drawn on this board. Create and Edit render in the existing Modal.jsx geometry — horizontally centred, items-start, max width 600px — with the dialog capped to the viewport height so its footer stays reachable and its body scrolls; detail stays a 520px right-hand drawer. Escape and Cancel close the dialog and return focus to the row that opened it, or to New invoice. The invoiceable-now banner that the existing register shows when certified or paid IPC net total exceeds invoice total (floored at zero) is absent on every frame here because this fixture carries no certified IPC net total; nothing is implied by its absence. Summary values use the existing formula computed from the fixture rows — Total sums every amount; Paid sums rows whose payment_status is Paid; Outstanding sums rows whose payment_status is Pending or Overdue (not Total minus Paid); ZATCA-cleared counts zatca_status Cleared. Status options are the existing enums only. Header actions Refresh, Export, New invoice and New from IPC are the existing ones. The proposal changes the owned contents of that modal and drawer only and keeps the shared modal and drawer accessibility and lifetime contracts — it is not a request to rewrite the global overlays. Save simulation shows pending and error presentation only. No backend, authentication, storage, API, RBAC or offline behaviour exists on this board.</span>
+</div>
+</section>
+
+<section style="padding:26px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">B</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Frame map and content mapping</h2></div>
+<p style="font-size:13.5px;line-height:1.55;color:#5D6966;margin:0 0 14px;max-width:860px">Each frame id is the <span style="font-family:ui-monospace,Menlo,Consolas,monospace">id</span> and <span style="font-family:ui-monospace,Menlo,Consolas,monospace">data-frame-id</span> of the rendered element; the control-bar readout names the frames on screen. Every frame is PROPOSED, NOT APPROVED. Karim approves the exact frames before contractor implementation.</p>
+<div style="background:#FAFAF7;border-radius:8px;overflow:hidden;max-width:1200px">
+<div style="display:grid;grid-template-columns:210px minmax(0,1fr) minmax(0,1.4fr) 150px;gap:14px;padding:10px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966"><span>Frame id</span><span>Content</span><span>How it is reached</span><span>Status</span></div>
+<sc-for list="{{ frameMap }}" as="r" hint-placeholder-count="12">
+<div style="display:grid;grid-template-columns:210px minmax(0,1fr) minmax(0,1.4fr) 150px;gap:14px;padding:10px 18px;border-top:1px solid rgba(22,33,31,.07);font-size:13px;line-height:1.45;align-items:start"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;font-weight:600">{{ r.id }}</span><span>{{ r.content }}</span><span style="color:#5D6966">{{ r.how }}</span><span style="{{ sstAttn }}">Proposed · not approved</span></div>
+</sc-for>
+</div>
+</section>
+
+<section style="padding:26px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">C</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Visual proposal versus unchanged behaviour</h2></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:1200px">
+<div style="background:#FAFAF7;border-radius:8px;padding:16px 18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="{{ mkInfo }}"></span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#245EA8">Visual proposal</span></div><div style="font-size:13px;line-height:1.6">Register layout: four summary values in a row, eight-column grid at 1024 and above, stacked rows at 768 that keep every label and value. Row selection highlight. Detail drawer grouped into Invoice details, Linked work, Dates and statuses. Create and Edit forms grouped the same way with full labels, 48px fields and the required marker on invoice number only. Status marks over the existing enums: ink square for Cleared and Paid, open ring for Reported and Pending, triangle for Rejected and Overdue, grey for Awaiting IPC and Not Issued; no green, no colour-only meaning. Create and Edit contents proposed within the existing 600px modal; detail contents within the existing 520px drawer. Pending Saving… and inline save error presentation. Disabled Scan and pre-fill with its sandbox note.</div></div>
+<div style="background:#FAFAF7;border-radius:8px;padding:16px 18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="width:9px;height:9px;background:#16211F"></span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase">Unchanged business behaviour</span></div><div style="font-size:13px;line-height:1.6">Refresh, Export, New invoice, New from IPC when a certified IPC exists. Total Invoiced, Paid, Outstanding and ZATCA-cleared computed exactly as today (Σ all; Σ Paid; Σ Pending or Overdue; count Cleared); no new KPI or formula. The invoiceable-now banner only when the existing calculation (certified or paid IPC net total less invoice total, floored at zero) is positive. Detail keeps InvoiceWirLinks and Attachments as they exist; notes appear only as the conditional New-from-IPC pre-fill, not as a saved field. The eight columns. Row click to detail; Edit and Delete with the existing confirmation. The fields invoice_number (required), contractor (read-only from project), element_guid, wir_number, amount SAR including zero, issue_date, due_date, paid_date, zatca_status, payment_status; no added required field or rule; optional values may stay empty. Statuses are recorded data, not enforced certification or payment eligibility. Internal drafts, not legally cleared e-invoices; no Fatoora integration. The Scan and pre-fill action exists in source and stays disconnected in the pilot. The Invoice Edit lifecycle fix is Algene's deliverable and is not drawn here.</div></div>
+</div>
+</section>
+
+<section style="padding:26px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">D</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Tokens</h2></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:1200px">
+<div style="background:#FAFAF7;border-radius:8px;padding:16px 18px">
+<div style="display:flex;flex-direction:column;gap:7px;font-size:13px">
+<sc-for list="{{ tokens }}" as="k" hint-placeholder-count="9">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:4px;background:{{ k.hex }};box-shadow:inset 0 0 0 1px rgba(22,33,31,.12);flex:none"></span><span style="flex:1">{{ k.name }}</span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;color:#5D6966">{{ k.hex }}</span></div>
+</sc-for>
+</div>
+</div>
+<div style="background:#FAFAF7;border-radius:8px;padding:16px 18px;font-size:13px;line-height:1.6">Type: system sans stack (system-ui, Segoe UI, Helvetica, Arial) in this export; monospace stack (ui-monospace, Menlo, Consolas) for references, amounts and section kickers. No purchased font binaries. Sizes 19 / 17 / 15.5 / 14 / 13.5 / 13 / 12.5 / 12. Radius 8px on every surface and control. Two surface levels: #FAFAF7 chrome, #FFFFFF content on a #F5F5F7 ground. Targets 48px minimum for every button, field and select. Focus 2px #245EA8 outline, 2px offset. Motion only on loading skeletons, disabled under reduced-motion.</div>
+</div>
+</section>
+
+<section style="padding:26px 22px 8px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">E</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Measured checks</h2></div>
+<p style="font-size:13.5px;line-height:1.55;color:#5D6966;margin:0 0 14px;max-width:860px">Measured in the rendered board with the viewport switch, Chromium-based preview, 3 Oct 2026. Nothing is extrapolated.</p>
+<div style="background:#FAFAF7;border-radius:8px;overflow:hidden;max-width:1200px">
+<div style="display:grid;grid-template-columns:90px minmax(0,1fr) minmax(0,1.7fr) minmax(0,.9fr) 80px;gap:12px;padding:10px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#5D6966"><span>Width</span><span>Layout</span><span>What was exercised</span><span>Smallest target</span><span>Overflow</span></div>
+<sc-for list="{{ measured }}" as="m" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:90px minmax(0,1fr) minmax(0,1.7fr) minmax(0,.9fr) 80px;gap:12px;padding:10px 18px;border-top:1px solid rgba(22,33,31,.07);font-size:13px;line-height:1.45;align-items:start"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;font-weight:600">{{ m.w }}</span><span>{{ m.layout }}</span><span style="color:#5D6966">{{ m.what }}</span><span style="color:#5D6966">{{ m.target }}</span><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px">{{ m.overflow }}</span></div>
+</sc-for>
+</div>
+<div style="margin-top:12px;font-size:13px;color:#5D6966;line-height:1.55;max-width:860px">{{ measuredNote }}</div>
+</section>
+
+<section style="padding:26px 22px 64px">
+<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:12px;flex-wrap:wrap"><span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;font-weight:600;color:#5D6966">F</span><h2 style="font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0">Limits</h2></div>
+<div style="background:#FAFAF7;border-radius:8px;padding:16px 18px;max-width:1200px;font-size:13px;line-height:1.6">A bounded design proposal for owner review; not a production or completed implementation claim, and not the pilot's bug fix. Frames A and B show the desired field state only; the lifecycle behaviour that loads a record into the form is Algene's deliverable. Saving and failure are presentation simulations. The 768 width is shown as a tablet layout of the same web UI, not a mobile app. Date fields use the browser's native control; its popup was not exercised. Export, New from IPC and Delete confirmation are existing behaviours and are named, not drawn. No physical device was used.</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1560,&quot;height&quot;:1100}}">
+class Component extends DCLogic {
+  frameRef=React.createRef();
+  state={mode:'1280',w:1280,data:'normal',phase:'ready',drawer:null,sel:null,form:null,formMode:null,saving:false,saveErr:false,noErr:false,note:''};
+  K={blocked:['#A53A32','tri'],attention:['#9A651A','ring'],info:['#245EA8','sq'],neutral:['#16211F','sq'],na:['#8A9491','sq']};
+  mk(k){const p=this.K[k]||this.K.neutral;const b='width:9px;height:9px;flex:none;';if(p[1]==='tri')return b+'background:'+p[0]+';clip-path:polygon(50% 0,100% 100%,0 100%)';if(p[1]==='ring')return b+'border:1.5px solid '+p[0]+';border-radius:50%';return b+'background:'+p[0];}
+  sst(k){const p=this.K[k]||this.K.neutral;return "font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;color:"+p[0];}
+  set(p){return ()=>this.setState(p);}
+  note(m){return ()=>this.setState({note:m});}
+  componentDidMount(){const el=this.frameRef.current;if(el&&typeof ResizeObserver!=='undefined'){this.ro=new ResizeObserver(es=>{const w=Math.round(es[0].contentRect.width);if(w&&Math.abs(w-this.state.w)>1)this.setState({w});});this.ro.observe(el);}}
+  componentWillUnmount(){if(this.ro)this.ro.disconnect();clearTimeout(this.t);}
+  width(){return this.state.mode==='auto'?this.state.w:+this.state.mode;}
+  focusIn(sel){const go=()=>{const root=this.frameRef.current||document;const el=root.querySelector(sel);if(el&&document.activeElement!==el)el.focus();};go();if(typeof requestAnimationFrame==='function')requestAnimationFrame(go);setTimeout(go,0);setTimeout(go,80);setTimeout(go,200);}
+
+  INV=[
+    {id:'INV-2026-0007',no:'INV-2026-0007',wir:'WIR-2438',guid:'3F2a9bC1dE4fG5hI6jK7lM8n',guidL:'Slab_B_SubBase · 3F2a9bC1dE4fG5hI6jK7lM8n',amount:412000,issue:'2026-02-14',due:'2026-03-16',paid:'2026-03-10',zatca:'Cleared',pay:'Paid',links:['WIR-2438'],att:['invoice-0007.pdf']},
+    {id:'INV-2026-0008',no:'INV-2026-0008',wir:'WIR-2447',guid:'',guidL:'',amount:186400,issue:'2026-03-02',due:'2026-04-01',paid:'',zatca:'Cleared',pay:'Pending',links:['WIR-2447'],att:[]},
+    {id:'INV-2026-0009',no:'INV-2026-0009',wir:'WIR-2451',guid:'0Qr8sT9uV0wX1yZ2aB3cD4eF',guidL:'Slab_C_Blinding · 0Qr8sT9uV0wX1yZ2aB3cD4eF',amount:0,issue:'',due:'',paid:'',zatca:'Awaiting IPC',pay:'Not Issued',links:['WIR-2451'],att:[]},
+    {id:'INV-2026-0010-SUPPLEMENTARY-RETENTION-RELEASE-PHASE-1A',no:'INV-2026-0010-SUPPLEMENTARY-RETENTION-RELEASE-PHASE-1A',wir:'WIR-2026-P2-CLP-EXTWORKS-ZONED-KERB-000002474',guid:'',guidL:'',amount:1284500,issue:'2026-03-09',due:'2026-04-08',paid:'',zatca:'Reported',pay:'Pending',links:['WIR-2026-P2-CLP-EXTWORKS-ZONED-KERB-000002474','WIR-2447'],att:['retention-schedule-1a.xlsx','cover-letter.pdf']},
+    {id:'INV-2026-0006',no:'INV-2026-0006',wir:'WIR-2402',guid:'',guidL:'',amount:96250,issue:'2026-01-20',due:'2026-02-19',paid:'',zatca:'Rejected',pay:'Overdue',links:['WIR-2402'],att:[]}];
+  ZK={'Awaiting IPC':['na','#5D6966'],Reported:['attention','#9A651A'],Cleared:['neutral','#16211F'],Rejected:['blocked','#A53A32']};
+  PK={'Not Issued':['na','#5D6966'],Pending:['attention','#9A651A'],Paid:['neutral','#16211F'],Overdue:['blocked','#A53A32']};
+  ZOPTS=['Awaiting IPC','Reported','Cleared','Rejected'];POPTS=['Not Issued','Pending','Paid','Overdue'];
+  WIRS=['WIR-2402','WIR-2438','WIR-2447','WIR-2451','WIR-2462','WIR-2470','WIR-2026-P2-CLP-EXTWORKS-ZONED-KERB-000002474'];
+  GUIDS=[{v:'3F2a9bC1dE4fG5hI6jK7lM8n',l:'Slab_B_SubBase · 3F2a9bC1dE4fG5hI6jK7lM8n'},{v:'0Qr8sT9uV0wX1yZ2aB3cD4eF',l:'Slab_C_Blinding · 0Qr8sT9uV0wX1yZ2aB3cD4eF'},{v:'7Gh1iJ2kL3mN4oP5qR6sT7uV',l:'Wall_RW2_Formwork · 7Gh1iJ2kL3mN4oP5qR6sT7uV'}];
+  sar(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  /* existing KPI formula from source: total = Σ amount; paid = Σ amount where payment_status==='Paid'; outstanding = Σ amount where payment_status is 'Pending' or 'Overdue'; cleared = count zatca_status==='Cleared' */
+  kpi(list){const sum=(f)=>list.filter(f).reduce((a,i)=>a+i.amount,0);return {total:sum(()=>true),paid:sum(i=>i.pay==='Paid'),outstanding:sum(i=>i.pay==='Pending'||i.pay==='Overdue'),cleared:list.filter(i=>i.zatca==='Cleared').length,n:list.length};}
+  fmtDate(s){if(!s)return '—';const d=new Date(s+'T00:00:00');return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+
+  openRow(inv){return ()=>this.setState({drawer:'detail',sel:inv.id,note:''},()=>this.focusIn('[role="dialog"] button[aria-label="Close"]'));}
+  openCreate=()=>this.setState({drawer:'form',formMode:'create',sel:null,form:{no:'',amount:'',wir:'',guid:'',issue:'',due:'',paid:'',zatca:'Awaiting IPC',pay:'Not Issued'},saving:false,saveErr:false,noErr:false,note:''},()=>this.focusIn('[role="dialog"] input[type="text"]'));
+  openEdit=()=>{const inv=this.INV.filter(i=>i.id===this.state.sel)[0];if(!inv)return;
+    this.setState({drawer:'form',formMode:'edit',form:{no:inv.no,amount:this.sar(inv.amount),wir:inv.wir,guid:inv.guid,issue:inv.issue,due:inv.due,paid:inv.paid,zatca:inv.zatca,pay:inv.pay},saving:false,saveErr:false,noErr:false},()=>this.focusIn('[role="dialog"] input[type="text"]'));};
+  closeDrawer=()=>{if(this.state.saving)return;const sel=this.state.sel;clearTimeout(this.t);this.setState({drawer:null,form:null,formMode:null,saving:false,saveErr:false,noErr:false});
+    this.focusIn(sel?'[data-invoice="'+sel+'"]':'[data-focus-return="new-invoice"]');};
+  onKey=e=>{if(e.key==='Escape')this.closeDrawer();};
+  field(k){return e=>{const v=e.target.value;this.setState(s=>({form:Object.assign({},s.form,{[k]:v}),noErr:k==='no'?false:s.noErr}));};}
+  submit=()=>{const f=this.state.form;if(!f||this.state.saving)return;if(!f.no.trim()){this.setState({noErr:true});return;}
+    this.setState({saving:true,saveErr:false});clearTimeout(this.t);
+    this.t=setTimeout(()=>this.setState(s=>s.data==='saveFail'?{saving:false,saveErr:true}:{saving:false,saveErr:false,drawer:null,form:null,formMode:null,note:'Presentation only: the save completed in this simulation. No record was created or changed anywhere.'}),900);};
+  refresh=()=>{this.retryLoad();};
+  retryLoad=()=>{clearTimeout(this.t);this.setState({phase:'loading'});this.t=setTimeout(()=>this.setState(s=>({phase:s.data==='readFail'?'error':'ready'})),900);};
+
+  renderVals(){
+    const st=this.state,W=this.width();const stacked=W<1024;const sidebar=W>=1024;
+    const hb=(on,c)=>'min-height:26px;padding:0 9px;border-radius:8px;border:1px solid '+(on?c:'rgba(250,250,247,.28)')+';background:'+(on?c:'transparent')+";color:#FAFAF7;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;font-weight:600;cursor:pointer";
+    const list=st.data==='empty'?[]:this.INV;
+    const loading=st.phase==='loading',error=st.phase==='error'&&st.data==='readFail',empty=!loading&&!error&&list.length===0,show=!loading&&!error&&list.length>0;
+    const cols='minmax(0,1.6fr) minmax(0,1.3fr) 92px 92px 120px minmax(0,1fr) minmax(0,1fr) 92px';
+    const k=this.kpi(list);const rows=list.map(i=>({id:i.id,no:i.no,wir:i.wir,issue:this.fmtDate(i.issue),due:this.fmtDate(i.due),paid:this.fmtDate(i.paid),amount:this.sar(i.amount),zatca:i.zatca,pay:i.pay,
+      zMk:this.mk(this.ZK[i.zatca][0]),zColor:this.ZK[i.zatca][1],pMk:this.mk(this.PK[i.pay][0]),pColor:this.PK[i.pay][1],selected:st.sel===i.id,go:this.openRow(i),
+      style:'width:100%;display:grid;grid-template-columns:'+cols+';gap:12px;align-items:start;text-align:start;background:'+(st.sel===i.id?'#F2F5F9':'transparent')+';border:0;border-top:1px solid rgba(22,33,31,.07);padding:13px 18px;font-family:inherit;color:inherit;cursor:pointer;min-height:56px',
+      stackStyle:'width:100%;display:block;text-align:start;background:'+(st.sel===i.id?'#F2F5F9':'transparent')+';border:0;border-top:1px solid rgba(22,33,31,.07);padding:13px 16px;font-family:inherit;color:inherit;cursor:pointer;min-height:56px'}));
+    const sel=this.INV.filter(i=>i.id===st.sel)[0];
+    const d=sel?{no:sel.no,contractor:'Coastal Build JV',amount:this.sar(sel.amount),noAtt:sel.att.length===0,links:sel.links,linkCount:sel.links.length+(sel.links.length===1?' link':' links'),att:sel.att,hasAtt:sel.att.length>0,attCount:sel.att.length?sel.att.length+(sel.att.length===1?' file':' files'):'none attached',wir:sel.wir,guid:sel.guid||'None linked',guidStyle:sel.guid?'':'color:#5D6966;font-family:inherit;font-size:14px',issue:this.fmtDate(sel.issue),due:this.fmtDate(sel.due),paid:this.fmtDate(sel.paid),paidStyle:sel.paid?'':'color:#5D6966',zatca:sel.zatca,pay:sel.pay,zMk:this.mk(this.ZK[sel.zatca][0]),zColor:this.ZK[sel.zatca][1],pMk:this.mk(this.PK[sel.pay][0]),pColor:this.PK[sel.pay][1]}:{};
+    const formOn=st.drawer==='form'&&!!st.form,detailOn=st.drawer==='detail'&&!!sel;
+    const drawerId=detailOn?'invoice-detail':formOn?(st.saving?'invoice-form-pending':st.saveErr?'invoice-form-save-error':st.formMode==='create'?'invoice-create':st.sel==='INV-2026-0007'?'invoice-edit-a':st.sel==='INV-2026-0009'?'invoice-edit-b':'invoice-edit'):'';
+    const registerId=stacked?'invoice-register-stacked':'invoice-register';
+    const shellId='pilot-invoices-'+(W>=1440?'1440':W>=1280?'1280':W>=1024?'1024':'768');
+    const f=st.form||{};
+    return {
+      frameRef:this.frameRef,yes:true,shellId,sidebarOn:sidebar,
+      readout:(stacked?'tablet · stacked register':'desktop · 8-column register')+' · '+(st.mode==='auto'?st.w+'px auto':st.mode+'px forced')+' · frames '+shellId+' › '+(loading?'invoice-register-loading':error?'invoice-register-error':empty?'invoice-register-empty':registerId)+(drawerId?' › '+drawerId:''),
+      frameStyle:'background:#F5F5F7;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px rgba(22,33,31,.13);'+(st.mode==='auto'?'width:100%;':'width:'+st.mode+'px;flex:none;')+'height:860px',
+      switchRows:[
+        {name:'Viewport',opts:[['768','768'],['1024','1024'],['1280','1280'],['1440','1440'],['auto','Auto']].map(m=>({label:m[1],go:this.set({mode:m[0],note:''}),style:hb(st.mode===m[0],'#245EA8')}))},
+        {name:'Data and read',opts:[['normal','Populated'],['empty','No invoices'],['readFail','Read fails'],['saveFail','Save fails']].map(m=>({label:m[1],go:()=>{clearTimeout(this.t);this.setState({data:m[0],phase:m[0]==='readFail'?'error':'ready',drawer:null,form:null,sel:null,saving:false,saveErr:false,note:''});},style:hb(st.data===m[0],'#9A651A')})).concat([{label:'Reload',go:this.retryLoad,style:hb(false,'#9A651A')}])},
+        {name:'Open',opts:[{label:'Detail 0007',go:()=>this.openRow(this.INV[0])()},{label:'Edit A · 0007',go:()=>{this.setState({sel:'INV-2026-0007'},()=>this.openEdit());}},{label:'Edit B · 0009',go:()=>{this.setState({sel:'INV-2026-0009'},()=>this.openEdit());}},{label:'Create',go:this.openCreate}].map(o=>({label:o.label,go:o.go,style:hb(false,'#245EA8')}))}],
+      note:st.note,clearNote:this.set({note:''}),mkBlock:this.mk('blocked'),sstBlock:this.sst('blocked'),mkInfo:this.mk('info'),sstInfo:this.sst('info'),sstAttn:this.sst('attention'),
+      nav:['Overview','Site Work','BoQ & Progress','Commercial','Documents','Reports'].map(l=>{const on=l==='Commercial';return {label:l,bar:on?'#245EA8':'transparent',go:on?this.set({note:''}):this.note(l+' is on ACC Workspace Rollout v3; reference only.'),
+        style:'display:flex;align-items:center;gap:9px;width:100%;min-height:48px;padding:0 9px 0 0;border:0;border-radius:8px;text-align:start;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:'+(on?'600':'450')+';background:'+(on?'#EAF1FA':'transparent')+';color:'+(on?'#245EA8':'#16211F')};}),
+      hasCertifiedIpc:true,pingExport:this.note('Existing action: Export runs as it does today. Not drawn here.'),pingFromIpc:this.note('Existing action: New from IPC pre-fills a draft from certified IPC-06 as it does today. Not drawn here.'),
+      openCreate:this.openCreate,
+      stLoading:loading,stError:error,stEmpty:empty,stList:show,registerId,wideTable:!stacked,stackedTable:stacked,cols,rows,
+      summary:[{k:'Total invoiced',v:this.sar(k.total),sub:'SAR · all '+k.n+' invoices',c:''},{k:'Paid',v:this.sar(k.paid),sub:'SAR · payment status Paid',c:''},{k:'Outstanding',v:this.sar(k.outstanding),sub:'SAR · payment status Pending or Overdue',c:''},{k:'ZATCA-cleared',v:String(k.cleared),sub:'of '+k.n+' · recorded status Cleared',c:''}],
+      pingRefresh:this.refresh,bannerOn:false,
+      retryLoad:this.retryLoad,
+      drawerOn:detailOn||formOn,drawerId,overlayStyle:'position:absolute;inset:0;background:rgba(22,33,31,.28);display:flex;'+(detailOn?'justify-content:flex-end;align-items:stretch':'justify-content:center;align-items:flex-start;padding:'+(stacked?'16px 12px':'32px 24px')),
+      dialogStyle:'position:relative;flex:none;background:#FFFFFF;display:flex;flex-direction:column;'+(detailOn?'width:min(520px,'+(stacked?'92%':'66%')+');height:100%;box-shadow:-18px 0 40px -28px rgba(22,33,31,.65)':'width:min(600px,100%);max-width:600px;max-height:100%;border-radius:8px;box-shadow:0 24px 60px -24px rgba(22,33,31,.55),0 0 0 1px rgba(22,33,31,.08)'),closeDrawer:this.closeDrawer,onKey:this.onKey,
+      drawerKicker:detailOn?'Invoice · internal draft':st.formMode==='create'?'New invoice · internal draft':'Edit invoice · internal draft',
+      drawerTitle:detailOn?sel.no:st.formMode==='create'?'New invoice':(sel?sel.no:''),
+      drawerSub:detailOn?('Linked WIR '+sel.wir):st.formMode==='create'?'Coastal Logistics Park · Coastal Build JV':'Changes apply to this draft only',
+      detailOn,formOn,isCreate:st.formMode==='create',d,
+      openEdit:this.openEdit,pingDelete:this.note('Existing action: Delete asks for confirmation as it does today. Not drawn here.'),
+      f,noBorder:st.noErr?'#A53A32':'rgba(22,33,31,.2)',noErr:st.noErr,
+      onNo:this.field('no'),onAmount:this.field('amount'),onWir:this.field('wir'),onGuid:this.field('guid'),onIssue:this.field('issue'),onDue:this.field('due'),onPaid:this.field('paid'),onZatca:this.field('zatca'),onPay:this.field('pay'),
+      wirOpts:this.WIRS,guidOpts:this.GUIDS,zatcaOpts:this.ZOPTS,payOpts:this.POPTS,
+      saving:st.saving,saveErr:st.saveErr,submit:this.submit,
+      submitLabel:st.saving?'Saving…':st.formMode==='create'?'Create invoice':'Save changes',
+      submitStyle:'min-height:48px;padding:0 15px;border-radius:8px;border:0;font-family:inherit;font-size:13.5px;font-weight:600;cursor:'+(st.saving?'default':'pointer')+';background:'+(st.saving?'#E6E7EA':'#245EA8')+';color:'+(st.saving?'#5D6966':'#FFFFFF'),
+      cancelStyle:'min-height:48px;padding:0 15px;border-radius:8px;background:#FFFFFF;border:1px solid rgba(22,33,31,.2);color:'+(st.saving?'#9AA6A3':'#16211F')+';font-family:inherit;font-size:13.5px;font-weight:600;cursor:'+(st.saving?'default':'pointer'),
+      footNote:st.saving?'Saving. Cancel is unavailable until the request returns.':st.saveErr?'Your entries are kept. Try again sends the same form.':'',
+      frameMap:[
+        ['pilot-invoices-1280 / -1440','Populated register: Refresh, Export, New from IPC, New invoice; four summary values from the existing formula; eight columns; five rows including a long invoice number and WIR; no invoiceable-now banner (no certified IPC net total in the fixture)','Viewport 1280 or 1440, Data Populated'],
+        ['invoice-register','Eight-column register','Width ≥ 1024'],
+        ['invoice-register-stacked','Stacked register rows with every label and value','Viewport 768'],
+        ['invoice-detail','Selected record in the existing 520px drawer: statuses, invoice details, linked work, dates and statuses, Linked WIRs, Attachments, Edit and Delete; no Notes section for saved invoices','Row click, or Open › Detail 0007 (one attachment); INV-2026-0010 shows two links and two attachments; INV-2026-0008 shows the empty attachments state'],
+        ['invoice-create','Create form in the existing 600px modal, blank, defaults Awaiting IPC and Not Issued, disabled Scan and pre-fill','New invoice, or Open › Create'],
+        ['invoice-edit-a','Edit invoice A, fully populated (INV-2026-0007)','Detail › Edit, or Open › Edit A'],
+        ['invoice-edit-b','Edit invoice B: amount 0.00, empty issue, due and paid dates, Awaiting IPC and Not Issued (INV-2026-0009)','Open › Edit B'],
+        ['invoice-form-pending','Saving… with both footer buttons disabled','Create invoice or Save changes, for 900 ms'],
+        ['invoice-form-save-error','Inline save error, all entries preserved, same form retried','Data Save fails, then Save changes'],
+        ['invoice-register-loading','Loading skeleton','Reload, for 900 ms'],
+        ['invoice-register-empty','Genuinely empty project','Data No invoices'],
+        ['invoice-register-error','Read error with Try again; Refresh and the other header actions remain','Data Read fails'],
+        ['pilot-invoices-1024 / -768','Tablet layouts','Viewport 1024 (sidebar, eight columns) and 768 (no sidebar, stacked rows)']
+      ].map(r=>({id:r[0],content:r[1],how:r[2]})),
+      tokens:[{name:'Ground',hex:'#F5F5F7'},{name:'Surface · chrome',hex:'#FAFAF7'},{name:'Surface · content',hex:'#FFFFFF'},{name:'Ink',hex:'#16211F'},{name:'Secondary ink',hex:'#5D6966'},{name:'Blue · action, selection, information',hex:'#245EA8'},{name:'Amber · attention (Reported, Pending)',hex:'#9A651A'},{name:'Red · Rejected, Overdue, error',hex:'#A53A32'},{name:'Grey · Awaiting IPC, Not Issued, disabled',hex:'#8A9491'}],
+      measured:this.MEASURED.map(m=>({w:m[0],layout:m[1],what:m[2],target:m[3],overflow:m[4]})),measuredNote:this.MEASURED_NOTE};
+  }
+  MEASURED=[
+    ['1280','Sidebar 232px · eight-column register','Header actions Refresh, Export, New from IPC, New invoice at 48px. Summary from the existing formula over the fixture: Total invoiced 1,979,150.00 (all 5); Paid 412,000.00 (payment status Paid); Outstanding 1,567,150.00 (Pending 186,400.00 + 1,284,500.00, Overdue 96,250.00); ZATCA-cleared 2 of 5. Row statuses only from the existing enums — Cleared · Paid, Cleared · Pending, Awaiting IPC · Not Issued, Reported · Pending, Rejected · Overdue; none of the removed labels appear; no invoiceable-now banner; disclaimer, no-Fatoora and WIR-is-a-reference sentences present; one Sample data label; no green. Rows 56–93px, long invoice number and WIR wrap inside their cells. Row click → invoice-detail in the 520px right-hand drawer (flush right, full height), focus on Close, sections Invoice details · Linked work · Dates and statuses · Linked WIRs · Attachments (no Notes section), Edit and Delete in the footer; INV-2026-0007 shows one file, INV-2026-0008 shows No attachments, INV-2026-0010 shows 2 links and 2 files; Escape returns focus to the row. Edit A in the centred 600px modal (340px clear on each side, 32px from the top, 758px tall, footer visible without scrolling): nine fields populated, ZATCA options Awaiting IPC / Reported / Cleared / Rejected, payment options Not Issued / Pending / Paid / Overdue, focus on invoice number, fields 48px, Cancel returns focus to the row. Edit B: amount 0.00, dates empty, Awaiting IPC and Not Issued. Create: centred 600px modal, 796px tall, body scrolls and footer stays visible; defaults Awaiting IPC and Not Issued, Scan and pre-fill disabled, empty submit shows Enter an invoice number, Escape returns focus to New invoice. Save fails: Saving… disables Save and Cancel → inline error with the edited amount kept and Save re-enabled. No invoices and Read fails keep Refresh and the other header actions; Refresh → loading → register','48px (sidebar items, header buttons, fields, footer)','0'],
+    ['1440','Sidebar · eight-column register','Same frames; rows 56–93px; Edit and Create modals centred with 420px clear on each side, footer visible, Create body scrolls; detail drawer 520px flush right','48px','0'],
+    ['1024','Sidebar · eight-column register','All eight columns kept; the long invoice row wraps to 159px rather than clipping; Refresh and the other header actions at 48px; Edit and Create modals centred (212px each side), footer visible, Create body scrolls; detail drawer 520px flush right','48px','0'],
+    ['768','No sidebar · stacked register','Each row carries invoice, amount, linked WIR, issued, due, paid date, ZATCA and payment with full labels; rows 90–109px. Detail drawer 520px flush right with the long invoice number and the long linked WIR inside; Edit and Create modals centred at 600px with 84px clear on each side and 16px from the top, all fields 48px, footer visible, Create body scrolls (828px tall); Escape returns focus to the opening row, and from Create to New invoice','48px (Refresh)','0']];
+  MEASURED_NOTE='Re-measured after removing the Notes section from saved-invoice detail (no persisted notes field in 1955bf7; detail.notes is the conditional New-from-IPC pre-fill only): detail for INV-2026-0007, 0008 and 0010 renders Invoice details, Linked work, Dates and statuses, Linked WIRs and Attachments with no Notes word anywhere in the canvas, 520px wide, focus on Close and Escape back to the row, overflow 0 at 1280 and 768. Earlier re-measured after reconciliation to source 1955bf7 and after centring the Create and Edit modal to the Modal.jsx geometry (items-start, justify-center, max width 600px) while the detail stays a right-hand drawer; at every width the modal has equal left and right clearances, its footer is inside the frame, and where the body exceeds the available height it scrolls; the earlier table that carried invented statuses and a Total-minus-Paid outstanding figure has been removed. Overflow is the frame scrollWidth minus clientWidth: 0 at every width, including with the drawer or modal open. Timer states (Saving…, loading) were confirmed after a wait in a hidden preview frame rather than at 900 ms. Untested: the native date picker popup, Export, New from IPC, Refresh against real data and the Delete confirmation (existing behaviours, named not drawn), the invoiceable-now banner (absent by premise in this fixture), the real attachment and WIR-link components (placement only), screen-reader announcement order, and any physical device.';
+}
+</script>
+</body>
+</html>

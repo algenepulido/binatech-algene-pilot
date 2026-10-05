@@ -1,0 +1,316 @@
+/* =============================================================================
+   BinaTech — Certification Ledger design foundation
+   Derived from BinaTech_App__standalone_.html (Claude Design mockup).
+   Framework-agnostic CSS custom properties + base + component recipes.
+
+   HOW TO USE
+   - Load this once, high in the app (e.g. imported in main.jsx / index.css),
+     BEFORE component styles so tokens are available everywhere.
+   - Refactor components to consume var(--sc-*) instead of hardcoded hex.
+   - If the app uses Tailwind, mirror these tokens into tailwind.config
+     (theme.extend.colors / fontFamily / borderRadius / boxShadow) and delete
+     duplicated literals from components. Do not run both systems in parallel.
+
+   NON-NEGOTIABLE SEMANTICS
+   - GREEN (--sc-certified, #1C6B52) means CERTIFIED / PAID ONLY. It is not a
+     brand "primary" and must never be used for decoration, hovers, generic
+     buttons, or emphasis. Primary actions use ink (--sc-ink). This is why the
+     token is named --sc-certified, not --sc-primary.
+   - This skin is cosmetic. It does not add server-side enforcement. Demo /
+     readiness surfaces keep their "Not backend-certified" badge regardless.
+   - Bilingual: use logical properties (padding-inline, margin-inline, start/
+     end) so RTL mirrors for free. Numbers/currency stay LTR (see .sc-num).
+============================================================================= */
+
+:root {
+  /* ---- Surfaces (porcelain, light only) ------------------------------ */
+  --sc-bg:            #F5F5F7;   /* app background                        */
+  --sc-surface:       #FAFAF7;   /* default card / panel                  */
+  --sc-surface-2:     #F3F5F3;   /* inset / secondary fill                */
+  --sc-surface-3:     #EEF0EE;   /* subtle fill, hover rows               */
+  --sc-raised:        #FFFFFF;   /* elevated / overlay surface            */
+  --sc-tint-green:    #EFF2F0;   /* faint certified wash (backgrounds)    */
+
+  /* ---- Ink ramp (text) ---------------------------------------------- */
+  --sc-ink:           #16211F;   /* primary text, primary buttons         */
+  --sc-ink-2:         #43544F;   /* body / secondary text                 */
+  --sc-muted:         #7C8C89;   /* labels, meta, captions                */
+  --sc-faint:         #A1A1A6;   /* disabled, timestamps, hints           */
+  --sc-on-dark:       #FAFAF7;   /* text on ink fills                     */
+
+  /* ---- Hairlines / borders ------------------------------------------ */
+  --sc-line:          #E4E4EA;   /* default hairline                      */
+  --sc-line-2:        #DCE2E0;   /* green-grey hairline (on tinted)       */
+  --sc-line-strong:   #B9C1BF;   /* emphasized border, inputs on focus    */
+
+  /* ---- Status semantics --------------------------------------------- */
+  /* CERTIFIED (green — status only) */
+  --sc-certified:     #1C6B52;
+  --sc-certified-bg:  rgba(28,107,82,0.10);
+  --sc-certified-bd:  rgba(28,107,82,0.25);
+  /* ACTION / LINK / INFO (blue) */
+  --sc-action:        #1D4ED8;
+  --sc-action-hover:  #2563EB;
+  --sc-action-bg:     rgba(29,78,216,0.08);
+  --sc-action-bd:     rgba(29,78,216,0.25);
+  /* PENDING / WARNING (amber) */
+  --sc-warning:       #B45309;
+  --sc-warning-bg:    rgba(180,83,9,0.08);
+  /* BLOCKED / DANGER (red) */
+  --sc-danger:        #B3261E;
+  --sc-danger-bg:     #FBECEB;
+  --sc-danger-bd:     #F3D6D4;
+
+  /* ---- Typography ---------------------------------------------------- */
+  --sc-font-sans:     'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --sc-font-mono:     'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+  --sc-font-display:  'Familjen Grotesk', var(--sc-font-sans);
+  --sc-font-ar:       'IBM Plex Sans Arabic', var(--sc-font-sans);
+
+  /* Type scale (px) — fine-grained, ledger-forward. Base = --fs-body. */
+  --fs-micro:   9.5px;
+  --fs-2xs:     10.5px;
+  --fs-xs:      11px;
+  --fs-sm:      11.5px;
+  --fs-body:    12.5px;   /* dominant reading size */
+  --fs-md:      13px;
+  --fs-lg:      14px;
+  --fs-xl:      16px;
+  --fs-2xl:     19px;
+  --fs-3xl:     24px;
+  --fs-4xl:     30px;
+
+  --fw-medium:  500;
+  --fw-semi:    600;   /* default emphasis */
+  --fw-bold:    700;
+
+  --lh-tight:   1.2;
+  --lh-body:    1.5;
+  --tracking-label: 0.06em;   /* uppercase mono labels */
+
+  /* ---- Radius -------------------------------------------------------- */
+  --r-1: 4px;
+  --r-2: 6px;
+  --r-3: 8px;
+  --r-4: 9px;    /* default control / card */
+  --r-5: 12px;
+  --r-6: 14px;
+  --r-pill: 999px;
+
+  /* ---- Elevation ----------------------------------------------------- */
+  --shadow-1: 0 1px 2px rgba(22,33,31,0.04);          /* resting card    */
+  --shadow-2: 0 6px 18px -8px rgba(22,33,31,0.16);    /* hover / popover */
+  --shadow-3: 0 12px 28px -14px rgba(22,33,31,0.22);  /* modal / overlay */
+  --ring:     0 0 0 3px rgba(28,107,82,0.25);         /* focus ring      */
+  --ring-action: 0 0 0 3px rgba(29,78,216,0.25);
+
+  /* ---- Space + motion ----------------------------------------------- */
+  --sp-1: 4px;  --sp-2: 6px;  --sp-3: 8px;  --sp-4: 12px;
+  --sp-5: 14px; --sp-6: 20px; --sp-7: 28px; --sp-8: 40px;
+
+  --dur: 140ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* =============================================================================
+   Base
+   NOTE (BinaTech integration): body-level rules here are intentionally gentle —
+   the legacy app skin (index.css) still owns unmigrated screens and loads AFTER
+   this file, so its body/font rules win where they overlap. As screens migrate,
+   legacy rules shrink until this file is the only skin. The [dir="rtl"] body
+   rule below will not match while dir lives on an inner app div (see
+   ops/ui-audit/handover-claude-design.md §7); migrated components opt in via
+   var(--sc-font-ar).
+============================================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--sc-bg);
+  color: var(--sc-ink);
+  font-family: var(--sc-font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+[dir="rtl"] body { font-family: var(--sc-font-ar); }
+
+a { color: var(--sc-action); text-decoration: none; }
+a:hover { color: var(--sc-action-hover); }
+
+::selection { background: rgba(28,107,82,0.14); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--sc-line-2);
+  border-radius: var(--r-2);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--sc-line-strong); background-clip: content-box; }
+
+:focus-visible { outline: none; box-shadow: var(--ring); border-radius: var(--r-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* =============================================================================
+   Typographic helpers
+============================================================================= */
+.sc-display { font-family: var(--sc-font-display); font-weight: var(--fw-semi); line-height: var(--lh-tight); }
+.sc-mono    { font-family: var(--sc-font-mono); }
+
+/* Uppercase micro-label (section eyebrows, field labels, table heads) */
+.sc-label {
+  font-family: var(--sc-font-mono);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-faint);
+}
+
+/* Numeric / currency — tabular, and forced LTR inside RTL text */
+.sc-num {
+  font-family: var(--sc-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.sc-meta { font-family: var(--sc-font-mono); font-size: var(--fs-sm); color: var(--sc-muted); }
+
+/* =============================================================================
+   Card
+============================================================================= */
+.sc-card {
+  background: var(--sc-surface);
+  border: 1px solid var(--sc-line);
+  border-radius: var(--r-4);
+  box-shadow: var(--shadow-1);
+}
+.sc-card--raised { background: var(--sc-raised); }
+.sc-card__head {
+  padding: var(--sp-5) var(--sp-5) var(--sp-3);
+  border-bottom: 1px solid var(--sc-line);
+}
+.sc-card__body { padding: var(--sp-5); }
+
+/* =============================================================================
+   Buttons — primary is INK, never green.
+============================================================================= */
+.sc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  font-family: var(--sc-font-sans);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+  line-height: 1;
+  border: 1px solid var(--sc-line-strong);
+  border-radius: var(--r-3);
+  background: var(--sc-raised);
+  color: var(--sc-ink);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.sc-btn:hover { background: var(--sc-surface-3); }
+.sc-btn:disabled { color: var(--sc-faint); background: var(--sc-surface-2); cursor: not-allowed; }
+
+.sc-btn--primary { background: var(--sc-ink); color: var(--sc-on-dark); border-color: var(--sc-ink); }
+.sc-btn--primary:hover { background: #0F1917; }
+
+.sc-btn--ghost { background: transparent; border-color: transparent; color: var(--sc-ink-2); }
+.sc-btn--ghost:hover { background: var(--sc-surface-3); }
+
+.sc-btn--danger { background: var(--sc-danger-bg); color: var(--sc-danger); border-color: var(--sc-danger-bd); }
+
+/* =============================================================================
+   Inputs
+============================================================================= */
+.sc-input {
+  width: 100%;
+  padding: var(--sp-2) var(--sp-4);
+  font-family: var(--sc-font-sans);
+  font-size: var(--fs-md);
+  color: var(--sc-ink);
+  background: var(--sc-raised);
+  border: 1px solid var(--sc-line-strong);
+  border-radius: var(--r-3);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.sc-input::placeholder { color: var(--sc-faint); }
+.sc-input:focus { outline: none; border-color: var(--sc-certified); box-shadow: var(--ring); }
+.sc-input[aria-invalid="true"] { border-color: var(--sc-danger-bd); box-shadow: 0 0 0 3px var(--sc-danger-bg); }
+/* numeric inputs (money, quantities) read as ledger figures */
+.sc-input--num { font-family: var(--sc-font-mono); font-variant-numeric: tabular-nums; text-align: end; }
+
+/* =============================================================================
+   Status badges / pills — the semantic core of the system
+============================================================================= */
+.sc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 3px var(--sp-3);
+  font-family: var(--sc-font-mono);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: 0.02em;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.sc-badge__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: currentColor; }
+
+.sc-badge--certified { color: var(--sc-certified); background: var(--sc-certified-bg); border-color: var(--sc-certified-bd); }
+.sc-badge--pending   { color: var(--sc-warning);   background: var(--sc-warning-bg); }
+.sc-badge--blocked   { color: var(--sc-danger);     background: var(--sc-danger-bg);  border-color: var(--sc-danger-bd); }
+.sc-badge--info      { color: var(--sc-action);     background: var(--sc-action-bg);  border-color: var(--sc-action-bd); }
+.sc-badge--neutral   { color: var(--sc-muted);      background: var(--sc-surface-2);  border-color: var(--sc-line); }
+
+/* =============================================================================
+   Table — hairline rows, mono numerics
+============================================================================= */
+.sc-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body); }
+.sc-table thead th {
+  padding: var(--sp-2) var(--sp-4);
+  text-align: start;
+  font-family: var(--sc-font-mono);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--sc-faint);
+  border-bottom: 1px solid var(--sc-line);
+}
+.sc-table tbody td { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--sc-line); color: var(--sc-ink-2); }
+.sc-table tbody tr:hover { background: var(--sc-surface-3); }
+.sc-table .col-num { text-align: end; font-family: var(--sc-font-mono); font-variant-numeric: tabular-nums; direction: ltr; }
+
+/* =============================================================================
+   Sidebar / nav item
+============================================================================= */
+.sc-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-3);
+  color: var(--sc-ink-2);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+.sc-nav-item:hover { background: var(--sc-surface-3); }
+.sc-nav-item[aria-current="page"] { background: var(--sc-surface-3); color: var(--sc-ink); font-weight: var(--fw-semi); }
+
+/* =============================================================================
+   Divider
+============================================================================= */
+.sc-hr { border: none; border-top: 1px solid var(--sc-line); margin: var(--sp-5) 0; }

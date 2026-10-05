@@ -1,0 +1,296 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Funnel+Display:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Cairo:wght@400;500;600;700&display=swap');
+/* Brand v1.0 faces (Familjen Grotesk, IBM Plex Sans / Mono / Sans Arabic) are
+   now SELF-HOSTED via @fontsource — imported in src/main.jsx before this file.
+   Only Instrument Serif italic (the owner-approved marketing accent) still
+   comes from Google Fonts; migrating it is a deliberate follow-up, not scope
+   creep of the ledger-token adoption. The legacy app stack above (Inter /
+   Funnel Display / JetBrains Mono / Cairo) keeps serving unmigrated screens. */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
+}
+
+/* Typography & UI helpers */
+.mono { font-family: 'JetBrains Mono', monospace; letter-spacing: 0; }
+.display { font-family: 'Funnel Display', 'Inter', 'Cairo', sans-serif; letter-spacing: -0.02em; }
+[dir="rtl"] { font-family: 'Cairo', 'Inter', sans-serif; }
+[dir="rtl"] .display { font-family: 'Cairo', sans-serif; }
+
+/* Refined, quiet scrollbars */
+.scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+.scrollbar::-webkit-scrollbar-track { background: transparent; }
+.scrollbar::-webkit-scrollbar-thumb { background: #cfcfd6; border-radius: 6px; border: 2px solid transparent; background-clip: content-box; }
+.scrollbar::-webkit-scrollbar-thumb:hover { background: #b4b4bd; background-clip: content-box; }
+
+/* Subtle, premium motion */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fade-in { animation: fadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+button, a { transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, transform 0.18s ease; }
+
+/* Landing-page motion: gentle float for the hero "product shot", a live
+   pulse dot, and a soft entrance for board items as they cycle. */
+@keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.82); } }
+@keyframes riseIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.lp-float { animation: floatY 6.5s ease-in-out infinite; }
+.lp-pulse { animation: pulseDot 2.2s ease-in-out infinite; }
+.lp-rise { animation: riseIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* In-app (signed-in) subtle entrance — used by data screens like the
+   Dashboard. transform + opacity only (GPU-friendly, no layout shift). */
+.app-rise { animation: riseIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Accessibility: honor "Reduce Motion" — disable all of the above. Durations
+   AND delays collapse, so nothing staggered stays hidden waiting for its turn. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+html, body, #root { height: 100%; margin: 0; }
+
+/* Accessibility: a clear, consistent keyboard-focus ring for interactive
+   elements (only for keyboard users via :focus-visible, so mouse clicks stay
+   clean). Uses the brand blue. */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:not([tabindex="-1"]):focus-visible,
+[role="button"]:focus-visible, summary:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* tabindex="-1" marks a PROGRAMMATIC focus target — a dialog or sheet we move
+   focus into on open so keyboard users land inside it. It is not a control the
+   user tabbed to, so it must not paint a keyboard focus ring, and it must not
+   inherit the 4px ring radius (which was squaring off the mobile sheet's
+   rounded top corners every time a drawer opened). Focus still moves there;
+   it just stops looking like a focused button. */
+[tabindex="-1"]:focus,
+[tabindex="-1"]:focus-visible {
+  outline: none;
+}
+
+/* Skip-to-content link: visually hidden until focused by keyboard. */
+.skip-link {
+  position: fixed; top: 8px; left: 8px; z-index: 100;
+  background: #1d4ed8; color: #fff; padding: 8px 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 600; transform: translateY(-150%);
+  transition: transform .15s ease;
+}
+.skip-link:focus { transform: translateY(0); outline: 2px solid #fff; outline-offset: 2px; }
+[dir="rtl"] .skip-link { left: auto; right: 8px; }
+
+/* ============================================================
+   Hero BIM backdrop — a subtle construction-tech / BIM geometric layer
+   (wireframe grid, plan rectangles, node dots, connecting paths) concentrated
+   on the right and behind the product mockup, faded toward the headline.
+   Decorative only (pointer-events: none); content sits above via z-index.
+   ============================================================ */
+.hero-bim-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+
+/* Soft blue glow anchoring the cluster (clearly visible, very soft). */
+.hero-bim-glow {
+  position: absolute;
+  top: -60px;
+  inset-inline-end: 4%;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  filter: blur(60px);
+  background: radial-gradient(circle, rgba(47,102,246,0.16), rgba(47,102,246,0.05) 46%, transparent 72%);
+}
+
+/* Visible blueprint grid fragment (the construction-tech "grid logic"). */
+.hero-bim-gridfrag {
+  position: absolute;
+  top: 34px;
+  inset-inline-end: -30px;
+  width: min(58vw, 760px);
+  height: 470px;
+  background-image:
+    linear-gradient(rgba(47,102,246,0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47,102,246,0.11) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(135% 115% at 100% 24%, #000 36%, transparent 82%);
+  mask-image: radial-gradient(135% 115% at 100% 24%, #000 36%, transparent 82%);
+}
+[dir="rtl"] .hero-bim-gridfrag { transform: scaleX(-1); }
+
+.hero-bim-grid {
+  position: absolute;
+  top: 20px;
+  inset-inline-end: -30px;
+  width: min(64vw, 900px);
+  height: auto;
+  opacity: 1;
+  filter: drop-shadow(0 18px 44px rgba(47, 102, 246, 0.08));
+}
+[dir="rtl"] .hero-bim-grid { transform: scaleX(-1); }
+
+/* Fade the pattern toward the headline side so text stays clean — but clear
+   fully on the right two-fifths so the geometry reads. */
+.hero-bim-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right,
+    #f6f6f8 0%, rgba(246,246,248,0.94) 22%, rgba(246,246,248,0.66) 40%,
+    rgba(246,246,248,0.20) 58%, rgba(246,246,248,0) 74%);
+}
+[dir="rtl"] .hero-bim-fade {
+  background: linear-gradient(to left,
+    #f6f6f8 0%, rgba(246,246,248,0.94) 22%, rgba(246,246,248,0.66) 40%,
+    rgba(246,246,248,0.20) 58%, rgba(246,246,248,0) 74%);
+}
+
+@media (max-width: 1024px) {
+  .hero-bim-grid { width: min(80vw, 660px); inset-inline-end: -60px; top: 70px; opacity: 0.8; }
+}
+
+/* Mobile: simplify — pull it up out of the text, lower opacity, fade vertically. */
+@media (max-width: 768px) {
+  /* Mobile hero: one gesture only — a soft glow behind the board, no detailed
+     grid/nodes over the headline. */
+  .hero-bim-grid, .hero-bim-gridfrag { display: none; }
+  .hero-bim-glow {
+    width: 300px; height: 300px; top: auto; bottom: 6%;
+    inset-inline-end: 50%; transform: translateX(50%);
+    opacity: 0.8;
+  }
+  [dir="rtl"] .hero-bim-glow { transform: translateX(-50%); }
+  .hero-bim-fade { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) { .hero-bim-grid { filter: none; } }
+
+/* ============================================================
+   Demo video panel — BIM / construction-tech treatment INSIDE the dark
+   "system in a minute" card: a faint masked grid (::before), an inner hairline
+   ring (::after) and an inline SVG (.demo-bim-svg) with a center glow, plan
+   rectangles, connection paths and node dots. Decorative; content sits above.
+   ============================================================ */
+.demo-panel { position: relative; }
+.demo-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(143, 177, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 177, 255, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.30;
+  -webkit-mask-image: radial-gradient(circle at 50% 45%, black 28%, transparent 82%);
+  mask-image: radial-gradient(circle at 50% 45%, black 28%, transparent 82%);
+  pointer-events: none;
+}
+.demo-panel::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 1;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+.demo-bim-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.95;
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .demo-panel::before { background-size: 64px 64px; opacity: 0.18; }
+  .demo-bim-svg { opacity: 0.55; }
+}
+
+/* ============================================================
+   BIM SECTION SHAPE SYSTEM — consistent construction-tech decoration applied
+   across landing sections: corner wireframe frames, concentric arc clusters,
+   a blueprint strip, and node-connection maps. Decorative (pointer-events:none),
+   content sits above via z-index.
+   ============================================================ */
+.section-shape { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+
+/* Corner wireframe frames (light sections — technical plan rectangles). */
+.shape-wireframe { position: absolute; border: 1px solid rgba(47, 102, 246, 0.16); border-radius: 18px; }
+.shape-corner-frame .frame-a { width: min(36vw, 360px); height: 230px; top: 24px; inset-inline-end: 40px; }
+.shape-corner-frame .frame-b { width: min(24vw, 240px); height: 150px; top: 74px; inset-inline-end: 140px; border-color: rgba(47, 102, 246, 0.10); }
+
+/* Concentric arcs (on dark/blue CTA cards — faint white rings). */
+.shape-arc { position: absolute; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.16); }
+.shape-arc-cluster .arc-1 { width: 300px; height: 300px; top: -90px; inset-inline-end: -50px; }
+.shape-arc-cluster .arc-2 { width: 460px; height: 460px; top: -170px; inset-inline-end: -130px; border-color: rgba(255, 255, 255, 0.12); }
+.shape-arc-cluster .arc-3 { width: 640px; height: 640px; top: -250px; inset-inline-end: -210px; border-color: rgba(255, 255, 255, 0.08); }
+
+/* Blueprint strip along the bottom of dark CTA cards. */
+.shape-blueprint-strip {
+  position: absolute; inset: auto 0 0 0; height: 120px;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 42px 100%;
+  -webkit-mask-image: linear-gradient(to top, #000, transparent);
+  mask-image: linear-gradient(to top, #000, transparent);
+}
+
+/* Node-connection map (dark sections — light-blue graph on the right). */
+.shape-node-right {
+  position: absolute; inset-inline-end: 2%; top: 50%;
+  width: min(52vw, 600px); height: auto;
+  transform: translateY(-50%);
+}
+[dir="rtl"] .shape-node-right { transform: translateY(-50%) scaleX(-1); }
+
+@media (max-width: 768px) {
+  /* One faint corner motif per section; never sized over the text column. */
+  .shape-corner-frame { opacity: 0.45; }
+  .shape-corner-frame .frame-b { display: none; }
+  .shape-node-right { width: 260px; top: auto; bottom: 4%; opacity: 0.4; transform: none; }
+  [dir="rtl"] .shape-node-right { transform: scaleX(-1); }
+  .shape-arc-cluster .arc-3 { display: none; }
+}
+
+/* Logo "alive" — the stacked blocks gently float/breathe (used big on the
+   landing). Subtle parallax: top block rises as the middle settles. */
+@keyframes logoFloatTop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.3px); } }
+@keyframes logoFloatMid { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(0.7px); } }
+@keyframes logoFloatBot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(0.2px); } }
+.logo-animated .logo-blk-top { animation: logoFloatTop 3.4s ease-in-out infinite; }
+.logo-animated .logo-blk-mid { animation: logoFloatMid 3.4s ease-in-out infinite; }
+.logo-animated .logo-blk-bot { animation: logoFloatBot 3.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .logo-animated .logo-blk-top, .logo-animated .logo-blk-mid, .logo-animated .logo-blk-bot { animation: none; }
+}
+
+/* Mobile bottom sheet slide-up. */
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-up { animation: sheetUp 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) { .sheet-up { animation: none; } }
+
+/* Print-to-PDF: hide app chrome, let the main content flow onto the page. */
+@media print {
+  header, footer, aside { display: none !important; }
+  main, .flex-1 { overflow: visible !important; height: auto !important; }
+  body, #root { height: auto !important; background: #fff !important; }
+  .scrollbar { overflow: visible !important; }
+}
