@@ -46,6 +46,15 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
     paid_date: initial?.paid_date ?? '',
   });
   const [busy, setBusy] = useState(false);
+  // `busy` drives the button's disabled state, which is a UI courtesy, not a control:
+  // the form also submits on Enter through the hidden submit button, and that path
+  // never looks at it. The ref is the control, and it is read synchronously so two
+  // events in the same tick cannot both pass it.
+  const busyRef = useRef(false);
+  // A save outlives the form that started it. When the record changes the form is
+  // replaced, and the answer to the old one must not reach the new one.
+  const aliveRef = useRef(true);
+  useEffect(() => () => { aliveRef.current = false; }, []);
   const [error, setError] = useState(null);
   const [wirs, setWirs] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -139,7 +148,9 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
 
   async function submit(e) {
     e?.preventDefault();
+    if (busyRef.current) return;
     if (!form.invoice_number.trim()) { setError('Invoice No. is required.'); return; }
+    busyRef.current = true;
     setError(null); setBusy(true);
     try {
       const payload = {
@@ -149,8 +160,15 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
       };
       const saved = editing ? await updateInvoice(initial.id, payload) : await createInvoice(payload);
       if (scan?.url) URL.revokeObjectURL(scan.url);
+      if (!aliveRef.current) return;
       onSaved?.(saved); onClose?.();
-    } catch (err) { setError(err?.message ?? String(err)); } finally { setBusy(false); }
+    } catch (err) {
+      if (!aliveRef.current) return;
+      setError(err?.message ?? String(err));
+    } finally {
+      busyRef.current = false;
+      if (aliveRef.current) setBusy(false);
+    }
   }
 
   const mark = (k) => extracted.has(k);

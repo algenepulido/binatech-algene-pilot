@@ -31,6 +31,14 @@ export function InvoicesView({ t }) {
   const [detail, setDetail] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  // Every open mounts a fresh form. The form seeds its fields from `initial` on its
+  // first render only, so a form kept alive across records shows whatever it was
+  // seeded with the first time — empty, because nothing was selected then. Keying
+  // the modal on this counter ends that: Edit, New and New from IPC each get their
+  // own instance seeded from their own record. It changes only on open, so an
+  // ordinary rerender while someone is typing never remounts the form.
+  const [formSeq, setFormSeq] = useState(0);
+  const openForm = useCallback((record) => { setEditing(record); setFormSeq((n) => n + 1); setFormOpen(true); }, []);
   const [ipcs, setIpcs] = useState([]);
   const [fromIpc, setFromIpc] = useState(false);
   const listRef = useRef(null);
@@ -108,7 +116,7 @@ export function InvoicesView({ t }) {
           { label: 'ZATCA Status', key: 'zatca_status', width: 14 },
           { label: 'Payment Status', key: 'payment_status', width: 14 },
           { label: 'Paid Date', key: 'paid_date', width: 12 },
-        ] })}>Export</Btn>{certifiedIpcs.length > 0 && <Btn icon={FileCheck} onClick={() => requireAuth(() => setFromIpc(true))}>New from IPC</Btn>}<Btn icon={Plus} variant="primary" onClick={() => requireAuth(() => { setEditing(null); setFormOpen(true); })}>New Invoice</Btn></>} />
+        ] })}>Export</Btn>{certifiedIpcs.length > 0 && <Btn icon={FileCheck} onClick={() => requireAuth(() => setFromIpc(true))}>New from IPC</Btn>}<Btn icon={Plus} variant="primary" onClick={() => requireAuth(() => openForm(null))}>New Invoice</Btn></>} />
 
       {invoiceableNow > 0 && (
         <div className="mx-6 mt-3 rounded-lg border p-3 flex flex-col sm:flex-row sm:items-center gap-2.5" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
@@ -136,7 +144,7 @@ export function InvoicesView({ t }) {
               steps={['Certify an IPC from approved work', 'Create the invoice from that IPC', 'Clear it in Fatoora, then track payment']}
               actions={[
                 ...(certifiedIpcs.length > 0 ? [{ label: 'New from IPC', icon: FileCheck, onClick: () => requireAuth(() => setFromIpc(true)) }] : []),
-                { label: 'New Invoice', icon: Plus, variant: certifiedIpcs.length > 0 ? 'secondary' : 'primary', onClick: () => requireAuth(() => { setEditing(null); setFormOpen(true); }) },
+                { label: 'New Invoice', icon: Plus, variant: certifiedIpcs.length > 0 ? 'secondary' : 'primary', onClick: () => requireAuth(() => openForm(null)) },
               ]} />
           : (
             <table className="w-full text-xs">
@@ -173,7 +181,7 @@ export function InvoicesView({ t }) {
       {/* Inspection of an existing invoice -> Drawer (list stays behind it).
           "New invoice from a certified IPC" below stays a Modal: it is a form. */}
       <Drawer open={Boolean(detail)} onClose={closeDetail} title={detail?.invoice_number} subtitle={detail?.wir_number ? `Linked to ${detail.wir_number}` : 'Invoice'} width={520}
-        footer={detail && <><Btn icon={Trash2} onClick={() => onDelete(detail)}>Delete</Btn><Btn icon={Pencil} variant="primary" onClick={() => requireAuth(() => { setEditing(detail); setFormOpen(true); })}>Edit</Btn></>}>
+        footer={detail && <><Btn icon={Trash2} onClick={() => onDelete(detail)}>Delete</Btn><Btn icon={Pencil} variant="primary" onClick={() => requireAuth(() => openForm(detail))}>Edit</Btn></>}>
         {detail && (
           <div>
             <div className="flex items-center gap-2 mb-3"><StatusPill status={detail.zatca_status} size="lg" /><StatusPill status={detail.payment_status} size="lg" /></div>
@@ -203,7 +211,7 @@ export function InvoicesView({ t }) {
         {certifiedIpcs.length === 0 ? <div className="text-[13px]" style={{ color: COL.textMute }}>No certified IPCs yet — certify an IPC first.</div> : (
           <div className="rounded-lg border divide-y" style={{ borderColor: COL.border }}>
             {certifiedIpcs.map((p) => (
-              <button key={p.id} type="button" onClick={() => { setFromIpc(false); setEditing({ amount: Number(p.net_payable || 0), notes: `Based on ${p.ipc_number}${p.period ? ' · ' + p.period : ''}`, zatca_status: 'Awaiting IPC', payment_status: 'Not Issued' }); setFormOpen(true); }}
+              <button key={p.id} type="button" onClick={() => { setFromIpc(false); openForm({ amount: Number(p.net_payable || 0), notes: `Based on ${p.ipc_number}${p.period ? ' · ' + p.period : ''}`, zatca_status: 'Awaiting IPC', payment_status: 'Not Issued' }); }}
                 className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-start hover:bg-stone-50">
                 <span><span className="mono font-semibold" style={{ color: COL.accent }}>{p.ipc_number}</span>{p.period && <span className="text-[12px]" style={{ color: COL.textDim }}> · {p.period}</span>}</span>
                 <span className="mono font-bold whitespace-nowrap" style={{ color: COL.text }}>SAR {fmt(p.net_payable)}</span>
@@ -214,7 +222,7 @@ export function InvoicesView({ t }) {
         <div className="text-[10.5px] mt-2" style={{ color: COL.textMute }}>The new invoice opens pre-filled; review and add buyer/VAT details before issuing.</div>
       </Modal>
 
-      <InvoiceFormModal open={formOpen} initial={editing} onClose={() => setFormOpen(false)} onSaved={(saved) => { setFormOpen(false); load(); if (detail && saved?.id === detail.id) setDetail(saved); }} />
+      <InvoiceFormModal key={formSeq} open={formOpen} initial={editing} onClose={() => setFormOpen(false)} onSaved={(saved) => { setFormOpen(false); load(); if (detail && saved?.id === detail.id) setDetail(saved); }} />
     </div>
   );
 }
