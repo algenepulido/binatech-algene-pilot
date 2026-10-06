@@ -85,7 +85,17 @@ const openEdit = async (inv) => {
 const cancel = () => fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 const closeDrawer = async () => { fireEvent.keyDown(document.activeElement || document.body, { key: 'Escape' }); await waitFor(() => {}); };
 
+
+// The register is drawn in two shapes, so every test has to say which width it is at.
+const mediaAt = (width) => (q) => {
+  const m = /\(max-width:\s*(\d+)px\)/.exec(q);
+  return { matches: m ? width <= Number(m[1]) : false, media: q, onchange: null,
+    addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent: () => false };
+};
+const atWidth = (w) => { window.matchMedia = vi.fn(mediaAt(w)); };
+
 beforeEach(() => {
+  atWidth(1280);
   listInvoices.mockResolvedValue([INV_A, INV_B, INV_Z]);
   listIpcs.mockResolvedValue([]);
   listWirs.mockResolvedValue([]);

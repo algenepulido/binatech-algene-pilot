@@ -41,7 +41,16 @@ const ONE = [{
 }];
 const CLOSING_NOTE = /Nothing here certifies an invoice/;
 
-beforeEach(() => { listIpcs.mockResolvedValue([]); listWirs.mockResolvedValue([]); });
+
+// The register is drawn in two shapes, so every test has to say which width it is at.
+const mediaAt = (width) => (q) => {
+  const m = /\(max-width:\s*(\d+)px\)/.exec(q);
+  return { matches: m ? width <= Number(m[1]) : false, media: q, onchange: null,
+    addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, dispatchEvent: () => false };
+};
+const atWidth = (w) => { window.matchMedia = vi.fn(mediaAt(w)); };
+
+beforeEach(() => { atWidth(1280); listIpcs.mockResolvedValue([]); listWirs.mockResolvedValue([]); });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe('Invoice register — a failed read is never an empty register', () => {
@@ -121,5 +130,42 @@ describe('Invoice register — the amount keeps what is stored', () => {
     expect(screen.getByText('10 Aug 2026')).toBeInTheDocument();
     expect(screen.getByText('09 Sep 2026')).toBeInTheDocument();
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+  });
+});
+
+describe('Invoice register — below 1024 the row data stacks with labels', () => {
+  it('at 768 the eight columns become one labelled card per invoice', async () => {
+    atWidth(768);
+    listInvoices.mockResolvedValue(ONE);
+    render(<InvoicesView t={T.en} />);
+    await screen.findByText('SYN-INV-A-0001');
+
+    expect(document.querySelector('table')).toBeNull();
+    const list = document.querySelector('[data-invoice-list]');
+    expect(list).toBeTruthy();
+    for (const label of ['Linked WIR', 'Issue Date', 'Due Date', 'ZATCA Status', 'Payment Status', 'Paid Date']) {
+      expect(screen.getByText(label), label).toBeInTheDocument();
+    }
+    expect(screen.getByText('48,250.50')).toBeInTheDocument();
+    expect(screen.getByText('10 Aug 2026')).toBeInTheDocument();
+  });
+
+  it('the stacked card opens the same record the wide row would', async () => {
+    atWidth(768);
+    listInvoices.mockResolvedValue(ONE);
+    render(<InvoicesView t={T.en} />);
+    const opener = await screen.findByRole('button', { name: /Open invoice SYN-INV-A-0001/ });
+    expect(opener).toHaveAttribute('data-invoice-open', 'inv-a');
+    fireEvent.click(opener);
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('at 1024 and up the eight columns are back', async () => {
+    atWidth(1024);
+    listInvoices.mockResolvedValue(ONE);
+    render(<InvoicesView t={T.en} />);
+    await screen.findByText('SYN-INV-A-0001');
+    expect(document.querySelector('table')).toBeTruthy();
+    expect(document.querySelector('[data-invoice-list]')).toBeNull();
   });
 });

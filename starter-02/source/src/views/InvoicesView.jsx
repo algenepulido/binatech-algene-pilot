@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useIsMobile } from '../lib/useIsMobile.js';
 import { confirmDialog } from '../components/ConfirmDialog.jsx';
 import { toast } from '../components/Toast.jsx';
 import { Download, FileCheck, Pencil, Plus, RotateCcw, Trash2, ShieldAlert, ArrowRight, Check, X as XIcon, AlertTriangle } from 'lucide-react';
@@ -39,6 +40,11 @@ function ComplianceRow({ ok, warn, label }) {
 
 export function InvoicesView({ t }) {
   const { requireAuth } = useAuth();
+  // invoice-register is drawn at 1024 and up. Below that the frames draw
+  // invoice-register-stacked, because the eight columns do not survive the width:
+  // at 768 the payment status is clipped and the paid date is off the screen
+  // entirely, inside a container the reader has to find and scroll sideways.
+  const stacked = useIsMobile(1023);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -173,7 +179,31 @@ export function InvoicesView({ t }) {
                 ...(certifiedIpcs.length > 0 ? [{ label: 'New from IPC', icon: FileCheck, onClick: () => requireAuth(() => setFromIpc(true)) }] : []),
                 { label: 'New Invoice', icon: Plus, variant: certifiedIpcs.length > 0 ? 'secondary' : 'primary', onClick: () => requireAuth(() => openForm(null)) },
               ]} />
-          : (
+          : stacked ? (
+            <div data-invoice-list>
+              {invoices.map((inv) => (
+                <div key={inv.id} onClick={(e) => openDetail(inv, e.currentTarget)} className="px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-stone-50" style={{ borderColor: COL.border }}>
+                  <div className="flex items-start justify-between gap-3">
+                    <button type="button" data-invoice-open={inv.id} aria-label={`Open invoice ${inv.invoice_number}`} className="mono text-[12.5px] font-semibold text-start break-all" style={{ color: COL.accent }}>{inv.invoice_number}</button>
+                    <span className="mono text-[12.5px] font-bold whitespace-nowrap">{money2(inv.amount)}</span>
+                  </div>
+                  <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-3 gap-y-1 text-[11.5px]">
+                    {[['Linked WIR', <span className="mono break-all">{inv.wir_number || inv.element_guid || '\u2014'}</span>],
+                      ['Issue Date', <span className="mono">{dmy(inv.issue_date)}</span>],
+                      ['Due Date', <span className="mono">{dmy(inv.due_date)}</span>],
+                      ['ZATCA Status', <StatusPill status={inv.zatca_status} />],
+                      ['Payment Status', <StatusPill status={inv.payment_status} />],
+                      ['Paid Date', <span className="mono" style={{ color: inv.paid_date ? '#16a34a' : COL.textDim }}>{dmy(inv.paid_date)}</span>]].map(([label, value]) => (
+                        <div key={label} className="contents">
+                          <dt className="mono text-[10px] uppercase tracking-wider self-center" style={{ color: COL.textMute }}>{label}</dt>
+                          <dd className="self-center" style={{ color: COL.text }}>{value}</dd>
+                        </div>
+                      ))}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          ) : (
             <table className="w-full text-xs">
               <thead className="sticky top-0 mono" style={{ background: COL.surface, color: COL.textMute }}><tr style={{ borderBottom: `1px solid ${COL.border}` }}>{['Invoice #', 'Linked WIR', 'Issue Date', 'Due Date', 'Amount (SAR)', 'ZATCA Status', 'Payment Status', 'Paid Date'].map((h) => <th key={h} className={`px-4 py-2 text-[10px] uppercase tracking-wider font-semibold ${h === 'Amount (SAR)' ? 'text-right' : 'text-left'}`}>{h}</th>)}</tr></thead>
               <tbody>
