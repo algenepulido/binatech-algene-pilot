@@ -17,6 +17,20 @@ import { fmt, fmtSAR } from '../lib/format.js';
 import { COL } from '../lib/theme.js';
 import { exportSheet } from '../lib/excelExport.js';
 
+// The approved frames show invoice amounts to 2 decimals and dates as "14 Feb 2026".
+// The 2 decimals are not decoration: SYN-INV-A-0001 stores 48,250.5 and the register
+// was rounding it to 48,251, so half a riyal disappeared between the row and the form.
+const money2 = (n) => (n == null || n === '' || Number.isNaN(Number(n))
+  ? '\u2014'
+  : new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n)));
+const dmy = (iso) => {
+  if (!iso) return '\u2014';
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : `${String(d.getDate()).padStart(2, '0')} ${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
+};
+
 function ComplianceRow({ ok, warn, label }) {
   const c = ok ? '#15803d' : warn ? '#b45309' : '#991b1b';
   const Icon = ok ? Check : warn ? AlertTriangle : XIcon;
@@ -138,7 +152,20 @@ export function InvoicesView({ t }) {
 
       <div ref={listRef} className="flex-1 overflow-y-auto overflow-x-auto scrollbar">
         {loading ? <div className="text-center text-xs py-10" style={{ color: COL.textMute }}>Loading invoices…</div>
-          : error ? <div className="mx-6 my-4 text-xs px-3 py-2 rounded" style={{ background: '#fee2e2', color: '#b91c1c' }}>{error}</div>
+          : error ? (
+            /* The frames specify a read-error state with Try again, and the rule is that a
+               failed read never reads as an empty register. Says what is not shown and why,
+               announces itself, and offers the one action that can help. Modelled on the
+               Commercial Control error block so the two screens behave the same way. */
+            <div role="alert" className="mx-6 my-4 rounded-md border px-4 py-5 flex flex-col sm:flex-row sm:items-center gap-3" style={{ background: '#fef3f2', borderColor: '#fecdca', color: '#7a271a' }}>
+              <AlertTriangle size={18} className="flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="text-[14px] font-semibold">Invoices could not be loaded.</div>
+                <div className="text-[12.5px] mt-0.5">No invoices are listed, because none could be read from the project records. This is not an empty register.</div>
+              </div>
+              <Btn icon={RotateCcw} variant="primary" onClick={load}>Try again</Btn>
+            </div>
+          )
           : invoices.length === 0 ? <EmptyState icon={FileCheck} title="No client invoices yet"
               description={invoiceableNow > 0 ? `SAR ${fmt(invoiceableNow)} is invoiceable now from your certified IPCs. Invoices are issued from certified work only — each traces back to its IPC, BoQ and proven WIRs.` : 'Issue invoices backed by certified work only. Certify an IPC first, then invoice from it — each invoice traces back to its proof.'}
               steps={['Certify an IPC from approved work', 'Create the invoice from that IPC', 'Clear it in Fatoora, then track payment']}
@@ -148,23 +175,28 @@ export function InvoicesView({ t }) {
               ]} />
           : (
             <table className="w-full text-xs">
-              <thead className="sticky top-0 mono" style={{ background: COL.surface, color: COL.textDim }}><tr style={{ borderBottom: `1px solid ${COL.border}` }}>{['Invoice #', 'Linked WIR', 'Issue Date', 'Due Date', 'Amount (SAR)', 'ZATCA Status', 'Payment Status', 'Paid Date'].map((h) => <th key={h} className="px-4 py-2.5 text-left">{h}</th>)}</tr></thead>
+              <thead className="sticky top-0 mono" style={{ background: COL.surface, color: COL.textMute }}><tr style={{ borderBottom: `1px solid ${COL.border}` }}>{['Invoice #', 'Linked WIR', 'Issue Date', 'Due Date', 'Amount (SAR)', 'ZATCA Status', 'Payment Status', 'Paid Date'].map((h) => <th key={h} className={`px-4 py-2 text-[10px] uppercase tracking-wider font-semibold ${h === 'Amount (SAR)' ? 'text-right' : 'text-left'}`}>{h}</th>)}</tr></thead>
               <tbody>
                 {invoices.map((inv) => (
                   <tr key={inv.id} onClick={(e) => openDetail(inv, e.currentTarget)} className="border-b hover:bg-stone-50 cursor-pointer" style={{ borderColor: COL.border }}>
                     <td className="px-4 py-2.5 mono font-semibold" style={{ color: COL.accent }}><button type="button" data-invoice-open={inv.id} aria-label={`Open invoice ${inv.invoice_number}`} className="text-start">{inv.invoice_number}</button></td>
                     <td className="px-4 py-2.5 mono text-[11px]">{inv.wir_number || inv.element_guid || '—'}</td>
-                    <td className="px-4 py-2.5 mono text-[10px]" style={{ color: COL.textDim }}>{inv.issue_date || '—'}</td>
-                    <td className="px-4 py-2.5 mono text-[10px]" style={{ color: COL.textDim }}>{inv.due_date || '—'}</td>
-                    <td className="px-4 py-2.5 mono text-right font-bold">{fmt(inv.amount)}</td>
+                    <td className="px-4 py-2.5 mono text-[10.5px] whitespace-nowrap" style={{ color: COL.textDim }}>{dmy(inv.issue_date)}</td>
+                    <td className="px-4 py-2.5 mono text-[10.5px] whitespace-nowrap" style={{ color: COL.textDim }}>{dmy(inv.due_date)}</td>
+                    <td className="px-4 py-2.5 mono text-right font-bold whitespace-nowrap">{money2(inv.amount)}</td>
                     <td className="px-4 py-2.5"><div className="flex items-center gap-1.5"><StatusPill status={inv.zatca_status} />{inv.zatca_status === 'Cleared' && <FileCheck size={11} style={{ color: '#15803d' }} />}</div></td>
                     <td className="px-4 py-2.5"><StatusPill status={inv.payment_status} /></td>
-                    <td className="px-4 py-2.5 mono text-[10px]" style={{ color: inv.paid_date ? '#16a34a' : COL.textDim }}>{inv.paid_date || '—'}</td>
+                    <td className="px-4 py-2.5 mono text-[10.5px] whitespace-nowrap" style={{ color: inv.paid_date ? '#16a34a' : COL.textDim }}>{dmy(inv.paid_date)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
+        {invoices.length > 0 && (
+          <div className="px-4 py-2.5 border-t text-[11.5px]" style={{ borderColor: COL.border, color: COL.textMute }}>
+            Status columns show recorded data. Nothing here certifies an invoice, clears it, or makes it eligible for payment.
+          </div>
+        )}
         <div className="p-6 border-t" style={{ borderColor: COL.border }}>
           <div className="rounded-lg border p-4" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
             <div className="flex items-start gap-3">
