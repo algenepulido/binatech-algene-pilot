@@ -172,6 +172,14 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {state === 'project' && loading && <span role="status" className="mono text-[10.5px]" style={{ color: COL.textMute }}>{L.refreshing}</span>}
+            {/* Compact toolbar: the register filter sits with the page controls, not
+                inside the table, so the table header carries only the status chips. */}
+            {showData && !phone && (
+              <label className="relative flex items-center w-56 lg:w-64">
+                <Search size={13} className="absolute start-2.5" style={{ color: COL.textMute }} />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L.search} aria-label={L.search} className="w-full rounded-md border ps-8 pe-2.5 text-[12.5px] outline-none" style={{ minHeight: 32, borderColor: COL.border, background: COL.surface, color: COL.text }} />
+              </label>
+            )}
             <Btn icon={RotateCcw} onClick={reload} disabled={loading}>{L.refresh}</Btn>
           </div>
         </div>
@@ -257,10 +265,12 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
                       {k === 'all' ? L.all : L.status[k]} · {counts[k]}
                     </button>
                   ))}
-                  <label className="relative flex items-center w-full sm:w-56">
-                    <Search size={13} className="absolute start-2.5" style={{ color: COL.textMute }} />
-                    <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L.search} aria-label={L.search} className="w-full rounded-md border ps-8 pe-2.5 text-[12.5px] outline-none" style={{ minHeight: 32, borderColor: COL.border, background: COL.surface, color: COL.text }} />
-                  </label>
+                  {phone && (
+                    <label className="relative flex items-center w-full">
+                      <Search size={13} className="absolute start-2.5" style={{ color: COL.textMute }} />
+                      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L.search} aria-label={L.search} className="w-full rounded-md border ps-8 pe-2.5 text-[12.5px] outline-none" style={{ minHeight: 32, borderColor: COL.border, background: COL.surface, color: COL.text }} />
+                    </label>
+                  )}
                 </div>
               </div>
 
