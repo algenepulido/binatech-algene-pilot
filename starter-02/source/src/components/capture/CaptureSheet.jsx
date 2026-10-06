@@ -17,6 +17,7 @@ import { getCurrentProjectId, subscribeProject } from '../../lib/currentProject.
 import { FIELD, MONO } from '../../lib/fieldTokens.js';
 import { useProject } from '../../lib/project.jsx';
 import { Surface, Rule, Eyebrow } from '../../views/field/surface.jsx';
+import { ProgressComposer } from './ProgressComposer.jsx';
 import { LocalDraftCapture } from './LocalDraftCapture.jsx';
 
 // Retained as the capture-kind catalogue used elsewhere in the app. The target
@@ -253,6 +254,7 @@ export function CaptureSheet({ open, onClose, onNavigate, t = {}, lang = 'en', l
   }
 
   const headerTitle = {
+    progress: ar ? 'تقرير التقدم' : 'Report progress',
     local: t.localDraft?.title || (ar ? 'مسودة محلية' : 'Local draft'),
     entry: t.mNavCapture || 'Capture',
     context: t.fmWorkProgress || 'Work progress',
@@ -304,10 +306,13 @@ export function CaptureSheet({ open, onClose, onNavigate, t = {}, lang = 'en', l
             <Rule />
             <button data-local-draft-entry onClick={() => setStep('local')} style={{ minHeight: 48, marginTop: 18, padding: '10px 16px', borderRadius: FIELD.rControl, background: FIELD.ink, color: FIELD.onDark, fontSize: 15, fontWeight: 600 }}>{t.localDraft?.title || (ar ? 'مسودة محلية' : 'Local draft')}</button>
             <p style={{ marginTop: 8, fontSize: 13.5, color: FIELD.mute }}>{t.localDraft?.entryHint || (ar ? 'ملاحظات وصور محفوظة في هذا المتصفح فقط.' : 'Notes and photos saved in this browser only.')}</p>
+            <button data-progress-entry onClick={() => setStep('progress')} style={{ minHeight: 48, marginTop: 18, padding: '10px 16px', borderRadius: FIELD.rControl, border: `1px solid ${FIELD.ink}`, background: 'transparent', color: FIELD.ink, fontSize: 15, fontWeight: 600 }}>{ar ? 'تقرير التقدم' : 'Report progress'}</button>
+            <p style={{ marginTop: 8, fontSize: 13.5, color: FIELD.mute }}>{ar ? 'روايتك لما جرى في الموقع. لا تعتمد ولا تصادق على شيء.' : 'Your account of the work on site. It approves and certifies nothing.'}</p>
           </div>
         )}
 
         {renderStep === 'local' && <LocalDraftCapture lang={lang} />}
+        {renderStep === 'progress' && <ProgressComposer onDone={() => setStep('entry')} />}
 
         {renderStep === 'context' && (
           <div className="overflow-y-auto" style={{ padding: '28px 20px 28px', color: FIELD.ink }}>
