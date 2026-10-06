@@ -156,6 +156,9 @@ describe('Invoice register — below 1024 the row data stacks with labels', () =
     render(<InvoicesView t={T.en} />);
     const opener = await screen.findByRole('button', { name: /Open invoice SYN-INV-A-0001/ });
     expect(opener).toHaveAttribute('data-invoice-open', 'inv-a');
+    // the opener has to be the card's own, not a wide-table row that happens to
+    // carry the same attribute, or this passes without a stacked shape existing
+    expect(opener.closest('[data-invoice-list]')).not.toBeNull();
     fireEvent.click(opener);
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
