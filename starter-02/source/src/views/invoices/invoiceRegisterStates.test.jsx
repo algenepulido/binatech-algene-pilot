@@ -169,3 +169,42 @@ describe('Invoice register — below 1024 the row data stacks with labels', () =
     expect(document.querySelector('[data-invoice-list]')).toBeNull();
   });
 });
+
+describe('Invoice detail — the drawer agrees with the row it was opened from', () => {
+  it('shows the same amount and the same dates as the register', async () => {
+    listInvoices.mockResolvedValue(ONE);
+    render(<InvoicesView t={T.en} />);
+    fireEvent.click(await screen.findByText('SYN-INV-A-0001'));
+    const drawer = await screen.findByRole('dialog');
+
+    // the register says 48,250.50 and 10 Aug 2026; the drawer used to round and to
+    // print the raw ISO date, so one screen told two stories about one invoice
+    expect(drawer).toHaveTextContent('SAR 48,250.50');
+    expect(drawer).not.toHaveTextContent('SAR 48,251');
+    expect(drawer).toHaveTextContent('10 Aug 2026');
+    expect(drawer).not.toHaveTextContent('2026-08-10');
+  });
+});
+
+describe('Invoice create — no control offers what the pilot cannot do', () => {
+  it('scan and pre-fill says it is unavailable instead of inviting a click', async () => {
+    listInvoices.mockResolvedValue(ONE);
+    render(<InvoicesView t={T.en} />);
+    fireEvent.click(await screen.findByRole('button', { name: /New Invoice/i }));
+    await screen.findByText('New client invoice');
+
+    expect(screen.queryByRole('button', { name: /AI pre-fills/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Upload invoice/i })).toBeNull();
+    expect(screen.getByText(/Scan and pre-fill is not available in this pilot/i)).toBeInTheDocument();
+  });
+
+  it('create mode opens on the statuses the frames specify', async () => {
+    listInvoices.mockResolvedValue(ONE);
+    render(<InvoicesView t={T.en} />);
+    fireEvent.click(await screen.findByRole('button', { name: /New Invoice/i }));
+    const title = await screen.findByText('New client invoice');
+    const form = title.closest('[role="dialog"]');
+    expect(form).toHaveTextContent('Awaiting IPC');
+    expect(form).toHaveTextContent('Not Issued');
+  });
+});

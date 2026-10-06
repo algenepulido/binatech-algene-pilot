@@ -247,7 +247,7 @@ export function InvoicesView({ t }) {
         {detail && (
           <div>
             <div className="flex items-center gap-2 mb-3"><StatusPill status={detail.zatca_status} size="lg" /><StatusPill status={detail.payment_status} size="lg" /></div>
-            {[['Amount', 'SAR ' + fmt(detail.amount)], ['Issue Date', detail.issue_date], ['Due Date', detail.due_date], ['Paid Date', detail.paid_date], ['Linked WIR', detail.wir_number], ['Element', detail.element_guid]].map(([kk, v]) => (
+            {[['Amount', 'SAR ' + money2(detail.amount)], ['Issue Date', dmy(detail.issue_date)], ['Due Date', dmy(detail.due_date)], ['Paid Date', dmy(detail.paid_date)], ['Linked WIR', detail.wir_number], ['Element', detail.element_guid]].map(([kk, v]) => (
               <div key={kk} className="flex justify-between py-1.5 border-b text-xs" style={{ borderColor: COL.border }}><span style={{ color: COL.textDim }}>{kk}</span><span style={{ color: COL.text }}>{v || '—'}</span></div>
             ))}
             {detail.notes && <div className="text-[11.5px] mt-2 px-2.5 py-1.5 rounded" style={{ background: COL.accentBg, color: COL.text }}>{detail.notes}</div>}

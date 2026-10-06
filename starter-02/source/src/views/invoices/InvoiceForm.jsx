@@ -221,9 +221,12 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
           <div className="rounded-lg border border-dashed p-3" style={{ borderColor: COL.borderStrong, background: COL.surfaceAlt }}>
             <input ref={fileRef} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/*" className="hidden" onChange={(e) => onPick(e.target.files?.[0])} />
             {!scan ? (
-              <button type="button" onClick={() => fileRef.current?.click()} className="w-full flex items-center justify-center gap-2 py-1.5 text-[12px] font-semibold" style={{ color: COL.accent }}>
-                <Upload size={14} /> Upload invoice / scan (PDF, PNG, JPG) — AI pre-fills the fields
-              </button>
+              /* Scan and pre-fill reads the invoice with a service this pilot does not
+                 have, so the control says so instead of inviting a click that cannot
+                 work. Everything behind it is untouched and comes back with the service. */
+              <div className="w-full flex items-center justify-center gap-2 py-1.5 text-[12px]" style={{ color: COL.textMute }}>
+                <Upload size={14} /> <span>Scan and pre-fill is not available in this pilot. Enter the invoice below.</span>
+              </div>
             ) : (
               <div className="flex items-center gap-3">
                 {scan.isImage ? <img src={scan.url} alt="" className="w-12 h-12 rounded object-cover border" style={{ borderColor: COL.border }} /> : <span className="w-12 h-12 rounded border flex items-center justify-center" style={{ borderColor: COL.border, background: COL.bg }}><FileText size={20} style={{ color: COL.accent }} /></span>}
