@@ -26,6 +26,7 @@
 //
 // Fixtures mirror the starter's synthetic invoices. No production writes.
 // ============================================================
+import { StrictMode } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -168,26 +169,58 @@ describe('Invoice Edit — one pending save, one request', () => {
   });
 });
 
-describe('Invoice Edit — a late answer belongs to the record that asked', () => {
-  it('a late result for A does not close the form opened on B', async () => {
-    let settleA;
-    updateInvoice.mockImplementation(() => new Promise((res) => { settleA = res; }));
+describe('Invoice Edit — a save in flight owns the form', () => {
+  it('nothing closes the form while the service has not answered', async () => {
+    let settle;
+    updateInvoice.mockImplementation(() => new Promise((res) => { settle = res; }));
     render(<InvoicesView t={T.en} />);
     await openEdit(INV_A);
 
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(updateInvoice).toHaveBeenCalledTimes(1));
 
-    cancel();
-    await openEdit(INV_B);
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.keyDown(document.body, { key: 'Escape' });
 
-    settleA?.({ ...INV_A });
+    expect(screen.getByText('Invoice SYN-INV-A-0001')).toBeInTheDocument();
+    expect(invoiceNo()).toHaveValue('SYN-INV-A-0001');
+    settle?.({ ...INV_A });
+  });
+
+  // The record cannot be switched under a pending save any more, so the old A-to-B
+  // race is no longer reachable from the screen. The guard behind it still matters:
+  // navigating away unmounts the view while the service is still thinking, and the
+  // answer must not try to drive a form that is gone.
+  it('an answer that arrives after the view is gone changes nothing and throws nothing', async () => {
+    let settle;
+    updateInvoice.mockImplementation(() => new Promise((res) => { settle = res; }));
+    const view = render(<InvoicesView t={T.en} />);
+    await openEdit(INV_A);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(updateInvoice).toHaveBeenCalledTimes(1));
+
+    const errors = [];
+    const spy = vi.spyOn(console, 'error').mockImplementation((...a) => errors.push(a.join(' ')));
+    view.unmount();
+    settle?.({ ...INV_A });
     await new Promise((r) => setTimeout(r, 0));
+    spy.mockRestore();
 
-    expect(
-      screen.queryByText('Invoice SYN-INV-B-0002'),
-      'the form opened on B must still be open after a late result for A',
-    ).toBeInTheDocument();
-    expect(invoiceNo()).toHaveValue('SYN-INV-B-0002');
+    expect(errors.filter((e) => /unmounted|not wrapped in act/i.test(e))).toEqual([]);
+  });
+
+  it('a failed save reports itself, and still does so under StrictMode', async () => {
+    updateInvoice.mockRejectedValue({ message: 'Synthetic save failure (starter scenario). Nothing was changed.', code: 'PILOT_WRITE_FAILURE' });
+    render(<StrictMode><InvoicesView t={T.en} /></StrictMode>);
+    await openEdit(INV_A);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(await screen.findByText(/Synthetic save failure/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save changes' })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Cancel' })).not.toBeDisabled();
+    expect(invoiceNo()).toHaveValue('SYN-INV-A-0001');
   });
 });

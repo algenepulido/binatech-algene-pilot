@@ -54,7 +54,10 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
   // A save outlives the form that started it. When the record changes the form is
   // replaced, and the answer to the old one must not reach the new one.
   const aliveRef = useRef(true);
-  useEffect(() => () => { aliveRef.current = false; }, []);
+  // Set on every run, not only cleared on teardown: StrictMode mounts, tears down
+  // and mounts again, so a ref that is only ever cleared stays cleared for the life
+  // of the form and every save silently stops reporting its own result.
+  useEffect(() => { aliveRef.current = true; return () => { aliveRef.current = false; }; }, []);
   const [error, setError] = useState(null);
   const [wirs, setWirs] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -171,6 +174,12 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
     }
   }
 
+  // The frames show the form's footer disabled while a save is pending. The close
+  // control lives in the shared Modal, which is not ours to change, so the guard goes
+  // on the request instead: while a save is in flight nothing closes the form, and the
+  // reporter sees the outcome rather than a form that vanished mid-write.
+  const closeIfIdle = () => { if (!busyRef.current) onClose?.(); };
+
   const mark = (k) => extracted.has(k);
   const fmtNum = (n) => (n == null || n === '' || Number.isNaN(Number(n)) ? '—' : new Intl.NumberFormat().format(Number(n)));
   const ready = steps[4].state === 'done';
@@ -193,14 +202,14 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
   const alertStyle = { red: { bg: '#fef2f2', c: '#b91c1c' }, amber: { bg: '#fffbeb', c: '#92400e' }, green: { bg: '#f0fdf4', c: '#15803d' } };
 
   return (
-    <Modal open={open} onClose={onClose} title={editing ? `Invoice ${initial.invoice_number}` : 'New client invoice'}
+    <Modal open={open} onClose={closeIfIdle} title={editing ? `Invoice ${initial.invoice_number}` : 'New client invoice'}
       subtitle={`${project?.name || 'Project'}${project?.contractor ? ` · ${project.contractor}` : ''} · ZATCA invoice register`} width={600}
       footer={
         <div className="flex items-center gap-2 w-full">
           <span className="text-[11px] me-auto" style={{ color: blocking ? '#b91c1c' : COL.textDim }}>
             {blocking ? 'Duplicate number — review before saving' : (ready ? 'All checks passed' : 'Fill required fields, then create')}
           </span>
-          <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
+          <Btn variant="secondary" onClick={closeIfIdle} disabled={busy}>Cancel</Btn>
           <Btn variant="primary" onClick={submit} disabled={busy}>{cta}</Btn>
         </div>
       }>
