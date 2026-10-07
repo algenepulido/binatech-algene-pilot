@@ -234,3 +234,103 @@ describe('Invoice Edit — a save in flight owns the form', () => {
     expect(invoiceNo()).toHaveValue('SYN-INV-A-0001');
   });
 });
+
+// ============================================================
+// Stale answers, proved rather than inferred.
+//
+// The client's point: a locked form stops the record changing underneath a save,
+// but that is not proof that a late answer is safe. Two routes are still open
+// while a save is in flight, and both are driven here rather than argued about.
+//
+// On the replaced A-to-B test: it opened A, started a save, cancelled to B, and
+// asserted A's answer did not reach B. With a save in flight owning the form,
+// Cancel is disabled and that route no longer exists. What it protected is
+// protected below, where the route is still real.
+// ============================================================
+import * as currentProject from '../../lib/currentProject.js';
+
+describe('Invoice save — an answer belongs to the screen and the project that asked', () => {
+  it('navigating away mid-save: the answer drives nothing and raises nothing', async () => {
+    let settle;
+    updateInvoice.mockImplementation(() => new Promise((res) => { settle = res; }));
+    const view = render(<InvoicesView t={T.en} />);
+    await openEdit(INV_A);
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(updateInvoice).toHaveBeenCalledTimes(1));
+
+    const noise = [];
+    const spy = vi.spyOn(console, 'error').mockImplementation((...a) => noise.push(a.join(' ')));
+    view.unmount();
+    settle?.({ ...INV_A });
+    await new Promise((r) => setTimeout(r, 0));
+    spy.mockRestore();
+
+    expect(noise.filter((n) => /unmounted|not wrapped in act/i.test(n))).toEqual([]);
+  });
+
+  it('changing project mid-save: the old answer does not close the form now open', async () => {
+    const started = 'project-a';
+    let now = started;
+    vi.spyOn(currentProject, 'getCurrentProjectId').mockImplementation(() => now);
+    let settle;
+    updateInvoice.mockImplementation(() => new Promise((res) => { settle = res; }));
+    render(<InvoicesView t={T.en} />);
+    await openEdit(INV_A);
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(updateInvoice).toHaveBeenCalledTimes(1));
+
+    now = 'project-b';                      // the reporter moves to another project
+    settle?.({ ...INV_A });
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(screen.getByText('Invoice SYN-INV-A-0001')).toBeInTheDocument();
+    expect(invoiceNo()).toHaveValue('SYN-INV-A-0001');
+    vi.restoreAllMocks();
+  });
+});
+
+describe('Invoice save — one press, one request, whichever control is used', () => {
+  it('three clicks and three Enters while pending are one request', async () => {
+    let settle;
+    updateInvoice.mockImplementation(() => new Promise((res) => { settle = res; }));
+    render(<InvoicesView t={T.en} />);
+    await openEdit(INV_A);
+
+    const save = screen.getByRole('button', { name: 'Save changes' });
+    fireEvent.click(save);
+    await waitFor(() => expect(updateInvoice).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(save); fireEvent.click(save);
+    await userEvent.type(invoiceNo(), '{Enter}');
+    await userEvent.type(invoiceNo(), '{Enter}');
+    await userEvent.type(invoiceNo(), '{Enter}');
+
+    expect(updateInvoice).toHaveBeenCalledTimes(1);
+    settle?.({ ...INV_A });
+  });
+});
+
+describe('Invoice save — a refusal keeps the work and asks again correctly', () => {
+  it('edits are retained and the retry carries the same record id and payload', async () => {
+    updateInvoice.mockRejectedValueOnce({ message: 'Synthetic save failure (starter scenario). Nothing was changed.', code: 'PILOT_WRITE_FAILURE' })
+      .mockImplementation((id, fields) => Promise.resolve({ ...INV_A, ...fields, id }));
+    render(<StrictMode><InvoicesView t={T.en} /></StrictMode>);
+    await openEdit(INV_A);
+    await userEvent.clear(invoiceNo());
+    await userEvent.type(invoiceNo(), 'SYN-INV-A-0001-R');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    expect(await screen.findByText(/Synthetic save failure/)).toBeInTheDocument();
+    expect(invoiceNo()).toHaveValue('SYN-INV-A-0001-R');
+    expect(screen.getByRole('button', { name: 'Save changes' })).not.toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(updateInvoice).toHaveBeenCalledTimes(2));
+    const [firstId, firstPayload] = updateInvoice.mock.calls[0];
+    const [retryId, retryPayload] = updateInvoice.mock.calls[1];
+    expect(firstId).toBe('inv-a');
+    expect(retryId).toBe('inv-a');                       // the record it was opened on
+    expect(retryPayload.invoice_number).toBe('SYN-INV-A-0001-R');
+    expect(retryPayload).toEqual(firstPayload);          // the same report, asked again
+  });
+});

@@ -15,6 +15,7 @@ import { listWirs } from '../../api/wirs.js';
 import { resultLabel } from '../../lib/wirStatus.js';
 import { extractInvoice, ACCEPT_TYPES, MAX_BYTES } from '../../lib/invoiceExtract.js';
 import { useProject } from '../../lib/project.jsx';
+import { getCurrentProjectId } from '../../lib/currentProject.js';
 import { useElements } from '../../lib/elements.jsx';
 import { COL } from '../../lib/theme.js';
 
@@ -154,6 +155,9 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
     if (busyRef.current) return;
     if (!form.invoice_number.trim()) { setError('Invoice No. is required.'); return; }
     busyRef.current = true;
+    // The answer belongs to the project the save was sent from. The form being
+    // locked stops the record changing underneath it; this stops the project doing so.
+    const sentProject = getCurrentProjectId();
     setError(null); setBusy(true);
     try {
       const payload = {
@@ -163,10 +167,10 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
       };
       const saved = editing ? await updateInvoice(initial.id, payload) : await createInvoice(payload);
       if (scan?.url) URL.revokeObjectURL(scan.url);
-      if (!aliveRef.current) return;
+      if (!aliveRef.current || sentProject !== getCurrentProjectId()) return;
       onSaved?.(saved); onClose?.();
     } catch (err) {
-      if (!aliveRef.current) return;
+      if (!aliveRef.current || sentProject !== getCurrentProjectId()) return;
       setError(err?.message ?? String(err));
     } finally {
       busyRef.current = false;
