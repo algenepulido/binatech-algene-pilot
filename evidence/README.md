@@ -21,3 +21,15 @@ The composer has also been driven over a LAN origin rather than localhost, where
 `isSecureContext` is false and `crypto.randomUUID` is absent, which is the phone's
 condition and the reason the request id is not built with that API. That is still
 not a device check.
+
+## WebKit, iPhone frame
+
+`composer/webkit-iphone-*.png` are the composer on Playwright's WebKit build,
+the engine Safari uses, with the iPhone Pro Max profile: 428px wide, 3x pixel
+ratio, touch events on. Compose, photo, review, send and receipt all pass there,
+and no control the composer owns is under 44px.
+
+It is a closer approximation than a desktop browser at 390px. It is still not a
+device. The picker it drives is a file input with a fixture image, not the iOS
+camera returning a 12MP photo, and that camera path is the one the image ladder
+exists for.
