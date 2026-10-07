@@ -115,6 +115,16 @@ afterEach(() => { cleanup(); document.getElementById('main-content')?.remove(); 
 
 const row = (code) => screen.getAllByRole('row').find((r) => within(r).queryByText(code));
 const dialog = () => screen.queryByRole('dialog');
+// From 1024px Commercial Control's inspector is a panel beside the register rather
+// than a dialog over it. The contract it has to keep is the same, so the tests find
+// whichever is mounted and assert against that. Only the two assertions that name a
+// modal outright are rewritten below; identity, Escape, exact-row return, the
+// rerender guard and StrictMode are unchanged.
+const inspector = () => document.querySelector('[data-line-inspector-panel]') ?? screen.queryByRole('dialog');
+const inspectorLabel = () => inspector()?.getAttribute('aria-label') ?? null;
+// The panel stays mounted with an empty state, so "cleared" means it no longer
+// shows a line, not that it vanished. The Drawer answers the same way: gone is gone.
+const selectedLine = () => (document.querySelector('[data-line-inspector]') ? inspectorLabel() : null);
 const settledHub = () => waitFor(() => expect(document.querySelector('[data-commercial-state]').getAttribute('data-commercial-state')).toBe('project'));
 async function mountHub({ lang = 'en', strict = false } = {}) {
   const ui = <><main id="main-content" tabIndex={-1}><CommercialHubView lang={lang} onNavigate={() => {}} /></main></>;
@@ -124,17 +134,18 @@ async function mountHub({ lang = 'en', strict = false } = {}) {
 }
 
 describe('REVIEW-RETURN-1 · Commercial Control ledger → inspector → back to the same row', () => {
-  it('RED 1 · keyboard: Enter on row A opens the inspector with focus inside; Escape returns focus to row A', async () => {
+  it('RED 1 · keyboard: Enter on row A opens the inspector and leaves focus on the row; Escape returns focus to row A', async () => {
     const user = userEvent.setup();
     await mountHub();
     const a = row('A-200');
     act(() => a.focus());
     await user.keyboard('{Enter}');
-    expect(dialog()).toBeTruthy();
-    expect(dialog().getAttribute('aria-label')).toBe('A-200');                      // canonical selection preserved
-    expect(dialog().contains(document.activeElement), 'focus moves into the inspector').toBe(true);
+    expect(inspector()).toBeTruthy();
+    expect(selectedLine()).toBe('A-200');                      // canonical selection preserved
+    expect(inspector().contains(document.activeElement), 'a non-modal panel does not pull focus off the row').toBe(false);
+    expect(document.activeElement, 'focus stays on the row that opened it').toBe(a);
     await user.keyboard('{Escape}');
-    expect(dialog()).toBeNull();
+    expect(selectedLine(), 'the selection is cleared').toBeNull();
     expect(document.activeElement, 'focus returns to the exact invoking row').toBe(a);
   });
 
@@ -143,9 +154,9 @@ describe('REVIEW-RETURN-1 · Commercial Control ledger → inspector → back to
     await mountHub();
     const a = row('A-100');
     await user.click(within(a).getByText('A-100'));
-    expect(dialog().getAttribute('aria-label')).toBe('A-100');
-    await user.click(within(dialog()).getByRole('button', { name: 'Close' }));
-    expect(dialog()).toBeNull();
+    expect(selectedLine()).toBe('A-100');
+    await user.click(within(inspector()).getByRole('button', { name: 'Close' }));
+    expect(selectedLine(), 'the selection is cleared').toBeNull();
     expect(document.activeElement).toBe(a);
   });
 
@@ -158,8 +169,8 @@ describe('REVIEW-RETURN-1 · Commercial Control ledger → inspector → back to
     expect(document.activeElement).toBe(a);
     act(() => b.focus());
     await user.keyboard('{Enter}');
-    expect(dialog().getAttribute('aria-label')).toBe('A-400');
-    await user.click(within(dialog()).getByRole('button', { name: 'Close' }));
+    expect(selectedLine()).toBe('A-400');
+    await user.click(within(inspector()).getByRole('button', { name: 'Close' }));
     expect(document.activeElement).toBe(b);
     expect(document.activeElement).not.toBe(a);
   });
@@ -188,11 +199,11 @@ describe('REVIEW-RETURN-1 · Commercial Control ledger → inspector → back to
     const a = row('A-200');
     act(() => a.focus());
     await user.keyboard('{Enter}');
-    const close = within(dialog()).getByRole('button', { name: 'Close' });
+    const close = within(inspector()).getByRole('button', { name: 'Close' });
     act(() => close.focus());
     rerender(<main id="main-content" tabIndex={-1}><CommercialHubView lang="ar" onNavigate={() => {}} /></main>);
     await act(async () => {});
-    expect(dialog()).toBeTruthy();
+    expect(inspector()).toBeTruthy();
     expect(document.activeElement, 'a rerender does not pull focus back to the panel').toBe(close);
     await user.keyboard('{Escape}');
     expect(document.activeElement).toBe(row('A-200'));
@@ -204,7 +215,7 @@ describe('REVIEW-RETURN-1 · Commercial Control ledger → inspector → back to
     const a = row('A-300');
     act(() => a.focus());
     await user.keyboard('{Enter}');
-    expect(dialog().contains(document.activeElement)).toBe(true);
+    expect(document.activeElement, 'focus stays on the row that opened it').toBe(a);
     await user.keyboard('{Escape}');
     expect(document.activeElement).toBe(a);
   });
@@ -219,30 +230,34 @@ describe('REVIEW-RETURN-1 · Commercial Control ledger → inspector → back to
     await waitFor(() => expect(document.querySelector('[data-line-row]')).toBeTruthy());
     expect(a.isConnected).toBe(false);
     await user.keyboard('{Escape}');
-    expect(dialog()).toBeNull();
+    expect(selectedLine(), 'the selection is cleared').toBeNull();
     expect(document.activeElement).toBe(document.getElementById('main-content'));
   });
 
-  it('modal containment: Tab from the last control wraps to the first, Shift+Tab from the panel or the first wraps to the last', async () => {
+  it('no containment: focus is never trapped in the panel, and Tab reaches it and leaves again', async () => {
     const user = userEvent.setup();
     await mountHub();
-    act(() => row('A-100').focus());
+    const a = row('A-100');
+    act(() => a.focus());
     await user.keyboard('{Enter}');
-    const panel = dialog();
+    const panel = inspector();
     const focusables = [...panel.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')];
     expect(focusables.length).toBeGreaterThan(1);
-    const first = focusables[0]; const last = focusables[focusables.length - 1];
-    expect(document.activeElement).toBe(panel);
-    await user.tab({ shift: true });
-    expect(document.activeElement, 'Shift+Tab from the panel stays inside').toBe(last);
-    await user.tab();
-    expect(document.activeElement, 'Tab from the last control wraps').toBe(first);
-    await user.tab({ shift: true });
-    expect(document.activeElement, 'Shift+Tab from the first control wraps').toBe(last);
-    for (let i = 0; i < focusables.length + 2; i += 1) { await user.tab(); expect(panel.contains(document.activeElement)).toBe(true); }
+
+    // A panel that never closes must not hold the keyboard. Tabbing far past its
+    // last control has to leave it, or a keyboard user cannot get back to the table.
+    expect(panel.contains(document.activeElement), 'opening does not move focus into it').toBe(false);
+    for (let i = 0; i < focusables.length + 4; i += 1) await user.tab();
+    expect(panel.contains(document.activeElement), 'focus is not held inside the panel').toBe(false);
+
+    // and it is reachable: focus its last control and Escape still hands the row back
+    act(() => focusables[focusables.length - 1].focus());
+    expect(panel.contains(document.activeElement)).toBe(true);
+    await user.keyboard('{Escape}');
+    expect(document.activeElement).toBe(a);
   });
 
-  it('after close and after unmount nothing lingers: Tab moves normally, every document listener is removed, no restriction is left', async () => {
+  it('after close and after unmount nothing lingers: Tab moves normally, no document listener is ever installed, no restriction is left', async () => {
     const user = userEvent.setup();
     const { unmount } = await mountHub();
     const a = row('A-100');
@@ -253,9 +268,9 @@ describe('REVIEW-RETURN-1 · Commercial Control ledger → inspector → back to
     const remove = vi.spyOn(document, 'removeEventListener').mockImplementation(function (t, fn, o) { live.delete(fn); return EventTarget.prototype.removeEventListener.call(this, t, fn, o); });
     const pending = () => [...live];
     await user.keyboard('{Enter}');
-    expect(pending().length, 'the open inspector listens (Escape)').toBeGreaterThan(0);
+    expect(pending(), 'a panel beside the register installs no document listener at all').toEqual([]);
     await user.keyboard('{Escape}');
-    expect(pending(), 'closing removes every document listener it added').toEqual([]);
+    expect(pending(), 'and so there is none to leave behind').toEqual([]);
     expect(document.activeElement).toBe(a);
     const ledger = [...document.querySelectorAll('tbody tr[tabindex="0"]')];
     await user.tab();
