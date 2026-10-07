@@ -152,3 +152,140 @@ describe('Progress composer — the acknowledgement claims only what happened', 
     expect(onDone).toHaveBeenCalled();
   });
 });
+
+// ============================================================
+// What the UI allows while something is in flight.
+//
+// Written after the client read the diff and found that Review was reachable
+// while a photo was still preparing, so the report that was read was not the
+// report that was sent. The suite was green throughout, because every test in it
+// followed the sequence the author had in mind. These follow what the controls
+// actually permit instead.
+//
+// The rule they pin: a photo takes its slot when it is picked, not when it
+// finishes. Then the limit, the removal and the review all see one report.
+// ============================================================
+const prepareEvidenceImage = vi.fn();
+vi.mock('../../lib/evidenceImagePreparation.js', () => ({ prepareEvidenceImage: (...a) => prepareEvidenceImage(...a) }));
+
+const pick = (name = 'a.jpg') => fireEvent.change(document.querySelector('[data-progress-photo-input]'),
+  { target: { files: [new File(['x'], name, { type: 'image/jpeg' })] } });
+const settleWith = (resolve, bytes = 1_000_000) => resolve({ ok: true, candidate: new Blob([new Uint8Array(bytes)], { type: 'image/jpeg' }) });
+const tick = () => new Promise((r) => setTimeout(r, 0));
+const slots = () => document.querySelectorAll('[data-progress-photo-state]').length;
+
+describe('Composer — a photo that is still preparing is already part of the report', () => {
+  it('Review stays shut until the photo is ready, and says why', async () => {
+    let finish;
+    prepareEvidenceImage.mockImplementation(() => new Promise((r) => { finish = r; }));
+    render(<ProgressComposer />);
+    describeIt('Pour done.');
+    expect(document.querySelector('[data-progress-review]')).not.toBeDisabled();
+
+    pick();
+    await tick();
+    expect(document.querySelector('[data-progress-review]')).toBeDisabled();
+    expect(document.querySelector('[data-progress-not-ready]').textContent).toMatch(/still being prepared/i);
+    expect(document.querySelector('[data-progress-photo-state]').textContent).toMatch(/preparing/i);
+
+    settleWith(finish);
+    await waitFor(() => expect(document.querySelector('[data-progress-review]')).not.toBeDisabled());
+    expect(document.querySelector('[data-progress-photo-state]').textContent).toMatch(/MB/);
+  });
+
+  it('what was reviewed is what is sent', async () => {
+    let finish;
+    prepareEvidenceImage.mockImplementation(() => new Promise((r) => { finish = r; }));
+    submitProgressReport.mockImplementation((r) => Promise.resolve(receipt(r.requestId, r.projectId)));
+    render(<ProgressComposer />);
+    describeIt('Pour done.');
+    pick();
+    await tick();
+    settleWith(finish);
+    await waitFor(() => expect(document.querySelector('[data-progress-review]')).not.toBeDisabled());
+
+    review();
+    const reviewed = document.body.textContent;
+    send();
+    await waitFor(() => expect(submitProgressReport).toHaveBeenCalled());
+    const sent = submitProgressReport.mock.calls[0][0].photos;
+    expect(reviewed).toMatch(/a\.jpg/);
+    expect(sent).toHaveLength(1);
+  });
+
+  it('three quick picks fill the three slots and a fourth is refused', async () => {
+    const finishers = [];
+    prepareEvidenceImage.mockImplementation(() => new Promise((r) => { finishers.push(r); }));
+    render(<ProgressComposer />);
+    describeIt('Pour done.');
+    pick('a.jpg'); pick('b.jpg'); pick('c.jpg'); pick('d.jpg');
+    await tick();
+    expect(slots()).toBe(3);
+    expect(document.querySelector('[data-progress-photo-message]').textContent).toMatch(/3 photos is the most/);
+    finishers.forEach((f) => settleWith(f));
+    await waitFor(() => expect(document.querySelectorAll('[data-progress-photo-state="ready"]').length).toBe(3));
+  });
+
+  it('a slot removed while preparing does not come back, and frees its place', async () => {
+    const finishers = [];
+    prepareEvidenceImage.mockImplementation(() => new Promise((r) => { finishers.push(r); }));
+    render(<ProgressComposer />);
+    describeIt('Pour done.');
+    pick('a.jpg');
+    await tick();
+    fireEvent.click(document.querySelector('[data-progress-remove-photo]'));
+    expect(slots()).toBe(0);
+
+    settleWith(finishers[0]);
+    await tick();
+    expect(slots()).toBe(0);
+
+    pick('b.jpg'); pick('c.jpg'); pick('d.jpg');
+    await tick();
+    expect(slots()).toBe(3);                       // the abandoned slot was given back
+  });
+
+  it('a preparation that fails frees its slot and says so', async () => {
+    let finish;
+    prepareEvidenceImage.mockImplementation(() => new Promise((r) => { finish = r; }));
+    render(<ProgressComposer />);
+    describeIt('Pour done.');
+    pick('a.jpg');
+    await tick();
+    finish({ ok: false, error: { code: 'CANNOT_MEET_SIZE_LIMIT' } });
+    await waitFor(() => expect(slots()).toBe(0));
+    expect(document.querySelector('[data-progress-photo-message]').textContent).toMatch(/cannot be brought under/i);
+    expect(document.querySelector('[data-progress-review]')).not.toBeDisabled();
+  });
+});
+
+describe('Composer — a report that was edited is not the report that failed', () => {
+  it('an unchanged retry keeps the id, an edited one does not', async () => {
+    prepareEvidenceImage.mockReset();
+    const err = Object.assign(new Error('refused'), { code: 'SIMULATED_FAILURE' });
+    submitProgressReport.mockRejectedValueOnce(err).mockImplementation((r) => Promise.resolve(receipt(r.requestId, r.projectId)));
+    render(<ProgressComposer />);
+    describeIt('Pour done.');
+    review(); send();
+    await screen.findByText(/Not sent/);
+
+    send();                                        // the same report, sent again
+    await screen.findByText(ACK_NOTE);
+    const [first, retry] = submitProgressReport.mock.calls.map((c) => c[0]);
+    expect(retry.requestId).toBe(first.requestId);
+
+    cleanup();
+    submitProgressReport.mockReset();
+    submitProgressReport.mockRejectedValueOnce(err).mockImplementation((r) => Promise.resolve(receipt(r.requestId, r.projectId)));
+    render(<ProgressComposer />);
+    describeIt('Pour done.');
+    review(); send();
+    await screen.findByText(/Not sent/);
+    fireEvent.click(document.querySelector('[data-progress-back]'));
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Pour done, plus the kerb.' } });
+    review(); send();
+    await screen.findByText(ACK_NOTE);
+    const [failed, edited] = submitProgressReport.mock.calls.map((c) => c[0]);
+    expect(edited.requestId).not.toBe(failed.requestId);
+  });
+});

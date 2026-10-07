@@ -90,34 +90,62 @@ export function ProgressComposer({ onDone }) {
   const sendingRef = useRef(false);                 // the guard the service does not provide
   const liveRef = useRef(true);
   useEffect(() => { liveRef.current = true; return () => { liveRef.current = false; }; }, []);
-  // One id for one report: a retry is the same submission, not a new one.
+  // One id for one report. A retry is that report sent again; an edited report is
+  // a different report and gets a different id rather than inheriting one silently.
   const requestIdRef = useRef(null);
+  const signedRef = useRef(null);
+  const slotsRef = useRef(0);
+  const photosRef = useRef(photos);
+  useEffect(() => { photosRef.current = photos; }, [photos]);
 
   const reference = options.find((o) => o.key === refKey)?.value ?? null;
-  const ready = description.trim().length > 0 && fieldStatus !== null;
+  const preparing = photos.some((p) => p.preparing);
+  const ready = description.trim().length > 0 && fieldStatus !== null && !preparing;
 
+  // A photo takes its slot when it is picked, not when it finishes preparing.
+  // Counted on a ref so several quick picks cannot all read the same stale length,
+  // and held as a visible row so the limit, the removal and the review all see the
+  // same report. Nothing can arrive late into a report that has already been read.
   const addPhoto = useCallback(async (file) => {
     if (!file) return;
-    if (photos.length >= PROGRESS_REPORT_LIMITS.maxPhotos) {
+    if (slotsRef.current >= PROGRESS_REPORT_LIMITS.maxPhotos) {
       setPhotoMessage(`${PROGRESS_REPORT_LIMITS.maxPhotos} photos is the most a report carries.`);
       return;
     }
-    setPhotoMessage('Preparing that photo…');
-    const prepared = await prepareEvidenceImage(file);
+    slotsRef.current += 1;
+    const slot = newRequestId();
+    const pickedProject = projectId;
+    setPhotos((list) => [...list, { id: slot, candidate: null, name: file.name || 'photo', preparing: true }]);
+    setPhotoMessage('');
+
+    let prepared;
+    try { prepared = await prepareEvidenceImage(file); }
+    catch { prepared = { ok: false, error: { code: 'ENCODE_FAILED' } }; }
+
+    const drop = () => { slotsRef.current = Math.max(0, slotsRef.current - 1); setPhotos((l) => l.filter((x) => x.id !== slot)); };
+    // gone screen, abandoned slot, or a different project: the result belongs to none of them
     if (!liveRef.current) return;
+    if (pickedProject !== getCurrentProjectId()) { drop(); return; }
+    if (!photosRef.current.some((x) => x.id === slot)) { slotsRef.current = Math.max(0, slotsRef.current - 1); return; }
     if (!prepared.ok) {
+      drop();
       setPhotoMessage(IMAGE_ERRORS[prepared.error?.code] ?? 'That photo could not be prepared.');
       return;
     }
-    setPhotos((list) => [...list, { id: newRequestId(), candidate: prepared.candidate, name: file.name || 'photo' }]);
-    setPhotoMessage('');
-  }, [photos.length]);
+    setPhotos((l) => l.map((x) => (x.id === slot ? { ...x, candidate: prepared.candidate, preparing: false } : x)));
+  }, [projectId]);
 
   const send = useCallback(async () => {
     if (sendingRef.current) return;
     sendingRef.current = true;
     const sentProject = projectId;
-    const id = requestIdRef.current ?? (requestIdRef.current = newRequestId());
+    const sig = JSON.stringify([reference, description, fieldStatus, blockerNote.trim() || null,
+      photos.map((x) => `${x.name}:${x.candidate?.size ?? 0}`)]);
+    if (requestIdRef.current === null || signedRef.current !== sig) {
+      requestIdRef.current = newRequestId();      // a different report, not a retry of the last one
+      signedRef.current = sig;
+    }
+    const id = requestIdRef.current;
     setFailure('');
     setStep('sending');
     try {
@@ -241,8 +269,8 @@ export function ProgressComposer({ onDone }) {
         {photos.map((p) => (
           <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 44, borderTop: `1px solid ${FIELD.page}`, paddingTop: 8, marginTop: 8 }}>
             <span style={{ flex: 1, minWidth: 0, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-            <span style={{ fontSize: 13, color: FIELD.mute }}>{MB(p.candidate.size)}</span>
-            <button type="button" data-progress-remove-photo={p.id} aria-label={`Remove ${p.name}`} onClick={() => setPhotos((l) => l.filter((x) => x.id !== p.id))}
+            <span data-progress-photo-state={p.preparing ? 'preparing' : 'ready'} style={{ fontSize: 13, color: FIELD.mute }}>{p.preparing ? 'preparing…' : MB(p.candidate.size)}</span>
+            <button type="button" data-progress-remove-photo={p.id} aria-label={`Remove ${p.name}`} onClick={() => { slotsRef.current = Math.max(0, slotsRef.current - 1); setPhotos((l) => l.filter((x) => x.id !== p.id)); }}
               style={{ minHeight: 44, minWidth: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: FIELD.ink }}><Trash2 size={17} /></button>
           </div>
         ))}
@@ -253,7 +281,7 @@ export function ProgressComposer({ onDone }) {
       </Card>
 
       <Primary data-progress-review onClick={() => setStep('review')} disabled={!ready}>Review</Primary>
-      {!ready && <p style={{ margin: '10px 0 0', fontSize: 13.5, color: FIELD.mute }}>A description and a status are needed before you can review it.</p>}
+      {!ready && <p data-progress-not-ready style={{ margin: '10px 0 0', fontSize: 13.5, color: FIELD.mute }}>{preparing ? 'One photo is still being prepared. Review opens when it is ready.' : 'A description and a status are needed before you can review it.'}</p>}
     </div>
   );
 }
