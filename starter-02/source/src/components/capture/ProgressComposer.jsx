@@ -65,7 +65,19 @@ const Primary = ({ children, ...rest }) => (
   <button type="button" {...rest} style={{ width: '100%', minHeight: 52, borderRadius: 12, background: FIELD.ink, color: FIELD.onDark, fontSize: 16, fontWeight: 600, opacity: rest.disabled ? 0.45 : 1, ...rest.style }}>{children}</button>
 );
 const Secondary = ({ children, ...rest }) => (
-  <button type="button" {...rest} style={{ width: '100%', minHeight: 48, borderRadius: 12, background: 'transparent', border: `1px solid ${FIELD.mute}`, color: FIELD.ink, fontSize: 15, fontWeight: 600, marginTop: 10, opacity: rest.disabled ? 0.45 : 1, ...rest.style }}>{children}</button>
+  <button
+    type="button"
+    {...rest}
+    style={{
+      width: '100%', minHeight: 48, borderRadius: 12,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+      background: 'transparent', border: `1px solid ${FIELD.mute}`,
+      color: FIELD.ink, fontSize: 15, fontWeight: 600, marginTop: 10,
+      opacity: rest.disabled ? 0.45 : 1, ...rest.style,
+    }}
+  >
+    {children}
+  </button>
 );
 
 export function ProgressComposer({ onDone }) {
