@@ -311,8 +311,16 @@ export function CaptureSheet({ open, onClose, onNavigate, t = {}, lang = 'en', l
           </div>
         )}
 
-        {renderStep === 'local' && <LocalDraftCapture lang={lang} />}
-        {renderStep === 'progress' && <ProgressComposer onDone={() => setStep('entry')} />}
+        {renderStep === 'local' && (
+          <div className="flex-1 min-h-0 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+            <LocalDraftCapture lang={lang} />
+          </div>
+        )}
+        {renderStep === 'progress' && (
+          <div className="flex-1 min-h-0 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+            <ProgressComposer onDone={() => setStep('entry')} />
+          </div>
+        )}
 
         {renderStep === 'context' && (
           <div className="overflow-y-auto" style={{ padding: '28px 20px 28px', color: FIELD.ink }}>
