@@ -38,7 +38,12 @@ without it fails like this:
 ```
 BinaTech is not configured.
 Missing: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+Copy .env.example to .env (or .env.staging.example for staging) and
+set the values for the environment you intend to build for.
 ```
+
+That step is already in `starter-02/README.md` at the quickstart, and the error
+names it too. It is repeated here only so this page is runnable on its own.
 
 The values in `.env.example` are deliberately unusable. The host is `.invalid`,
 which can never resolve, `src/lib/supabase.js` is a synthetic in-memory client, and
