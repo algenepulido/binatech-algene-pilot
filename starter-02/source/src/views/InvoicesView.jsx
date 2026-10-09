@@ -14,16 +14,23 @@ import { listInvoices, deleteInvoice } from '../api/invoices.js';
 import { listIpcs } from '../api/ipcs.js';
 import { isSupabaseConfigured } from '../lib/supabase.js';
 import { useAuth } from '../lib/auth.jsx';
-import { fmt, fmtSAR } from '../lib/format.js';
 import { COL } from '../lib/theme.js';
 import { exportSheet } from '../lib/excelExport.js';
 
 // The approved frames show invoice amounts to 2 decimals and dates as "14 Feb 2026".
 // The 2 decimals are not decoration: SYN-INV-A-0001 stores 48,250.5 and the register
 // was rounding it to 48,251, so half a riyal disappeared between the row and the form.
+//
+// Every money figure on this screen reads from the same store, so every one of them has
+// to answer the same way. The shared `fmt` helper rounds to the riyal, which is right for
+// the summary cards elsewhere in the app but wrong here: it made the Outstanding card say
+// SAR 48,251 while the row directly beneath it said 48,250.50. One screen, two answers for
+// one invoice. `fmt` is left alone because every other screen reads from it; the figures on
+// this screen read from `money2` instead.
 const money2 = (n) => (n == null || n === '' || Number.isNaN(Number(n))
   ? '\u2014'
   : new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n)));
+const sar = (n) => `SAR ${money2(n)}`;
 const dmy = (iso) => {
   if (!iso) return '\u2014';
   const d = new Date(`${iso}T00:00:00`);
@@ -141,15 +148,15 @@ export function InvoicesView({ t }) {
       {invoiceableNow > 0 && (
         <div className="mx-6 mt-3 rounded-lg border p-3 flex flex-col sm:flex-row sm:items-center gap-2.5" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
           <FileCheck size={16} className="flex-shrink-0" style={{ color: '#15803d' }} />
-          <div className="flex-1 text-[13px]" style={{ color: '#15803d' }}><b>SAR {fmt(invoiceableNow)}</b> invoiceable now from {certifiedIpcs.length} certified IPC{certifiedIpcs.length === 1 ? '' : 's'} — certified value not yet invoiced.</div>
+          <div className="flex-1 text-[13px]" style={{ color: '#15803d' }}><b>{sar(invoiceableNow)}</b> invoiceable now from {certifiedIpcs.length} certified IPC{certifiedIpcs.length === 1 ? '' : 's'} — certified value not yet invoiced.</div>
           <Btn icon={ArrowRight} variant="primary" onClick={() => requireAuth(() => setFromIpc(true))}>New from IPC</Btn>
         </div>
       )}
       {invoices.length > 0 && (
         <div className="px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-3 border-b" style={{ borderColor: COL.border, background: COL.surface }}>
-          <KpiCard label="Total Invoiced" value={fmtSAR(k.total)} accent={COL.text} />
-          <KpiCard label="Paid" value={fmtSAR(k.paid)} accent="#16a34a" />
-          <KpiCard label="Outstanding" value={fmtSAR(k.outstanding)} accent="#d97706" />
+          <KpiCard label="Total Invoiced" value={sar(k.total)} accent={COL.text} />
+          <KpiCard label="Paid" value={sar(k.paid)} accent="#16a34a" />
+          <KpiCard label="Outstanding" value={sar(k.outstanding)} accent="#d97706" />
           <KpiCard label="ZATCA Cleared" value={`${k.cleared} / ${k.count}`} accent={COL.accent} />
         </div>
       )}
@@ -173,7 +180,7 @@ export function InvoicesView({ t }) {
             </div>
           )
           : invoices.length === 0 ? <EmptyState icon={FileCheck} title="No client invoices yet"
-              description={invoiceableNow > 0 ? `SAR ${fmt(invoiceableNow)} is invoiceable now from your certified IPCs. Invoices are issued from certified work only — each traces back to its IPC, BoQ and proven WIRs.` : 'Issue invoices backed by certified work only. Certify an IPC first, then invoice from it — each invoice traces back to its proof.'}
+              description={invoiceableNow > 0 ? `${sar(invoiceableNow)} is invoiceable now from your certified IPCs. Invoices are issued from certified work only — each traces back to its IPC, BoQ and proven WIRs.` : 'Issue invoices backed by certified work only. Certify an IPC first, then invoice from it — each invoice traces back to its proof.'}
               steps={['Certify an IPC from approved work', 'Create the invoice from that IPC', 'Clear it in Fatoora, then track payment']}
               actions={[
                 ...(certifiedIpcs.length > 0 ? [{ label: 'New from IPC', icon: FileCheck, onClick: () => requireAuth(() => setFromIpc(true)) }] : []),
@@ -276,7 +283,7 @@ export function InvoicesView({ t }) {
               <button key={p.id} type="button" onClick={() => { setFromIpc(false); openForm({ amount: Number(p.net_payable || 0), notes: `Based on ${p.ipc_number}${p.period ? ' · ' + p.period : ''}`, zatca_status: 'Awaiting IPC', payment_status: 'Not Issued' }); }}
                 className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-start hover:bg-stone-50">
                 <span><span className="mono font-semibold" style={{ color: COL.accent }}>{p.ipc_number}</span>{p.period && <span className="text-[12px]" style={{ color: COL.textDim }}> · {p.period}</span>}</span>
-                <span className="mono font-bold whitespace-nowrap" style={{ color: COL.text }}>SAR {fmt(p.net_payable)}</span>
+                <span className="mono font-bold whitespace-nowrap" style={{ color: COL.text }}>{sar(p.net_payable)}</span>
               </button>
             ))}
           </div>

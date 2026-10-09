@@ -52,8 +52,11 @@ vi.mock('../../api/wirs.js', () => ({ listWirs: (...a) => listWirs(...a) }));
 vi.mock('../../lib/supabase.js', () => ({ isSupabaseConfigured: true, supabase: {} }));
 vi.mock('../../lib/auth.jsx', () => ({ useAuth: () => ({ requireAuth: (fn) => fn(), user: { id: 'synthetic' } }) }));
 
+// A carries the stored 48,250.5, not a tidied 48,251. A fixture rounded to the
+// riyal cannot fail on a rounding defect, so the earlier one let the whole decimal
+// path through this file untested.
 const INV_A = {
-  id: 'inv-a', invoice_number: 'SYN-INV-A-0001', amount: 48251,
+  id: 'inv-a', invoice_number: 'SYN-INV-A-0001', amount: 48250.5,
   issue_date: '2026-08-10', due_date: '2026-09-09', paid_date: '',
   zatca_status: 'Reported', payment_status: 'Pending',
   wir_number: 'SYN-WIR-0002', element_guid: '',
@@ -109,7 +112,7 @@ describe('Invoice Edit — the record on screen is the record in the fields', ()
     render(<InvoicesView t={T.en} />);
     await openEdit(INV_A);
     expect(invoiceNo()).toHaveValue('SYN-INV-A-0001');
-    expect(amountField()).toHaveValue('48,251');
+    expect(amountField()).toHaveValue('48,250.5');
   });
 
   it('a stored zero amount is shown as zero, not as an empty field', async () => {
@@ -117,6 +120,22 @@ describe('Invoice Edit — the record on screen is the record in the fields', ()
     await openEdit(INV_Z);
     expect(invoiceNo()).toHaveValue('SYN-INV-Z-0003');
     expect(amountField()).toHaveValue('0');
+  });
+
+  it('the stored half riyal reaches the field, is saved as stored, and returns on reopen', async () => {
+    updateInvoice.mockImplementation((id, fields) => Promise.resolve({ ...INV_A, ...fields, id }));
+    render(<InvoicesView t={T.en} />);
+    await openEdit(INV_A);
+    expect(amountField()).toHaveValue('48,250.5');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(updateInvoice).toHaveBeenCalledTimes(1));
+    // the halala has to reach the service, not just the screen
+    expect(updateInvoice.mock.calls[0][1].amount).toBe(48250.5);
+    await waitFor(() => expect(screen.queryByText('Invoice SYN-INV-A-0001')).toBeNull());
+
+    await openEdit(INV_A);
+    expect(amountField()).toHaveValue('48,250.5');
   });
 
   it('switching A to B shows B identity and B values', async () => {

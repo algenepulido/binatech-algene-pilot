@@ -20,7 +20,7 @@
 //     only with rows, never over a failure or an empty register.
 // ============================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
 import { InvoicesView } from '../InvoicesView.jsx';
 import { T } from '../../i18n/translations.js';
 
@@ -40,6 +40,12 @@ const ONE = [{
   zatca_status: 'Reported', payment_status: 'Pending', wir_number: 'SYN-WIR-0002', element_guid: '',
 }];
 const CLOSING_NOTE = /Nothing here certifies an invoice/;
+
+// A KPI card found by its own label, so a value assertion cannot match a neighbour.
+// The lookup is scoped to the summary grid first: "Paid" is also a payment status in
+// the rows below, and an unscoped query would pick whichever came first.
+const kpiGrid = () => screen.getByText('ZATCA Cleared').parentElement.parentElement.parentElement;
+const card = (label) => within(kpiGrid()).getByText(label).parentElement.parentElement;
 
 
 // The register is drawn in two shapes, so every test has to say which width it is at.
@@ -130,6 +136,61 @@ describe('Invoice register — the amount keeps what is stored', () => {
     expect(screen.getByText('10 Aug 2026')).toBeInTheDocument();
     expect(screen.getByText('09 Sep 2026')).toBeInTheDocument();
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+  });
+});
+
+describe('Invoice register — the summary agrees with the rows beneath it', () => {
+  // The cards, the invoiceable banner and the certified IPC list all read the same
+  // store the rows read. The shared `fmt` helper rounds to the riyal, so the
+  // Outstanding card used to say SAR 48,251 directly above a row saying 48,250.50.
+  // One screen must not give two answers for one invoice.
+  const PAID_B = {
+    id: 'inv-b', invoice_number: 'SYN-INV-B-0002', amount: 13700,
+    issue_date: '2026-09-01', due_date: '2026-10-01', paid_date: '2026-09-20',
+    zatca_status: 'Cleared', payment_status: 'Paid', wir_number: '', element_guid: '',
+  };
+  const TWO = [ONE[0], PAID_B];
+
+  it('Total Invoiced and Outstanding keep the halala the rows show', async () => {
+    listInvoices.mockResolvedValue(TWO);
+    render(<InvoicesView t={T.en} />);
+    await screen.findByText('SYN-INV-A-0001');
+
+    expect(card('Total Invoiced')).toHaveTextContent('SAR 61,950.50');   // 48,250.50 + 13,700
+    expect(card('Outstanding')).toHaveTextContent('SAR 48,250.50');
+    expect(card('Paid')).toHaveTextContent('SAR 13,700.00');
+    expect(screen.queryByText('SAR 61,951')).toBeNull();
+    expect(screen.queryByText('SAR 48,251')).toBeNull();
+  });
+
+  it('the card and the row report one invoice the same way', async () => {
+    listInvoices.mockResolvedValue([ONE[0]]);
+    render(<InvoicesView t={T.en} />);
+    const row = await screen.findByText('SYN-INV-A-0001');
+    expect(row.closest('tr')).toHaveTextContent('48,250.50');
+    // the card above the row, found by its own label rather than by its value
+    expect(card('Outstanding')).toHaveTextContent('SAR 48,250.50');
+    expect(card('Total Invoiced')).toHaveTextContent('SAR 48,250.50');
+  });
+
+  it('invoiceable now keeps the halala', async () => {
+    listInvoices.mockResolvedValue(TWO);
+    listIpcs.mockResolvedValue([{ id: 'ipc-1', ipc_number: 'SYN-IPC-01', period: '2026-08', status: 'certified', net_payable: 186300 }]);
+    render(<InvoicesView t={T.en} />);
+    await screen.findByText('SYN-INV-A-0001');
+
+    expect(screen.getByText(/124,349\.50/)).toBeInTheDocument();     // 186,300 - 61,950.50
+    expect(document.body.textContent).not.toMatch(/124,350[^.]/);
+  });
+
+  it('the certified IPC a new invoice is raised from keeps the halala', async () => {
+    listInvoices.mockResolvedValue(TWO);
+    listIpcs.mockResolvedValue([{ id: 'ipc-1', ipc_number: 'SYN-IPC-01', period: '2026-08', status: 'certified', net_payable: 186300.25 }]);
+    render(<InvoicesView t={T.en} />);
+    await screen.findByText('SYN-INV-A-0001');
+
+    fireEvent.click(screen.getAllByRole('button', { name: /New from IPC/i })[0]);
+    expect(await screen.findByText('SAR 186,300.25')).toBeInTheDocument();
   });
 });
 
