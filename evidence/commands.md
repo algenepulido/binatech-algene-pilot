@@ -20,7 +20,7 @@ restores the repair and runs them again. git only, so nothing is left behind. It
 refuses to run on a dirty tree.
 
 ```
-$ work/demo/red-green.sh
+$ bash evidence/red-green.sh
 
  BEFORE - the two files exactly as the starter shipped them
  2 files changed, 27 insertions(+), 138 deletions(-)

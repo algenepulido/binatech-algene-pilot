@@ -69,12 +69,13 @@ That sentence is the point: nothing here reaches a backend, and nothing claims t
 
 ## Seeing the defects for yourself
 
-One command. It reverts the two repaired view files to what you supplied, runs the
-invoice tests, restores the repair and runs them again. It uses git only, refuses
-to run on a dirty tree, and leaves nothing behind.
+One command, in the branch so you can run it rather than read about it. It reverts
+the two repaired view files to what you supplied, runs the invoice tests, restores
+the repair and runs them again. It uses git only, refuses to run on a dirty tree,
+and leaves nothing behind.
 
 ```
-$ work/demo/red-green.sh
+$ bash evidence/red-green.sh
 
  BEFORE - the two files exactly as the starter shipped them
       Tests  29 failed | 5 passed (34)
