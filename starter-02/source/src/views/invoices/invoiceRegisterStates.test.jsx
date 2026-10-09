@@ -89,6 +89,23 @@ describe('Invoice register — a failed read is never an empty register', () => 
     expect(listInvoices).toHaveBeenCalledTimes(2);
   });
 
+  it('a read in flight announces itself, and is not an alert', async () => {
+    // Commercial Control already gives its loading state a role. This register
+    // printed the same sentence with no role at all, so a reader using a screen
+    // reader was told nothing at all while the register was still coming.
+    let release;
+    listInvoices.mockImplementation(() => new Promise((res) => { release = res; }));
+    render(<InvoicesView t={T.en} />);
+
+    const live = await screen.findByRole('status');
+    expect(live).toHaveTextContent(/Loading invoices/i);
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(document.querySelector('table')).toBeNull();
+
+    release([]);
+    await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+  });
+
   it('a genuinely empty read is the empty state, not the error state', async () => {
     listInvoices.mockResolvedValue([]);
     render(<InvoicesView t={T.en} />);

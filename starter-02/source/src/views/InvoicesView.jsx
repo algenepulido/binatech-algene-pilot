@@ -164,7 +164,7 @@ export function InvoicesView({ t }) {
       {!isSupabaseConfigured && <div className="mx-6 mt-3 text-xs px-3 py-2 rounded border" style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }}>Supabase isn't configured. Add your keys to <span className="mono">.env</span> and restart the dev server.</div>}
 
       <div ref={listRef} className="flex-1 overflow-y-auto overflow-x-auto scrollbar">
-        {loading ? <div className="text-center text-xs py-10" style={{ color: COL.textMute }}>Loading invoices…</div>
+        {loading ? <div role="status" className="text-center text-xs py-10" style={{ color: COL.textMute }}>Loading invoices…</div>
           : error ? (
             /* The frames specify a read-error state with Try again, and the rule is that a
                failed read never reads as an empty register. Says what is not shown and why,
