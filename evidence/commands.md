@@ -60,8 +60,9 @@ The starter shipped 762.
 One caveat worth knowing before you run it. `src/lib/evidenceImagePreparation.test.js`
 has a test, "20,000,001 bytes to SOURCE_TOO_LARGE", that allocates a 20 MB source
 against vitest's default 5 second timeout. On a loaded machine the allocation alone
-can pass it, and the run then reports 812 of 813. It happened twice here today and
-passed on the run above. That file on its own passes 68 of 68 every time:
+can pass it, and the run then reports 812 of 813. It failed on roughly half the
+full runs here today, a clean clone among them, and passed on the run above. That
+file on its own passes 68 of 68 every time:
 
 ```
 $ npx vitest run src/lib/evidenceImagePreparation.test.js
