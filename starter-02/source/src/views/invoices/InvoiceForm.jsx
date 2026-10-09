@@ -15,6 +15,7 @@ import { listWirs } from '../../api/wirs.js';
 import { resultLabel } from '../../lib/wirStatus.js';
 import { extractInvoice, ACCEPT_TYPES, MAX_BYTES } from '../../lib/invoiceExtract.js';
 import { useProject } from '../../lib/project.jsx';
+import { getCurrentProjectId } from '../../lib/currentProject.js';
 import { useElements } from '../../lib/elements.jsx';
 import { COL } from '../../lib/theme.js';
 
@@ -46,6 +47,18 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
     paid_date: initial?.paid_date ?? '',
   });
   const [busy, setBusy] = useState(false);
+  // `busy` drives the button's disabled state, which is a UI courtesy, not a control:
+  // the form also submits on Enter through the hidden submit button, and that path
+  // never looks at it. The ref is the control, and it is read synchronously so two
+  // events in the same tick cannot both pass it.
+  const busyRef = useRef(false);
+  // A save outlives the form that started it. When the record changes the form is
+  // replaced, and the answer to the old one must not reach the new one.
+  const aliveRef = useRef(true);
+  // Set on every run, not only cleared on teardown: StrictMode mounts, tears down
+  // and mounts again, so a ref that is only ever cleared stays cleared for the life
+  // of the form and every save silently stops reporting its own result.
+  useEffect(() => { aliveRef.current = true; return () => { aliveRef.current = false; }; }, []);
   const [error, setError] = useState(null);
   const [wirs, setWirs] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -139,7 +152,12 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
 
   async function submit(e) {
     e?.preventDefault();
+    if (busyRef.current) return;
     if (!form.invoice_number.trim()) { setError('Invoice No. is required.'); return; }
+    busyRef.current = true;
+    // The answer belongs to the project the save was sent from. The form being
+    // locked stops the record changing underneath it; this stops the project doing so.
+    const sentProject = getCurrentProjectId();
     setError(null); setBusy(true);
     try {
       const payload = {
@@ -149,9 +167,22 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
       };
       const saved = editing ? await updateInvoice(initial.id, payload) : await createInvoice(payload);
       if (scan?.url) URL.revokeObjectURL(scan.url);
+      if (!aliveRef.current || sentProject !== getCurrentProjectId()) return;
       onSaved?.(saved); onClose?.();
-    } catch (err) { setError(err?.message ?? String(err)); } finally { setBusy(false); }
+    } catch (err) {
+      if (!aliveRef.current || sentProject !== getCurrentProjectId()) return;
+      setError(err?.message ?? String(err));
+    } finally {
+      busyRef.current = false;
+      if (aliveRef.current) setBusy(false);
+    }
   }
+
+  // The frames show the form's footer disabled while a save is pending. The close
+  // control lives in the shared Modal, which is not ours to change, so the guard goes
+  // on the request instead: while a save is in flight nothing closes the form, and the
+  // reporter sees the outcome rather than a form that vanished mid-write.
+  const closeIfIdle = () => { if (!busyRef.current) onClose?.(); };
 
   const mark = (k) => extracted.has(k);
   const fmtNum = (n) => (n == null || n === '' || Number.isNaN(Number(n)) ? '—' : new Intl.NumberFormat().format(Number(n)));
@@ -175,14 +206,14 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
   const alertStyle = { red: { bg: '#fef2f2', c: '#b91c1c' }, amber: { bg: '#fffbeb', c: '#92400e' }, green: { bg: '#f0fdf4', c: '#15803d' } };
 
   return (
-    <Modal open={open} onClose={onClose} title={editing ? `Invoice ${initial.invoice_number}` : 'New client invoice'}
+    <Modal open={open} onClose={closeIfIdle} title={editing ? `Invoice ${initial.invoice_number}` : 'New client invoice'}
       subtitle={`${project?.name || 'Project'}${project?.contractor ? ` · ${project.contractor}` : ''} · ZATCA invoice register`} width={600}
       footer={
         <div className="flex items-center gap-2 w-full">
           <span className="text-[11px] me-auto" style={{ color: blocking ? '#b91c1c' : COL.textDim }}>
             {blocking ? 'Duplicate number — review before saving' : (ready ? 'All checks passed' : 'Fill required fields, then create')}
           </span>
-          <Btn variant="secondary" onClick={onClose}>Cancel</Btn>
+          <Btn variant="secondary" onClick={closeIfIdle} disabled={busy}>Cancel</Btn>
           <Btn variant="primary" onClick={submit} disabled={busy}>{cta}</Btn>
         </div>
       }>
@@ -194,9 +225,12 @@ export function InvoiceFormModal({ open, initial, onClose, onSaved }) {
           <div className="rounded-lg border border-dashed p-3" style={{ borderColor: COL.borderStrong, background: COL.surfaceAlt }}>
             <input ref={fileRef} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/*" className="hidden" onChange={(e) => onPick(e.target.files?.[0])} />
             {!scan ? (
-              <button type="button" onClick={() => fileRef.current?.click()} className="w-full flex items-center justify-center gap-2 py-1.5 text-[12px] font-semibold" style={{ color: COL.accent }}>
-                <Upload size={14} /> Upload invoice / scan (PDF, PNG, JPG) — AI pre-fills the fields
-              </button>
+              /* Scan and pre-fill reads the invoice with a service this pilot does not
+                 have, so the control says so instead of inviting a click that cannot
+                 work. Everything behind it is untouched and comes back with the service. */
+              <div className="w-full flex items-center justify-center gap-2 py-1.5 text-[12px]" style={{ color: COL.textMute }}>
+                <Upload size={14} /> <span>Scan and pre-fill is not available in this pilot. Enter the invoice below.</span>
+              </div>
             ) : (
               <div className="flex items-center gap-3">
                 {scan.isImage ? <img src={scan.url} alt="" className="w-12 h-12 rounded object-cover border" style={{ borderColor: COL.border }} /> : <span className="w-12 h-12 rounded border flex items-center justify-center" style={{ borderColor: COL.border, background: COL.bg }}><FileText size={20} style={{ color: COL.accent }} /></span>}

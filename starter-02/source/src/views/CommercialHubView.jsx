@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { RotateCcw, AlertOctagon, ChevronRight, Search } from 'lucide-react';
 import { Btn } from '../components/primitives.jsx';
 import { Drawer } from '../components/Drawer.jsx';
@@ -66,7 +66,7 @@ const TR = {
     noLines: 'No BoQ lines match this filter.', none: '—',
     status: { ready: 'No blocker signal', partial: 'Partly blocked', blocked: 'Blocked', review: 'Review needed', idle: 'No recorded activity' },
     dBreakdown: 'Value breakdown', dSubmitted: 'Submitted on WIRs', dNcr: 'NCR or rejected hold (estimate)', dPending: 'WIR awaiting approval', dMissing: 'No WIR coverage', dOver: 'WIR quantity above contract', dEvidence: 'Approved WIRs with no file attached',
-    dBlockers: 'Open blockers', dNoBlockers: 'No blockers derived for this line.', dWirs: 'Linked WIRs', dNoWirs: 'No WIR is attributed to this line.', dOpenQueue: 'Open in Certification Queue', dQty: 'Contract qty',
+    dBlockers: 'Open blockers', dNoBlockers: 'No blockers derived for this line.', dWirs: 'Linked WIRs', dNoWirs: 'No WIR is attributed to this line.', dOpenQueue: 'Open in Certification Queue', pickLine: 'Select a BoQ line to see its breakdown.', close: 'Close', dQty: 'Contract qty',
   },
   ar: {
     title: 'التحكم التجاري', readOnly: 'عرض للقراءة فقط. لا يعتمد ولا يوافق ولا يدفع أي شيء.',
@@ -91,7 +91,7 @@ const TR = {
     noLines: 'لا توجد بنود تطابق هذا المرشّح.', none: '—',
     status: { ready: 'لا إشارة عائق', partial: 'موقوف جزئياً', blocked: 'موقوف', review: 'يتطلب مراجعة', idle: 'لا نشاط مسجّل' },
     dBreakdown: 'تفصيل القيمة', dSubmitted: 'مُقدَّم في طلبات الفحص', dNcr: 'إيقاف بمخالفة أو رفض (تقدير)', dPending: 'فحص بانتظار الاعتماد', dMissing: 'بدون تغطية فحص', dOver: 'كمية طلبات الفحص فوق العقد', dEvidence: 'طلبات فحص معتمدة بلا ملف مرفق',
-    dBlockers: 'العوائق المفتوحة', dNoBlockers: 'لا توجد عوائق مستنتجة لهذا البند.', dWirs: 'طلبات الفحص المرتبطة', dNoWirs: 'لا يوجد طلب فحص منسوب لهذا البند.', dOpenQueue: 'افتح في قائمة الاعتماد', dQty: 'كمية العقد',
+    dBlockers: 'العوائق المفتوحة', dNoBlockers: 'لا توجد عوائق مستنتجة لهذا البند.', dWirs: 'طلبات الفحص المرتبطة', dNoWirs: 'لا يوجد طلب فحص منسوب لهذا البند.', dOpenQueue: 'افتح في قائمة الاعتماد', pickLine: 'اختر بند جدول الكميات لعرض تفصيله.', close: 'إغلاق', dQty: 'كمية العقد',
   },
 };
 
@@ -119,6 +119,22 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
   const [status, setStatus] = useState('all');
   const [q, setQ] = useState('');
   const [openId, setOpenId] = useState(null);
+  // From 1024px the inspector is a panel beside the register, not a dialog over it.
+  // Below that the shared Drawer stays exactly as it is, and keeps managing its own
+  // focus. A panel that never closes cannot trap focus, so the panel does not try:
+  // it leaves focus on the row that opened it and hands it back on Escape or Close.
+  const narrow = useIsMobile(1023);
+  const openerRef = useRef(null);
+  const openLine = (id, el) => { openerRef.current = el ?? null; setOpenId(id); };
+  const clearLine = () => {
+    const opener = openerRef.current;
+    openerRef.current = null;
+    setOpenId(null);
+    queueMicrotask(() => {
+      if (opener && opener.isConnected) opener.focus({ preventScroll: true });
+      else document.getElementById('main-content')?.focus?.({ preventScroll: true });
+    });
+  };
 
   // Gate BEFORE reading the room: with no real rows the hook hands back synthetic inputs.
   const state = loadError ? 'error' : (loading && isDemo) ? 'loading' : isDemo ? 'demo' : 'project';
@@ -161,8 +177,44 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
   );
   const sampleTag = demo ? <span data-sample-tag className="mono text-[9px] uppercase tracking-wider px-1 py-px rounded border" style={AMBER}>{L.sample}</span> : null;
 
+  // One inspector body, two presentations, so the panel and the Drawer can never
+  // drift apart. `line` is always the open line; neither presentation renders it empty.
+  const inspectorBody = (line) => (
+          <div className="space-y-4 text-[12.5px]" dir={ar ? 'rtl' : 'ltr'}>
+            {demo && <div className="rounded-md border px-3 py-1.5 text-[12px]" style={AMBER}><span className="font-semibold">{L.demoTitle}.</span></div>}
+            <div className="flex items-center justify-between gap-3">{statusChip(line.cls)}<span className="mono text-[11.5px]" style={{ color: COL.textDim }}>{L.dQty} {fmt(line.contractQty)} {line.unit}</span></div>
+            <div>
+              <div className="text-[10.5px] uppercase tracking-wider font-semibold mb-1" style={{ color: COL.textMute }}>{L.dBreakdown} · {L.valuesIn}</div>
+              <dl className="rounded-md border divide-y" style={{ borderColor: COL.border }}>
+                {[[L.sBoq, line.values.contract], [L.dSubmitted, line.values.claimed], [L.sWir, line.values.certifiable], [L.dNcr, line.values.ncr], [L.dPending, line.values.pending], [L.dMissing, line.values.missingWir], [L.dOver, line.values.overclaim], [L.dEvidence, kpis.evidenceUnknown ? null : line.values.evidenceGap]].map(([k, v]) => (
+                  <div key={k} className="flex items-center justify-between gap-3 px-3 py-1.5" style={{ borderColor: COL.border }}><dt style={{ color: COL.textDim }}>{k}</dt><dd className="mono font-medium" style={{ color: COL.text }}>{v == null ? L.none : money(v)}</dd></div>
+                ))}
+              </dl>
+              <p className="text-[11px] mt-1" style={{ color: COL.textMute }}>{L.nWir}</p>
+            </div>
+            <div>
+              <div className="text-[10.5px] uppercase tracking-wider font-semibold mb-1" style={{ color: COL.textMute }}>{L.dBlockers}</div>
+              {line.blockers.length === 0 ? <div style={{ color: COL.textMute }}>{L.dNoBlockers}</div> : (
+                <ul className="rounded-md border divide-y" style={{ borderColor: COL.border }}>
+                  {line.blockers.map((b) => <li key={b.reason} className="flex items-center justify-between gap-3 px-3 py-1.5" style={{ borderColor: COL.border }}><span style={{ color: COL.text }}>{blockerLabel(b.reason, lang)}</span><span className="mono">{money(b.value)}</span></li>)}
+                </ul>
+              )}
+            </div>
+            <div>
+              <div className="text-[10.5px] uppercase tracking-wider font-semibold mb-1" style={{ color: COL.textMute }}>{L.dWirs}</div>
+              {line.wirs.length === 0 ? <div style={{ color: COL.textMute }}>{L.dNoWirs}</div> : (
+                <ul className="rounded-md border divide-y" style={{ borderColor: COL.border }}>
+                  {line.wirs.map((w) => <li key={w.id} className="flex items-center justify-between gap-3 px-3 py-1.5" style={{ borderColor: COL.border }}><span className="mono" style={{ color: COL.text }}>{w.wir_number || w.id}</span><span style={{ color: COL.textDim }}>{w.result || L.none}</span></li>)}
+                </ul>
+              )}
+            </div>
+          </div>
+  );
+  const openQueueBtn = <Btn variant="primary" onClick={clearLine}>{L.dOpenQueue}</Btn>;
+
   return (
-    <div className="flex-1 flex flex-col overflow-hidden" dir={ar ? 'rtl' : 'ltr'} data-commercial-state={state} style={{ background: COL.bg }}>
+    <div className="flex-1 flex flex-col overflow-hidden" dir={ar ? 'rtl' : 'ltr'} data-commercial-state={state}
+      onKeyDown={(e) => { if (!narrow && openId && e.key === 'Escape') { e.stopPropagation(); clearLine(); } }} style={{ background: COL.bg }}>
       {/* Compact workspace header: context, title, read-only statement, section bar. */}
       <header data-workspace-header className="border-b px-4 sm:px-6 pt-3" style={{ background: COL.surface, borderColor: COL.border }}>
         <div className="flex items-start justify-between gap-3">
@@ -172,6 +224,14 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {state === 'project' && loading && <span role="status" className="mono text-[10.5px]" style={{ color: COL.textMute }}>{L.refreshing}</span>}
+            {/* Compact toolbar: the register filter sits with the page controls, not
+                inside the table, so the table header carries only the status chips. */}
+            {showData && !phone && (
+              <label className="relative flex items-center w-56 lg:w-64">
+                <Search size={13} className="absolute start-2.5" style={{ color: COL.textMute }} />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L.search} aria-label={L.search} className="w-full rounded-md border ps-8 pe-2.5 text-[12.5px] outline-none" style={{ minHeight: 32, borderColor: COL.border, background: COL.surface, color: COL.text }} />
+              </label>
+            )}
             <Btn icon={RotateCcw} onClick={reload} disabled={loading}>{L.refresh}</Btn>
           </div>
         </div>
@@ -183,7 +243,8 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
         </nav>
       </header>
 
-      <div data-overview className="flex-1 overflow-y-auto scrollbar px-4 py-3 sm:px-6 sm:py-4 space-y-3">
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+      <div data-overview className="flex-1 min-w-0 overflow-y-auto scrollbar px-4 py-3 sm:px-6 sm:py-4 space-y-3">
         {state === 'loading' && (
           <div role="status" className="rounded-md border px-4 py-10 text-center text-[13px]" style={{ background: COL.surface, borderColor: COL.border, color: COL.textDim }}>{L.loading}</div>
         )}
@@ -257,10 +318,12 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
                       {k === 'all' ? L.all : L.status[k]} · {counts[k]}
                     </button>
                   ))}
-                  <label className="relative flex items-center w-full sm:w-56">
-                    <Search size={13} className="absolute start-2.5" style={{ color: COL.textMute }} />
-                    <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L.search} aria-label={L.search} className="w-full rounded-md border ps-8 pe-2.5 text-[12.5px] outline-none" style={{ minHeight: 32, borderColor: COL.border, background: COL.surface, color: COL.text }} />
-                  </label>
+                  {phone && (
+                    <label className="relative flex items-center w-full">
+                      <Search size={13} className="absolute start-2.5" style={{ color: COL.textMute }} />
+                      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={L.search} aria-label={L.search} className="w-full rounded-md border ps-8 pe-2.5 text-[12.5px] outline-none" style={{ minHeight: 32, borderColor: COL.border, background: COL.surface, color: COL.text }} />
+                    </label>
+                  )}
                 </div>
               </div>
 
@@ -268,7 +331,7 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
                 /* Phone: a compact line list — the desktop ledger is not squeezed onto a 390px screen. */
                 <div data-line-list>
                   {rows.map((l) => (
-                    <button key={l.id} type="button" data-line-row onClick={() => setOpenId(l.id)} className="w-full px-3.5 py-2.5 border-b last:border-b-0 text-start flex items-start gap-3" style={{ minHeight: 56, borderColor: COL.border }}>
+                    <button key={l.id} type="button" data-line-row onClick={(e) => openLine(l.id, e.currentTarget)} className="w-full px-3.5 py-2.5 border-b last:border-b-0 text-start flex items-start gap-3" style={{ minHeight: 56, borderColor: COL.border }}>
                       <span className="flex-1 min-w-0">
                         <span className="flex items-center gap-2"><span className="mono text-[12px] font-semibold" style={{ color: COL.accent }}>{l.code}</span>{statusChip(l.cls)}</span>
                         <span className="block text-[12.5px] truncate mt-0.5" style={{ color: COL.text }}>{l.description}</span>
@@ -290,7 +353,7 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
                     </thead>
                     <tbody>
                       {rows.map((l) => (
-                        <tr key={l.id} tabIndex={0} onClick={() => setOpenId(l.id)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenId(l.id); } }}
+                        <tr key={l.id} tabIndex={0} onClick={(e) => openLine(l.id, e.currentTarget)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLine(l.id, e.currentTarget); } }}
                           className="border-t cursor-pointer hover:bg-stone-50" style={{ borderColor: COL.border, background: openId === l.id ? COL.accentBg : undefined }}>
                           <td className="px-2.5 py-1.5 mono font-semibold whitespace-nowrap" style={{ color: COL.accent }}>{l.code}</td>
                           <td className="px-2.5 py-1.5 max-w-[150px] xl:max-w-[210px] 2xl:max-w-[340px] truncate" style={{ color: COL.text }} title={l.description}>{l.description}</td>
@@ -313,40 +376,41 @@ export function CommercialHubView({ lang = 'en', onNavigate }) {
       </div>
 
       {/* D. Right-side context — the shared Drawer, read-only. No commercial action lives here. */}
-      <Drawer open={!!open} onClose={() => setOpenId(null)} title={open?.code || ''} subtitle={open?.description} width={480}
-        footer={open && <Btn variant="primary" onClick={() => { setOpenId(null); go('certqueue', 'all'); }}>{L.dOpenQueue}</Btn>}>
-        {open && (
-          <div className="space-y-4 text-[12.5px]" dir={ar ? 'rtl' : 'ltr'}>
-            {demo && <div className="rounded-md border px-3 py-1.5 text-[12px]" style={AMBER}><span className="font-semibold">{L.demoTitle}.</span></div>}
-            <div className="flex items-center justify-between gap-3">{statusChip(open.cls)}<span className="mono text-[11.5px]" style={{ color: COL.textDim }}>{L.dQty} {fmt(open.contractQty)} {open.unit}</span></div>
-            <div>
-              <div className="text-[10.5px] uppercase tracking-wider font-semibold mb-1" style={{ color: COL.textMute }}>{L.dBreakdown} · {L.valuesIn}</div>
-              <dl className="rounded-md border divide-y" style={{ borderColor: COL.border }}>
-                {[[L.sBoq, open.values.contract], [L.dSubmitted, open.values.claimed], [L.sWir, open.values.certifiable], [L.dNcr, open.values.ncr], [L.dPending, open.values.pending], [L.dMissing, open.values.missingWir], [L.dOver, open.values.overclaim], [L.dEvidence, kpis.evidenceUnknown ? null : open.values.evidenceGap]].map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between gap-3 px-3 py-1.5" style={{ borderColor: COL.border }}><dt style={{ color: COL.textDim }}>{k}</dt><dd className="mono font-medium" style={{ color: COL.text }}>{v == null ? L.none : money(v)}</dd></div>
-                ))}
-              </dl>
-              <p className="text-[11px] mt-1" style={{ color: COL.textMute }}>{L.nWir}</p>
-            </div>
-            <div>
-              <div className="text-[10.5px] uppercase tracking-wider font-semibold mb-1" style={{ color: COL.textMute }}>{L.dBlockers}</div>
-              {open.blockers.length === 0 ? <div style={{ color: COL.textMute }}>{L.dNoBlockers}</div> : (
-                <ul className="rounded-md border divide-y" style={{ borderColor: COL.border }}>
-                  {open.blockers.map((b) => <li key={b.reason} className="flex items-center justify-between gap-3 px-3 py-1.5" style={{ borderColor: COL.border }}><span style={{ color: COL.text }}>{blockerLabel(b.reason, lang)}</span><span className="mono">{money(b.value)}</span></li>)}
-                </ul>
-              )}
-            </div>
-            <div>
-              <div className="text-[10.5px] uppercase tracking-wider font-semibold mb-1" style={{ color: COL.textMute }}>{L.dWirs}</div>
-              {open.wirs.length === 0 ? <div style={{ color: COL.textMute }}>{L.dNoWirs}</div> : (
-                <ul className="rounded-md border divide-y" style={{ borderColor: COL.border }}>
-                  {open.wirs.map((w) => <li key={w.id} className="flex items-center justify-between gap-3 px-3 py-1.5" style={{ borderColor: COL.border }}><span className="mono" style={{ color: COL.text }}>{w.wir_number || w.id}</span><span style={{ color: COL.textDim }}>{w.result || L.none}</span></li>)}
-                </ul>
-              )}
-            </div>
-          </div>
-        )}
-      </Drawer>
+      {!narrow && showData && (
+        <aside data-line-inspector-panel aria-label={open ? open.code : L.dBreakdown}
+          className="w-[360px] xl:w-[400px] flex-shrink-0 border-s flex flex-col min-h-0"
+          style={{ background: COL.surface, borderColor: COL.border }}>
+          {open ? (
+            <>
+              <div className="px-4 py-3 border-b flex-shrink-0 flex items-start justify-between gap-2" style={{ borderColor: COL.border }}>
+                <div className="min-w-0">
+                  <div className="mono text-[13px] font-semibold" style={{ color: COL.accent }}>{open.code}</div>
+                  <div className="text-[12px] mt-0.5 break-words" style={{ color: COL.textDim }}>{open.description}</div>
+                </div>
+                <button type="button" onClick={clearLine} aria-label={L.close} className="flex-shrink-0 rounded-md px-2 text-[13px] hover:bg-stone-50" style={{ minHeight: 32, color: COL.textDim }}>{L.close}</button>
+              </div>
+              <div data-line-inspector className="flex-1 overflow-y-auto scrollbar px-4 py-3">{inspectorBody(open)}</div>
+              {/* The app floats an assistant button over the bottom-right corner, which is
+                  where a right-hand panel's footer sits. Clear it, or the one action this
+                  panel offers is unreachable at the widths this workspace is reviewed at. */}
+              <div className="px-4 pt-3 border-t flex-shrink-0" style={{ borderColor: COL.border, paddingBottom: 76 }}>
+                <Btn variant="primary" onClick={() => { clearLine(); go('certqueue', 'all'); }}>{L.dOpenQueue}</Btn>
+              </div>
+            </>
+          ) : (
+            <div data-inspector-empty className="flex-1 flex items-center justify-center px-6 text-center text-[12.5px]" style={{ color: COL.textMute }}>{L.pickLine}</div>
+          )}
+        </aside>
+      )}
+      </div>
+
+      {/* Under 1024px: the shared Drawer, untouched, managing its own focus. */}
+      {narrow && (
+        <Drawer open={!!open} onClose={clearLine} title={open?.code || ''} subtitle={open?.description} width={480}
+          footer={open && <Btn variant="primary" onClick={() => { clearLine(); go('certqueue', 'all'); }}>{L.dOpenQueue}</Btn>}>
+          {open && <div data-line-inspector>{inspectorBody(open)}</div>}
+        </Drawer>
+      )}
     </div>
   );
 }

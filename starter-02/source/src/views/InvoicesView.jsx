@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useIsMobile } from '../lib/useIsMobile.js';
 import { confirmDialog } from '../components/ConfirmDialog.jsx';
 import { toast } from '../components/Toast.jsx';
 import { Download, FileCheck, Pencil, Plus, RotateCcw, Trash2, ShieldAlert, ArrowRight, Check, X as XIcon, AlertTriangle } from 'lucide-react';
@@ -13,9 +14,30 @@ import { listInvoices, deleteInvoice } from '../api/invoices.js';
 import { listIpcs } from '../api/ipcs.js';
 import { isSupabaseConfigured } from '../lib/supabase.js';
 import { useAuth } from '../lib/auth.jsx';
-import { fmt, fmtSAR } from '../lib/format.js';
 import { COL } from '../lib/theme.js';
 import { exportSheet } from '../lib/excelExport.js';
+
+// The approved frames show invoice amounts to 2 decimals and dates as "14 Feb 2026".
+// The 2 decimals are not decoration: SYN-INV-A-0001 stores 48,250.5 and the register
+// was rounding it to 48,251, so half a riyal disappeared between the row and the form.
+//
+// Every money figure on this screen reads from the same store, so every one of them has
+// to answer the same way. The shared `fmt` helper rounds to the riyal, which is right for
+// the summary cards elsewhere in the app but wrong here: it made the Outstanding card say
+// SAR 48,251 while the row directly beneath it said 48,250.50. One screen, two answers for
+// one invoice. `fmt` is left alone because every other screen reads from it; the figures on
+// this screen read from `money2` instead.
+const money2 = (n) => (n == null || n === '' || Number.isNaN(Number(n))
+  ? '\u2014'
+  : new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n)));
+const sar = (n) => `SAR ${money2(n)}`;
+const dmy = (iso) => {
+  if (!iso) return '\u2014';
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : `${String(d.getDate()).padStart(2, '0')} ${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
+};
 
 function ComplianceRow({ ok, warn, label }) {
   const c = ok ? '#15803d' : warn ? '#b45309' : '#991b1b';
@@ -25,12 +47,25 @@ function ComplianceRow({ ok, warn, label }) {
 
 export function InvoicesView({ t }) {
   const { requireAuth } = useAuth();
+  // invoice-register is drawn at 1024 and up. Below that the frames draw
+  // invoice-register-stacked, because the eight columns do not survive the width:
+  // at 768 the payment status is clipped and the paid date is off the screen
+  // entirely, inside a container the reader has to find and scroll sideways.
+  const stacked = useIsMobile(1023);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  // Every open mounts a fresh form. The form seeds its fields from `initial` on its
+  // first render only, so a form kept alive across records shows whatever it was
+  // seeded with the first time — empty, because nothing was selected then. Keying
+  // the modal on this counter ends that: Edit, New and New from IPC each get their
+  // own instance seeded from their own record. It changes only on open, so an
+  // ordinary rerender while someone is typing never remounts the form.
+  const [formSeq, setFormSeq] = useState(0);
+  const openForm = useCallback((record) => { setEditing(record); setFormSeq((n) => n + 1); setFormOpen(true); }, []);
   const [ipcs, setIpcs] = useState([]);
   const [fromIpc, setFromIpc] = useState(false);
   const listRef = useRef(null);
@@ -108,20 +143,20 @@ export function InvoicesView({ t }) {
           { label: 'ZATCA Status', key: 'zatca_status', width: 14 },
           { label: 'Payment Status', key: 'payment_status', width: 14 },
           { label: 'Paid Date', key: 'paid_date', width: 12 },
-        ] })}>Export</Btn>{certifiedIpcs.length > 0 && <Btn icon={FileCheck} onClick={() => requireAuth(() => setFromIpc(true))}>New from IPC</Btn>}<Btn icon={Plus} variant="primary" onClick={() => requireAuth(() => { setEditing(null); setFormOpen(true); })}>New Invoice</Btn></>} />
+        ] })}>Export</Btn>{certifiedIpcs.length > 0 && <Btn icon={FileCheck} onClick={() => requireAuth(() => setFromIpc(true))}>New from IPC</Btn>}<Btn icon={Plus} variant="primary" onClick={() => requireAuth(() => openForm(null))}>New Invoice</Btn></>} />
 
       {invoiceableNow > 0 && (
         <div className="mx-6 mt-3 rounded-lg border p-3 flex flex-col sm:flex-row sm:items-center gap-2.5" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
           <FileCheck size={16} className="flex-shrink-0" style={{ color: '#15803d' }} />
-          <div className="flex-1 text-[13px]" style={{ color: '#15803d' }}><b>SAR {fmt(invoiceableNow)}</b> invoiceable now from {certifiedIpcs.length} certified IPC{certifiedIpcs.length === 1 ? '' : 's'} — certified value not yet invoiced.</div>
+          <div className="flex-1 text-[13px]" style={{ color: '#15803d' }}><b>{sar(invoiceableNow)}</b> invoiceable now from {certifiedIpcs.length} certified IPC{certifiedIpcs.length === 1 ? '' : 's'} — certified value not yet invoiced.</div>
           <Btn icon={ArrowRight} variant="primary" onClick={() => requireAuth(() => setFromIpc(true))}>New from IPC</Btn>
         </div>
       )}
       {invoices.length > 0 && (
         <div className="px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-3 border-b" style={{ borderColor: COL.border, background: COL.surface }}>
-          <KpiCard label="Total Invoiced" value={fmtSAR(k.total)} accent={COL.text} />
-          <KpiCard label="Paid" value={fmtSAR(k.paid)} accent="#16a34a" />
-          <KpiCard label="Outstanding" value={fmtSAR(k.outstanding)} accent="#d97706" />
+          <KpiCard label="Total Invoiced" value={sar(k.total)} accent={COL.text} />
+          <KpiCard label="Paid" value={sar(k.paid)} accent="#16a34a" />
+          <KpiCard label="Outstanding" value={sar(k.outstanding)} accent="#d97706" />
           <KpiCard label="ZATCA Cleared" value={`${k.cleared} / ${k.count}`} accent={COL.accent} />
         </div>
       )}
@@ -129,34 +164,76 @@ export function InvoicesView({ t }) {
       {!isSupabaseConfigured && <div className="mx-6 mt-3 text-xs px-3 py-2 rounded border" style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }}>Supabase isn't configured. Add your keys to <span className="mono">.env</span> and restart the dev server.</div>}
 
       <div ref={listRef} className="flex-1 overflow-y-auto overflow-x-auto scrollbar">
-        {loading ? <div className="text-center text-xs py-10" style={{ color: COL.textMute }}>Loading invoices…</div>
-          : error ? <div className="mx-6 my-4 text-xs px-3 py-2 rounded" style={{ background: '#fee2e2', color: '#b91c1c' }}>{error}</div>
+        {loading ? <div role="status" className="text-center text-xs py-10" style={{ color: COL.textMute }}>Loading invoices…</div>
+          : error ? (
+            /* The frames specify a read-error state with Try again, and the rule is that a
+               failed read never reads as an empty register. Says what is not shown and why,
+               announces itself, and offers the one action that can help. Modelled on the
+               Commercial Control error block so the two screens behave the same way. */
+            <div role="alert" className="mx-6 my-4 rounded-md border px-4 py-5 flex flex-col sm:flex-row sm:items-center gap-3" style={{ background: '#fef3f2', borderColor: '#fecdca', color: '#7a271a' }}>
+              <AlertTriangle size={18} className="flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="text-[14px] font-semibold">Invoices could not be loaded.</div>
+                <div className="text-[12.5px] mt-0.5">No invoices are listed, because none could be read from the project records. This is not an empty register.</div>
+              </div>
+              <Btn icon={RotateCcw} variant="primary" onClick={load}>Try again</Btn>
+            </div>
+          )
           : invoices.length === 0 ? <EmptyState icon={FileCheck} title="No client invoices yet"
-              description={invoiceableNow > 0 ? `SAR ${fmt(invoiceableNow)} is invoiceable now from your certified IPCs. Invoices are issued from certified work only — each traces back to its IPC, BoQ and proven WIRs.` : 'Issue invoices backed by certified work only. Certify an IPC first, then invoice from it — each invoice traces back to its proof.'}
+              description={invoiceableNow > 0 ? `${sar(invoiceableNow)} is invoiceable now from your certified IPCs. Invoices are issued from certified work only — each traces back to its IPC, BoQ and proven WIRs.` : 'Issue invoices backed by certified work only. Certify an IPC first, then invoice from it — each invoice traces back to its proof.'}
               steps={['Certify an IPC from approved work', 'Create the invoice from that IPC', 'Clear it in Fatoora, then track payment']}
               actions={[
                 ...(certifiedIpcs.length > 0 ? [{ label: 'New from IPC', icon: FileCheck, onClick: () => requireAuth(() => setFromIpc(true)) }] : []),
-                { label: 'New Invoice', icon: Plus, variant: certifiedIpcs.length > 0 ? 'secondary' : 'primary', onClick: () => requireAuth(() => { setEditing(null); setFormOpen(true); }) },
+                { label: 'New Invoice', icon: Plus, variant: certifiedIpcs.length > 0 ? 'secondary' : 'primary', onClick: () => requireAuth(() => openForm(null)) },
               ]} />
-          : (
+          : stacked ? (
+            <div data-invoice-list>
+              {invoices.map((inv) => (
+                <div key={inv.id} onClick={(e) => openDetail(inv, e.currentTarget)} className="px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-stone-50" style={{ borderColor: COL.border }}>
+                  <div className="flex items-start justify-between gap-3">
+                    <button type="button" data-invoice-open={inv.id} aria-label={`Open invoice ${inv.invoice_number}`} className="mono text-[12.5px] font-semibold text-start break-all" style={{ color: COL.accent }}>{inv.invoice_number}</button>
+                    <span className="mono text-[12.5px] font-bold whitespace-nowrap">{money2(inv.amount)}</span>
+                  </div>
+                  <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-3 gap-y-1 text-[11.5px]">
+                    {[['Linked WIR', <span className="mono break-all">{inv.wir_number || inv.element_guid || '\u2014'}</span>],
+                      ['Issue Date', <span className="mono">{dmy(inv.issue_date)}</span>],
+                      ['Due Date', <span className="mono">{dmy(inv.due_date)}</span>],
+                      ['ZATCA Status', <StatusPill status={inv.zatca_status} />],
+                      ['Payment Status', <StatusPill status={inv.payment_status} />],
+                      ['Paid Date', <span className="mono" style={{ color: inv.paid_date ? '#16a34a' : COL.textDim }}>{dmy(inv.paid_date)}</span>]].map(([label, value]) => (
+                        <div key={label} className="contents">
+                          <dt className="mono text-[10px] uppercase tracking-wider self-center" style={{ color: COL.textMute }}>{label}</dt>
+                          <dd className="self-center" style={{ color: COL.text }}>{value}</dd>
+                        </div>
+                      ))}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          ) : (
             <table className="w-full text-xs">
-              <thead className="sticky top-0 mono" style={{ background: COL.surface, color: COL.textDim }}><tr style={{ borderBottom: `1px solid ${COL.border}` }}>{['Invoice #', 'Linked WIR', 'Issue Date', 'Due Date', 'Amount (SAR)', 'ZATCA Status', 'Payment Status', 'Paid Date'].map((h) => <th key={h} className="px-4 py-2.5 text-left">{h}</th>)}</tr></thead>
+              <thead className="sticky top-0 mono" style={{ background: COL.surface, color: COL.textMute }}><tr style={{ borderBottom: `1px solid ${COL.border}` }}>{['Invoice #', 'Linked WIR', 'Issue Date', 'Due Date', 'Amount (SAR)', 'ZATCA Status', 'Payment Status', 'Paid Date'].map((h) => <th key={h} className={`px-4 py-2 text-[10px] uppercase tracking-wider font-semibold ${h === 'Amount (SAR)' ? 'text-right' : 'text-left'}`}>{h}</th>)}</tr></thead>
               <tbody>
                 {invoices.map((inv) => (
                   <tr key={inv.id} onClick={(e) => openDetail(inv, e.currentTarget)} className="border-b hover:bg-stone-50 cursor-pointer" style={{ borderColor: COL.border }}>
                     <td className="px-4 py-2.5 mono font-semibold" style={{ color: COL.accent }}><button type="button" data-invoice-open={inv.id} aria-label={`Open invoice ${inv.invoice_number}`} className="text-start">{inv.invoice_number}</button></td>
                     <td className="px-4 py-2.5 mono text-[11px]">{inv.wir_number || inv.element_guid || '—'}</td>
-                    <td className="px-4 py-2.5 mono text-[10px]" style={{ color: COL.textDim }}>{inv.issue_date || '—'}</td>
-                    <td className="px-4 py-2.5 mono text-[10px]" style={{ color: COL.textDim }}>{inv.due_date || '—'}</td>
-                    <td className="px-4 py-2.5 mono text-right font-bold">{fmt(inv.amount)}</td>
+                    <td className="px-4 py-2.5 mono text-[10.5px] whitespace-nowrap" style={{ color: COL.textDim }}>{dmy(inv.issue_date)}</td>
+                    <td className="px-4 py-2.5 mono text-[10.5px] whitespace-nowrap" style={{ color: COL.textDim }}>{dmy(inv.due_date)}</td>
+                    <td className="px-4 py-2.5 mono text-right font-bold whitespace-nowrap">{money2(inv.amount)}</td>
                     <td className="px-4 py-2.5"><div className="flex items-center gap-1.5"><StatusPill status={inv.zatca_status} />{inv.zatca_status === 'Cleared' && <FileCheck size={11} style={{ color: '#15803d' }} />}</div></td>
                     <td className="px-4 py-2.5"><StatusPill status={inv.payment_status} /></td>
-                    <td className="px-4 py-2.5 mono text-[10px]" style={{ color: inv.paid_date ? '#16a34a' : COL.textDim }}>{inv.paid_date || '—'}</td>
+                    <td className="px-4 py-2.5 mono text-[10.5px] whitespace-nowrap" style={{ color: inv.paid_date ? '#16a34a' : COL.textDim }}>{dmy(inv.paid_date)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
+        {invoices.length > 0 && (
+          <div className="px-4 py-2.5 border-t text-[11.5px]" style={{ borderColor: COL.border, color: COL.textMute }}>
+            Status columns show recorded data. Nothing here certifies an invoice, clears it, or makes it eligible for payment.
+          </div>
+        )}
         <div className="p-6 border-t" style={{ borderColor: COL.border }}>
           <div className="rounded-lg border p-4" style={{ background: '#fffbeb', borderColor: '#fde68a' }}>
             <div className="flex items-start gap-3">
@@ -173,11 +250,11 @@ export function InvoicesView({ t }) {
       {/* Inspection of an existing invoice -> Drawer (list stays behind it).
           "New invoice from a certified IPC" below stays a Modal: it is a form. */}
       <Drawer open={Boolean(detail)} onClose={closeDetail} title={detail?.invoice_number} subtitle={detail?.wir_number ? `Linked to ${detail.wir_number}` : 'Invoice'} width={520}
-        footer={detail && <><Btn icon={Trash2} onClick={() => onDelete(detail)}>Delete</Btn><Btn icon={Pencil} variant="primary" onClick={() => requireAuth(() => { setEditing(detail); setFormOpen(true); })}>Edit</Btn></>}>
+        footer={detail && <><Btn icon={Trash2} onClick={() => onDelete(detail)}>Delete</Btn><Btn icon={Pencil} variant="primary" onClick={() => requireAuth(() => openForm(detail))}>Edit</Btn></>}>
         {detail && (
           <div>
             <div className="flex items-center gap-2 mb-3"><StatusPill status={detail.zatca_status} size="lg" /><StatusPill status={detail.payment_status} size="lg" /></div>
-            {[['Amount', 'SAR ' + fmt(detail.amount)], ['Issue Date', detail.issue_date], ['Due Date', detail.due_date], ['Paid Date', detail.paid_date], ['Linked WIR', detail.wir_number], ['Element', detail.element_guid]].map(([kk, v]) => (
+            {[['Amount', 'SAR ' + money2(detail.amount)], ['Issue Date', dmy(detail.issue_date)], ['Due Date', dmy(detail.due_date)], ['Paid Date', dmy(detail.paid_date)], ['Linked WIR', detail.wir_number], ['Element', detail.element_guid]].map(([kk, v]) => (
               <div key={kk} className="flex justify-between py-1.5 border-b text-xs" style={{ borderColor: COL.border }}><span style={{ color: COL.textDim }}>{kk}</span><span style={{ color: COL.text }}>{v || '—'}</span></div>
             ))}
             {detail.notes && <div className="text-[11.5px] mt-2 px-2.5 py-1.5 rounded" style={{ background: COL.accentBg, color: COL.text }}>{detail.notes}</div>}
@@ -203,10 +280,10 @@ export function InvoicesView({ t }) {
         {certifiedIpcs.length === 0 ? <div className="text-[13px]" style={{ color: COL.textMute }}>No certified IPCs yet — certify an IPC first.</div> : (
           <div className="rounded-lg border divide-y" style={{ borderColor: COL.border }}>
             {certifiedIpcs.map((p) => (
-              <button key={p.id} type="button" onClick={() => { setFromIpc(false); setEditing({ amount: Number(p.net_payable || 0), notes: `Based on ${p.ipc_number}${p.period ? ' · ' + p.period : ''}`, zatca_status: 'Awaiting IPC', payment_status: 'Not Issued' }); setFormOpen(true); }}
+              <button key={p.id} type="button" onClick={() => { setFromIpc(false); openForm({ amount: Number(p.net_payable || 0), notes: `Based on ${p.ipc_number}${p.period ? ' · ' + p.period : ''}`, zatca_status: 'Awaiting IPC', payment_status: 'Not Issued' }); }}
                 className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-start hover:bg-stone-50">
                 <span><span className="mono font-semibold" style={{ color: COL.accent }}>{p.ipc_number}</span>{p.period && <span className="text-[12px]" style={{ color: COL.textDim }}> · {p.period}</span>}</span>
-                <span className="mono font-bold whitespace-nowrap" style={{ color: COL.text }}>SAR {fmt(p.net_payable)}</span>
+                <span className="mono font-bold whitespace-nowrap" style={{ color: COL.text }}>{sar(p.net_payable)}</span>
               </button>
             ))}
           </div>
@@ -214,7 +291,7 @@ export function InvoicesView({ t }) {
         <div className="text-[10.5px] mt-2" style={{ color: COL.textMute }}>The new invoice opens pre-filled; review and add buyer/VAT details before issuing.</div>
       </Modal>
 
-      <InvoiceFormModal open={formOpen} initial={editing} onClose={() => setFormOpen(false)} onSaved={(saved) => { setFormOpen(false); load(); if (detail && saved?.id === detail.id) setDetail(saved); }} />
+      <InvoiceFormModal key={formSeq} open={formOpen} initial={editing} onClose={() => setFormOpen(false)} onSaved={(saved) => { setFormOpen(false); load(); if (detail && saved?.id === detail.id) setDetail(saved); }} />
     </div>
   );
 }

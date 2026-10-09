@@ -278,7 +278,10 @@ describe('ACC-CC1 · Commercial Control workspace (Overview)', () => {
   it('a row opens a read-only line context with its source breakdown, linked WIRs and no commercial action', async () => {
     const nav = vi.fn(); useReal(); render(<CommercialHubView lang="en" onNavigate={nav} />); await settled('project');
     fireEvent.click(screen.getByText('A-100'));
-    const dlg = await screen.findByRole('dialog');
+    // From 1024px the line context is a panel beside the register; below it, the
+    // shared Drawer. Assert against the whole of whichever is mounted, footer
+    // included, so the "no commercial action" check covers every control it did.
+    const dlg = document.querySelector('[data-line-inspector-panel]') ?? await screen.findByRole('dialog');
     for (const label of ['BoQ value', 'Submitted on WIRs', 'Inspection-approved (WIR)', 'WIR awaiting approval', 'No WIR coverage']) expect(within(dlg).getAllByText(label).length, label).toBeGreaterThan(0);
     expect(within(dlg).getByText('WIR-0001')).toBeTruthy(); expect(within(dlg).getByText('WIR-0002')).toBeTruthy();
     expect(dlg.textContent).not.toMatch(/eligib/i);
@@ -350,5 +353,44 @@ describe('ACC-CC1 · copy and layout', () => {
     expect(document.querySelectorAll('[data-state-cell]')).toHaveLength(4);
     fireEvent.click(list.querySelector('[data-line-row]'));
     expect(await screen.findByRole('dialog')).toBeTruthy();
+  });
+});
+
+describe('ACC-CC2 · the inspector beside the register', () => {
+  it('is a panel, not a dialog, and is there before a line is picked', async () => {
+    useReal(); render(<CommercialHubView lang="en" onNavigate={() => {}} />); await settled('project');
+    expect(document.querySelector('[data-line-inspector-panel]')).toBeTruthy();
+    expect(document.querySelector('[data-inspector-empty]')).toBeTruthy();
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('picking a line fills it and clearing empties it, without the panel leaving', async () => {
+    useReal(); render(<CommercialHubView lang="en" onNavigate={() => {}} />); await settled('project');
+    const panel = document.querySelector('[data-line-inspector-panel]');
+    fireEvent.click(screen.getByText('A-100'));
+    expect(panel.getAttribute('aria-label')).toBe('A-100');
+    expect(document.querySelector('[data-line-inspector]')).toBeTruthy();
+
+    fireEvent.click(within(panel).getByRole('button', { name: 'Close' }));
+    expect(document.querySelector('[data-line-inspector]')).toBeNull();
+    expect(document.querySelector('[data-line-inspector-panel]')).toBe(panel);   // it never left
+  });
+
+  it('below 1024 the shared Drawer is what opens, and no panel is rendered', async () => {
+    window.matchMedia = vi.fn(mediaAt(900));
+    useReal(); render(<CommercialHubView lang="en" onNavigate={() => {}} />); await settled('project');
+    expect(document.querySelector('[data-line-inspector-panel]')).toBeNull();
+    fireEvent.click(screen.getByText('A-100'));
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+  });
+
+  it('the panel footer leaves room for the floating assistant, so its one action stays reachable', async () => {
+    useReal(); render(<CommercialHubView lang="en" onNavigate={() => {}} />); await settled('project');
+    fireEvent.click(screen.getByText('A-100'));
+    const footer = document.querySelector('[data-line-inspector-panel] .border-t');
+    // jsdom has no layout, so this pins the reservation rather than the overlap:
+    // the browser check is in work/evidence/w1-inspector. Without it, elementFromPoint
+    // at the button's centre returns the assistant at 1440 and 1280.
+    expect(Number.parseInt(footer.style.paddingBottom, 10)).toBeGreaterThan(60);
   });
 });
