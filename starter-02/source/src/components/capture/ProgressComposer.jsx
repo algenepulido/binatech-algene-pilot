@@ -23,6 +23,7 @@ import { FIELD } from '../../lib/fieldTokens.js';
 import { getCurrentProjectId } from '../../lib/currentProject.js';
 import { useProject } from '../../lib/project.jsx';
 import { prepareEvidenceImage } from '../../lib/evidenceImagePreparation.js';
+import { listWirs } from '../../api/wirs.js';
 import {
   submitProgressReport, FIELD_STATUS_LABELS, REFERENCE_TYPE_LABELS,
   PROGRESS_REPORT_LIMITS, PROGRESS_REFERENCE_FIXTURES, ACK_NOTE,
@@ -41,13 +42,23 @@ const IMAGE_ERRORS = {
 let requestSeq = 0;
 const newRequestId = () => `pr-${Date.now().toString(36)}-${(requestSeq += 1).toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
-const refOptions = (projectId) => {
+// Area and work item come from the fixture lists. WIR deliberately does not: the
+// fixtures say the WIR references are "the wir_number of every fixture WIR", so
+// they are read from the project's own WIRs rather than duplicated into a second
+// list that could drift away from the register. A report tied to an inspection
+// request is the one reference that matters most here, and leaving the type out
+// would have left the field reporter unable to point at the WIR they are standing
+// next to.
+const refOptions = (projectId, wirNumbers) => {
   const out = [{ key: 'none', label: 'None', value: null }];
   for (const type of ['area', 'work_item']) {
     for (const f of PROGRESS_REFERENCE_FIXTURES[type] ?? []) {
       if (f.projectId !== projectId) continue;
       out.push({ key: `${type}:${f.id}`, label: `${REFERENCE_TYPE_LABELS[type]} · ${f.id}`, value: { type, id: f.id } });
     }
+  }
+  for (const id of wirNumbers) {
+    out.push({ key: `wir:${id}`, label: `${REFERENCE_TYPE_LABELS.wir} · ${id}`, value: { type: 'wir', id } });
   }
   return out;
 };
@@ -86,7 +97,8 @@ export function ProgressComposer({ onDone }) {
   const projectId = getCurrentProjectId();
   const { project } = useProject();
   const projectLabel = project?.name || projectId;
-  const options = useMemo(() => refOptions(projectId), [projectId]);
+  const [wirNumbers, setWirNumbers] = useState([]);
+  const options = useMemo(() => refOptions(projectId, wirNumbers), [projectId, wirNumbers]);
 
   const [step, setStep] = useState('compose');      // compose · review · sending · error · ack
   const [refKey, setRefKey] = useState('none');     // the frames open on None
@@ -102,6 +114,23 @@ export function ProgressComposer({ onDone }) {
   const sendingRef = useRef(false);                 // the guard the service does not provide
   const liveRef = useRef(true);
   useEffect(() => { liveRef.current = true; return () => { liveRef.current = false; }; }, []);
+
+  // A reference is optional, so a WIR read that fails or is slow must cost the
+  // reporter nothing: the list opens on None and the other types are already there.
+  // A late answer for a project that is no longer open is dropped rather than
+  // offered, the same rule the photo preparation and the send already follow.
+  useEffect(() => {
+    const pickedProject = projectId;
+    let current = true;
+    setWirNumbers([]);
+    listWirs(pickedProject)
+      .then((rows) => {
+        if (!current || !liveRef.current || pickedProject !== getCurrentProjectId()) return;
+        setWirNumbers(rows.map((w) => w?.wir_number).filter(Boolean));
+      })
+      .catch(() => { /* the reference stays optional; nothing is said and nothing breaks */ });
+    return () => { current = false; };
+  }, [projectId]);
   // One id for one report. A retry is that report sent again; an edited report is
   // a different report and gets a different id rather than inheriting one silently.
   const requestIdRef = useRef(null);

@@ -23,6 +23,12 @@ vi.mock('../../pilot/progressReports.js', async (orig) => ({
   submitProgressReport: (...a) => submitProgressReport(...a),
 }));
 
+// The WIR references are read from the project's own WIRs rather than from a
+// second fixture list, so the read is driven here instead of being assumed.
+const listWirs = vi.fn();
+vi.mock('../../api/wirs.js', async (orig) => ({ ...(await orig()), listWirs: (...a) => listWirs(...a) }));
+const WIRS = [{ wir_number: 'SYN-WIR-0001' }, { wir_number: 'SYN-WIR-0002' }, { wir_number: null }];
+
 const receipt = (requestId, projectId) => ({
   ok: true, simulated: true, requestId, projectId, reference: null,
   receipt: { id: 'TEST-RECEIPT-0001', receivedAt: '2026-10-07T00:00:00.000Z', photoCount: 0, note: ACK_NOTE },
@@ -35,8 +41,58 @@ const describeIt = (text, status = 'in_progress') => {
 const review = () => fireEvent.click(document.querySelector('[data-progress-review]'));
 const send = () => fireEvent.click(document.querySelector('[data-progress-send]'));
 
-beforeEach(() => { submitProgressReport.mockReset(); });
+beforeEach(() => { submitProgressReport.mockReset(); listWirs.mockReset(); listWirs.mockResolvedValue(WIRS); });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
+
+describe('Progress composer — a report can point at the WIR it belongs to', () => {
+  // The frames list four reference types and the service accepts all four. The
+  // composer was offering two: a reporter standing next to an inspection request
+  // had no way to say so, which is the reference that matters most on this app.
+  const refSelect = () => document.querySelector('[data-progress-reference]');
+  const labels = () => [...refSelect().options].map((o) => o.textContent.trim());
+
+  it('offers every WIR in the project, labelled as a WIR', async () => {
+    render(<ProgressComposer />);
+    await waitFor(() => expect(labels()).toContain('WIR \u00b7 SYN-WIR-0001'));
+    expect(labels()).toContain('WIR \u00b7 SYN-WIR-0002');
+    expect(labels()[0]).toBe('None');
+    expect(refSelect().value).toBe('none');
+  });
+
+  it('a WIR with no number is not offered as a blank choice', async () => {
+    render(<ProgressComposer />);
+    await waitFor(() => expect(labels()).toContain('WIR \u00b7 SYN-WIR-0001'));
+    expect(labels().filter((l) => l === 'WIR \u00b7' || l === 'WIR \u00b7 ')).toHaveLength(0);
+    expect(labels().filter((l) => l.startsWith('WIR'))).toHaveLength(2);
+  });
+
+  it('the chosen WIR is what the service is sent', async () => {
+    submitProgressReport.mockImplementation((r) => Promise.resolve(receipt(r.requestId, r.projectId)));
+    render(<ProgressComposer />);
+    await waitFor(() => expect(labels()).toContain('WIR \u00b7 SYN-WIR-0002'));
+
+    fireEvent.change(refSelect(), { target: { value: 'wir:SYN-WIR-0002' } });
+    describeIt('Rebar to level 3 ready for inspection.');
+    review();
+    send();
+    await waitFor(() => expect(submitProgressReport).toHaveBeenCalledTimes(1));
+    expect(submitProgressReport.mock.calls[0][0].reference).toEqual({ type: 'wir', id: 'SYN-WIR-0002' });
+  });
+
+  it('a WIR read that fails costs the reporter nothing', async () => {
+    listWirs.mockRejectedValue(new Error('Synthetic read failure for wirs (starter scenario)'));
+    submitProgressReport.mockImplementation((r) => Promise.resolve(receipt(r.requestId, r.projectId)));
+    render(<ProgressComposer />);
+
+    expect(labels()[0]).toBe('None');
+    expect(document.body.textContent).not.toMatch(/Synthetic read failure/);
+    describeIt('Blockwork complete.');
+    review();
+    send();
+    await waitFor(() => expect(submitProgressReport).toHaveBeenCalledTimes(1));
+    expect(submitProgressReport.mock.calls[0][0].reference).toBeNull();
+  });
+});
 
 describe('Progress composer — the report is the reporter own statement', () => {
   it('opens with no status chosen and no reference, and will not review an empty report', () => {
